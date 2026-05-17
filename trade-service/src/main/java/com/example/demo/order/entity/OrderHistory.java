@@ -51,6 +51,7 @@ public class OrderHistory {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
