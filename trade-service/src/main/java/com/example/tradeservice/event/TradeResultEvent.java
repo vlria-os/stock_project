@@ -1,0 +1,13 @@
+package com.example.tradeservice.event;
+
+import lombok.Builder;
+import lombok.Getter;
+
+@Builder
+@Getter
+public class TradeResultEvent {
+    private Long buyerId;
+    private Long sellerId;
+    private Long amount;
+    private boolean success;
+}
