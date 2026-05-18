@@ -27,9 +27,9 @@ public class SecurityConfig {
                 // JWT 방식이라 서버에 세션 저장 안 함 (STATELESS)
                 .sessionManagement(session->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/auth/signup", "/auth/login", "/auth/reissue","/auth/reissue").permitAll()
-                        .anyRequest().authenticated());
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()  // 일단 전부 열기
+                );
 
         return http.build();
     }
