@@ -1,4 +1,4 @@
-package com.example.tradeservice.domain;
+package com.example.balanceservice.domain;
 
 public enum BalanceType {
     DEPOSIT,

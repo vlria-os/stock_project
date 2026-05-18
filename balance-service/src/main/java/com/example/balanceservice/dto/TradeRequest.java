@@ -1,4 +1,4 @@
-package com.example.tradeservice.dto;
+package com.example.balanceservice.dto;
 
 import lombok.Getter;
 

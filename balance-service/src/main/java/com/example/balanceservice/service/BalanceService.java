@@ -1,11 +1,11 @@
-package com.example.tradeservice.service;
+package com.example.balanceservice.service;
 
-import com.example.tradeservice.controller.BalanceKafkaProducer;
-import com.example.tradeservice.domain.Balance;
-import com.example.tradeservice.domain.BalanceHistory;
-import com.example.tradeservice.domain.BalanceType;
-import com.example.tradeservice.repository.BalanceHistoryRepository;
-import com.example.tradeservice.repository.BalanceRepository;
+import com.example.balanceservice.controller.BalanceKafkaProducer;
+import com.example.balanceservice.domain.Balance;
+import com.example.balanceservice.domain.BalanceHistory;
+import com.example.balanceservice.domain.BalanceType;
+import com.example.balanceservice.repository.BalanceHistoryRepository;
+import com.example.balanceservice.repository.BalanceRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

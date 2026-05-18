@@ -1,4 +1,4 @@
-package com.example.tradeservice.domain;
+package com.example.balanceservice.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

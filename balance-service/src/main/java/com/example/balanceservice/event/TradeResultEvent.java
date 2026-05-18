@@ -1,4 +1,4 @@
-package com.example.tradeservice.event;
+package com.example.balanceservice.event;
 
 import lombok.Builder;
 import lombok.Getter;

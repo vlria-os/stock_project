@@ -1,8 +1,7 @@
-package com.example.tradeservice.controller;
+package com.example.balanceservice.controller;
 
-import com.example.tradeservice.domain.BalanceHistory;
-import com.example.tradeservice.dto.BalanceRequest;
-import com.example.tradeservice.service.BalanceService;
+import com.example.balanceservice.dto.BalanceRequest;
+import com.example.balanceservice.service.BalanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

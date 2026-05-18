@@ -1,6 +1,6 @@
-package com.example.tradeservice.repository;
+package com.example.balanceservice.repository;
 
-import com.example.tradeservice.domain.Balance;
+import com.example.balanceservice.domain.Balance;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
