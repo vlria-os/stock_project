@@ -1,0 +1,14 @@
+package com.example.balanceservice.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class LockRequest {
+    private Long userId;
+    private Long amount;
+    private Long idempotencyKey;
+}
