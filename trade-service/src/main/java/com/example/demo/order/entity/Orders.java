@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -53,4 +54,5 @@ public class Orders {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+    private LocalDate expiredAt;
 }

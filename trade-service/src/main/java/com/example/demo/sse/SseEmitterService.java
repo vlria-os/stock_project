@@ -50,4 +50,21 @@ public class SseEmitterService {
             emitters.remove(userId);
         }
     }
+
+    //시스템 에러로 체결 실패시 전송
+    public void sendTradeError(Long userId, Long orderId){
+        SseEmitter emitter=emitters.get(userId);
+        if (emitter == null) return;
+
+        try{
+            emitter.send(SseEmitter.event()
+                    .name("error")
+                    .data(Map.of(
+                            "orderId", orderId,
+                            "message", "시스템 에러로 체결에 실패했습니다."
+                    )));
+        } catch (IOException e){
+            emitters.remove(userId);
+        }
+    }
 }
