@@ -9,5 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class BalanceDeductedEvent {
+public class BalanceResponseEvent {
+    private Long buyOrderId;
+    private Long buyerId;
+    private Long sellerId;
+    private Long amount;
+    private boolean success;
 }

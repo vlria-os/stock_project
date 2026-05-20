@@ -1,0 +1,2 @@
+balance.service.url=http://localhost:8083
+stock.service.url=http://localhost:8082

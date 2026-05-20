@@ -1,4 +1,4 @@
-package com.example.demo.kafka.event;
+package com.example.demo.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class BalanceFailedEvent {
+public class BalanceOrderResponse {
+    private boolean success;
 }
