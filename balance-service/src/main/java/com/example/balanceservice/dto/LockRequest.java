@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LockRequestDto {
+public class LockRequest {
     private Long userId;
     private Long amount;
     private Long idempotencyKey;

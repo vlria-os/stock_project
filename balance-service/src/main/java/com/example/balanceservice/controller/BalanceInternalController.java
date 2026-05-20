@@ -1,6 +1,6 @@
 package com.example.balanceservice.controller;
 
-import com.example.balanceservice.dto.LockRequestDto;
+import com.example.balanceservice.dto.LockRequest;
 import com.example.balanceservice.dto.TradeRequest;
 import com.example.balanceservice.service.BalanceService;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +28,13 @@ public class BalanceInternalController {
     }
 
     @PostMapping("/lock")
-    public ResponseEntity<Void> lockBalance(@RequestBody LockRequestDto request) {
+    public ResponseEntity<Void> lockBalance(@RequestBody LockRequest request) {
         balanceService.lockBalance(request.getUserId(), request.getAmount(), request.getIdempotencyKey());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/unlock")
-    public ResponseEntity<Void> unlockBalance(@RequestBody LockRequestDto request) {
+    public ResponseEntity<Void> unlockBalance(@RequestBody LockRequest request) {
         balanceService.unlockBalance(request.getUserId(), request.getAmount(), request.getIdempotencyKey());
         return ResponseEntity.ok().build();
     }

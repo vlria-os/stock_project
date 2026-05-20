@@ -20,7 +20,16 @@ spring:
                 redis-rate-limiter.replenishRate: 10   # 초당 10개 허용
                 redis-rate-limiter.burstCapacity: 20   # 최대 순간 20개
                 redis-rate-limiter.requestedTokens: 1
-
+        - id: balance-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/balance/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
 
 jwt:
   secret: 12345678901234567890123456789012
