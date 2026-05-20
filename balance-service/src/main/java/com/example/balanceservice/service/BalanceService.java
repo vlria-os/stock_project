@@ -36,7 +36,7 @@ public class BalanceService {
         redisTemplate.delete("lock:balance:" + userId);
     }
 
-    private boolean isDuplicate(String idempotencyKey) {
+    private boolean isDuplicate(Long idempotencyKey) {
         String key = "idempotency:" + idempotencyKey;
         Boolean isNew = redisTemplate.opsForValue()
                 .setIfAbsent(key, "processed", IDEMPOTENCY_TTL, TimeUnit.SECONDS);
@@ -51,7 +51,7 @@ public class BalanceService {
     }
 
     // 충전
-    public void deposit(Long userId, Long amount, String idempotencyKey) {
+    public void deposit(Long userId, Long amount, Long idempotencyKey) {
         if (isDuplicate(idempotencyKey)) throw new IllegalStateException("중복 요청");
         if (!tryLock(userId)) throw new IllegalStateException("잠시 후 다시 시도해주세요");
         try {
@@ -70,7 +70,7 @@ public class BalanceService {
     }
 
     // 출금
-    public void withdraw(Long userId, Long amount, String idempotencyKey) {
+    public void withdraw(Long userId, Long amount, Long idempotencyKey) {
         if (isDuplicate(idempotencyKey)) throw new IllegalStateException("중복 요청");
         if (!tryLock(userId)) throw new IllegalStateException("잠시 후 다시 시도해주세요");
         try {
@@ -89,8 +89,8 @@ public class BalanceService {
     }
 
     // 체결 처리 (buyer 차감 + seller 증가)
-    public void executeTrade(Long buyerId, Long sellerId, Long amount, String idempotencyKey) {
-        if (isDuplicate(idempotencyKey)) throw new IllegalStateException("중복 요청");
+    public void executeTrade(Long buyOrderId, Long buyerId, Long sellerId, Long amount) {
+        if (isDuplicate(buyOrderId)) throw new IllegalStateException("중복 요청");
 
         Long firstId = Math.min(buyerId, sellerId);
         Long secondId = Math.max(buyerId, sellerId);
@@ -126,7 +126,7 @@ public class BalanceService {
                         .amount(amount).balanceAfter(seller.getBalance()).build());
 
                 // 성공 발행
-                kafkaProducer.sendTradeResult(buyerId, sellerId, amount, true);
+                kafkaProducer.sendTradeResult(buyOrderId, buyerId, sellerId, amount, true);
 
             } catch (IllegalStateException e) {
                 balanceHistoryRepository.save(BalanceHistory.builder()
@@ -137,7 +137,7 @@ public class BalanceService {
                         .amount(amount).balanceAfter(seller.getBalance()).build());
 
                 // 실패 발행
-                kafkaProducer.sendTradeResult(buyerId, sellerId, amount, false);
+                kafkaProducer.sendTradeResult(buyOrderId, buyerId, sellerId, amount, false);
                 throw e;
             }
         } finally {

@@ -18,10 +18,10 @@ public class BalanceInternalController {
     @PostMapping("/trade")
     public ResponseEntity<Void> executeTrade(@RequestBody TradeRequest request) {
         balanceService.executeTrade(
+                request.getBuyOrderId(),
                 request.getBuyerId(),
                 request.getSellerId(),
-                request.getAmount(),
-                request.getIdempotencyKey()
+                request.getAmount()
         );
         return ResponseEntity.ok().build();
     }

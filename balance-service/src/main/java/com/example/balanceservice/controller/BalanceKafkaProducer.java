@@ -10,8 +10,9 @@ import org.springframework.stereotype.Component;
 public class BalanceKafkaProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendTradeResult(Long buyerId, Long sellerId, Long amount, boolean success) {
+    public void sendTradeResult(Long buyOrderId,Long buyerId, Long sellerId, Long amount, boolean success) {
         TradeResultEvent event = TradeResultEvent.builder()
+                .buyOrderId(buyOrderId)
                 .buyerId(buyerId)
                 .sellerId(sellerId)
                 .amount(amount)
