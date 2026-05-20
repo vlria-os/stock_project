@@ -107,15 +107,8 @@ public class BalanceService {
             Balance seller = balanceRepository.findByUserId(sellerId)
                     .orElseThrow(() -> new IllegalArgumentException("계좌 없음"));
 
-            balanceHistoryRepository.save(BalanceHistory.builder()
-                    .userId(buyerId).type(BalanceType.BUY_ORDER)
-                    .amount(amount).balanceAfter(buyer.getBalance()).build());
-            balanceHistoryRepository.save(BalanceHistory.builder()
-                    .userId(sellerId).type(BalanceType.SELL_ORDER)
-                    .amount(amount).balanceAfter(seller.getBalance()).build());
-
             try {
-                buyer.withdraw(amount);
+                buyer.withdrawLocked(amount);
                 seller.deposit(amount);
 
                 balanceHistoryRepository.save(BalanceHistory.builder()
@@ -128,7 +121,7 @@ public class BalanceService {
                 // 성공 발행
                 kafkaProducer.sendTradeResult(buyOrderId, buyerId, sellerId, amount, true);
 
-            } catch (IllegalStateException e) {
+            } catch (Exception e) {
                 balanceHistoryRepository.save(BalanceHistory.builder()
                         .userId(buyerId).type(BalanceType.BUY_FAIL)
                         .amount(amount).balanceAfter(buyer.getBalance()).build());
@@ -143,6 +136,44 @@ public class BalanceService {
         } finally {
             unlock(firstId);
             unlock(secondId);
+        }
+    }
+
+    // 락 걸기
+    public void lockBalance(Long userId, Long amount, Long idempotencyKey) {
+        if (isDuplicate(idempotencyKey)) throw new IllegalStateException("중복 요청");
+        if (!tryLock(userId)) throw new IllegalStateException("잠시 후 다시 시도해주세요");
+        try {
+            Balance balance = balanceRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("계좌 없음"));
+            balance.lockBalance(amount);
+            balanceHistoryRepository.save(BalanceHistory.builder()
+                    .userId(userId)
+                    .type(BalanceType.LOCK)
+                    .amount(amount)
+                    .balanceAfter(balance.getBalance())
+                    .build());
+        } finally {
+            unlock(userId);
+        }
+    }
+
+    // 락 해제 (주문 취소)
+    public void unlockBalance(Long userId, Long amount, Long idempotencyKey) {
+        if (isDuplicate(idempotencyKey)) throw new IllegalStateException("중복 요청");
+        if (!tryLock(userId)) throw new IllegalStateException("잠시 후 다시 시도해주세요");
+        try {
+            Balance balance = balanceRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("계좌 없음"));
+            balance.unlockBalance(amount);
+            balanceHistoryRepository.save(BalanceHistory.builder()
+                    .userId(userId)
+                    .type(BalanceType.UNLOCK)
+                    .amount(amount)
+                    .balanceAfter(balance.getBalance())
+                    .build());
+        } finally {
+            unlock(userId);
         }
     }
 }

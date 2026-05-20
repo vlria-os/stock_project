@@ -25,4 +25,16 @@ public class BalanceInternalController {
         );
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/lock")
+    public ResponseEntity<Void> lockBalance(@RequestBody LockRequest request) {
+        balanceService.lockBalance(request.getUserId(), request.getAmount(), request.getIdempotencyKey());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/unlock")
+    public ResponseEntity<Void> unlockBalance(@RequestBody LockRequest request) {
+        balanceService.unlockBalance(request.getUserId(), request.getAmount(), request.getIdempotencyKey());
+        return ResponseEntity.ok().build();
+    }
 }

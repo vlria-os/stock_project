@@ -23,6 +23,7 @@ public class Balance {
     private Long balanceId;
     private Long userId;
     private Long balance;
+    private Long lockedBalance;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
@@ -32,6 +33,7 @@ public class Balance {
         return Balance.builder()
                 .userId(userId)
                 .balance(0L)
+                .lockedBalance(0L)
                 .build();
     }
 
@@ -39,10 +41,28 @@ public class Balance {
         this.balance+=amount;
     }
 
+    // 일반 출금 (락 없음)
     public void withdraw(Long amount) {
-        if (this.balance < amount) {
+        if (this.balance - this.lockedBalance < amount) {
             throw new IllegalStateException("잔고 부족");
         }
         this.balance -= amount;
+    }
+
+    // 체결 출금 (락 해제 + 차감)
+    public void withdrawLocked(Long amount) {
+        this.balance -= amount;
+        this.lockedBalance -= amount;
+    }
+
+    public void lockBalance(Long amount) {
+        if (this.balance - this.lockedBalance < amount) {
+            throw new IllegalStateException("잔고 부족");
+        }
+        this.lockedBalance += amount;
+    }
+
+    public void unlockBalance(Long amount) {
+        this.lockedBalance -= amount;
     }
 }
