@@ -4,11 +4,13 @@ import com.example.demo.client.BalanceClient;
 import com.example.demo.client.dto.BalanceOrderRequest;
 import com.example.demo.client.dto.BalanceOrderResponse;
 import com.example.demo.client.dto.TradeRequest;
+import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.OrderCondition;
 import com.example.demo.order.enums.OrderType;
 import com.example.demo.order.enums.Side;
 import com.example.demo.order.enums.Status;
+import com.example.demo.order.repository.OrderHistoryRepository;
 import com.example.demo.order.repository.OrdersRepository;
 import com.example.demo.redis.OrderBookRepository;
 import com.example.demo.redis.dto.OrderBook;
@@ -27,6 +29,7 @@ public class TradeService {
     private final OrderMatchingEngine orderMatchingEngine;
     private final BalanceClient balanceClient;
     private final TradesRepository tradesRepository;
+    private final OrderHistoryRepository orderHistoryRepository;
 
     @Transactional
     public void placeOrder(Long userId, TradeRequest request){
@@ -115,6 +118,7 @@ public class TradeService {
             }
         }
 
+        //주문 insert
         Orders order=Orders.builder()
                 .userId(userId)
                 .stockCode(request.getStockCode())
@@ -128,6 +132,22 @@ public class TradeService {
                 .build();
 
         ordersRepository.save(order);
+
+        //주문 내역 insert
+        OrderHistory history=OrderHistory.builder()
+                .userId(order.getUserId())
+                .stockCode(order.getStockCode())
+                .orderType(order.getOrderType())
+                .orderCondition(order.getOrderCondition())
+                .side(order.getSide())
+                .price(order.getPrice())
+                .quantity(order.getQuantity())
+                .filledQuantity(0L)
+                .remainingQuantity(order.getQuantity())
+                .status(order.getStatus())
+                .build();
+
+        orderHistoryRepository.save(history);
 
         //redis 호가창에 등록
         orderBookRepository.addOrder(order);
