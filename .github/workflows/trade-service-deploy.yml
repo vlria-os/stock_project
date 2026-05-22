@@ -49,6 +49,9 @@ jobs:
               docker run -d --name trade-service -p 8084:8084 \
                 -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
                 -e KAFKA_HOST=${{ secrets.KAFKA_HOST }} \
+                -e DB_URL=${{ secrets.TRADE_DB_URL }} \
+                -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+                -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
                 -e SPRING_PROFILES_ACTIVE=prod \
                 ${{ env.IMAGE }}
             "
