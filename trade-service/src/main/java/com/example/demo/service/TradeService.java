@@ -124,6 +124,7 @@ public class TradeService {
                 .price(request.getPrice())
                 .quantity(request.getQuantity())
                 .status(Status.PENDING)
+                .expiredAt(request.getExpiredAt() != null ? request.getExpiredAt() : null)
                 .build();
 
         ordersRepository.save(order);
