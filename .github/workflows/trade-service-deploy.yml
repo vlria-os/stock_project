@@ -41,17 +41,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.BASTION_SSH_KEY }}
           script: |
-            ssh -i ~/.ssh/aws-invest-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.TRADE_EC2_PRIVATE_IP }} "
-              aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
-              docker pull ${{ env.IMAGE }}
-              docker stop trade-service || true
-              docker rm trade-service || true
-              docker run -d --name trade-service -p 8084:8084 \
-                -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
-                -e KAFKA_HOST=${{ secrets.KAFKA_HOST }} \
-                -e DB_URL=${{ secrets.TRADE_DB_URL }} \
-                -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
-                -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-                -e SPRING_PROFILES_ACTIVE=prod \
-                ${{ env.IMAGE }}
-            "
+            ssh -i ~/.ssh/aws-invest-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.TRADE_EC2_PRIVATE_IP }} << 'EOF'
+            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            docker pull ${{ env.IMAGE }}
+            docker stop trade-service || true
+            docker rm trade-service || true
+            docker run -d --name trade-service -p 8084:8084 -e REDIS_HOST=${{ secrets.REDIS_HOST }} -e KAFKA_HOST=${{ secrets.KAFKA_HOST }} -e DB_URL=${{ secrets.TRADE_DB_URL }} -e DB_USERNAME=${{ secrets.DB_USERNAME }} -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} -e SPRING_PROFILES_ACTIVE=prod ${{ env.IMAGE }}
+            EOF
