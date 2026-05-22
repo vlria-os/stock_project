@@ -45,6 +45,6 @@ jobs:
             docker pull ${{ env.IMAGE }}
             docker stop gateway-service || true
             docker rm gateway-service || true
-            docker run -d --name gateway-service -p 8085:8085 \
+            docker run -d --name gateway-service -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE=prod \
               ${{ env.IMAGE }}
