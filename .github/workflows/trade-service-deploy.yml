@@ -1,6 +1,6 @@
 name: Trade Service Deploy
 
-on:
+"on":
   push:
     branches: [main]
     paths:
