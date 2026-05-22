@@ -1,0 +1,2 @@
+balance.service.url=http://balance-service:8083
+stock.service.url=http://stock-service:8082
