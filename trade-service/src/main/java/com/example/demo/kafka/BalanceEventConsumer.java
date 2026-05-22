@@ -5,11 +5,11 @@ import com.example.demo.kafka.event.TradeCompletedEvent;
 import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.OrderCondition;
-import com.example.demo.order.enums.Side;
 import com.example.demo.order.enums.Status;
 import com.example.demo.order.repository.OrderHistoryRepository;
 import com.example.demo.order.repository.OrdersRepository;
 import com.example.demo.redis.OrderBookRepository;
+import com.example.demo.redis.RedisLockManager;
 import com.example.demo.redis.dto.OrderBook;
 import com.example.demo.sse.SseEmitterService;
 import com.example.demo.trade.entity.TradeHistory;
@@ -17,7 +17,6 @@ import com.example.demo.trade.entity.Trades;
 import com.example.demo.trade.repository.TradeHistoryRepository;
 import com.example.demo.trade.repository.TradesRepository;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class BalanceEventConsumer {
     private final RedisTemplate<String, String> redisTemplate;
-    private final RedissonClient redissonClient;
+    private final RedisLockManager redisLockManager;
     private final OrderBookRepository orderBookRepository;
     private final OrdersRepository ordersRepository;
     private final TradesRepository tradesRepository;
@@ -130,8 +129,8 @@ public class BalanceEventConsumer {
 
         //redis 매핑 삭제 + 락 해제
         redisTemplate.delete(String.format(MATCH_KEY, buyOrderId));
-        redissonClient.getLock(String.format(LOCK_KEY, buyOrderId)).forceUnlock();
-        redissonClient.getLock(String.format(LOCK_KEY, sellOrderId)).forceUnlock();
+        redisLockManager.unlock(String.format(LOCK_KEY, buyOrderId));
+        redisLockManager.unlock(String.format(LOCK_KEY, sellOrderId));
 
         //sse로 프론트에 체결 결과 전송
         sseEmitterService.sendTradeResult(buyOrder.getUserId(), filledQuantity, price);
@@ -193,8 +192,8 @@ public class BalanceEventConsumer {
                 .build());
 
         redisTemplate.delete(String.format(MATCH_KEY, buyOrderId));
-        redissonClient.getLock(String.format(LOCK_KEY, buyOrderId)).forceUnlock();
-        redissonClient.getLock(String.format(LOCK_KEY, sellOrderId)).forceUnlock();
+        redisLockManager.unlock(String.format(LOCK_KEY, buyOrderId));
+        redisLockManager.unlock(String.format(LOCK_KEY, sellOrderId));
 
         sseEmitterService.sendTradeError(buyOrder.getUserId(), buyOrderId);
         sseEmitterService.sendTradeError(sellOrder.getUserId(), sellOrderId);
