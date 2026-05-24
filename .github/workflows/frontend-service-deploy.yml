@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'react/**'
+  workflow_dispatch:
 
 jobs:
   deploy-frontend:
@@ -29,11 +30,11 @@ jobs:
           REGISTRY: ${{ secrets.ECR_REGISTRY }}
         run: |
           docker build \
-            -t $REGISTRY/frontend:${{ github.sha }} \
-            -t $REGISTRY/frontend:latest \
+            -t $REGISTRY/invest/react/front:${{ github.sha }} \
+            -t $REGISTRY/invest/react/front:latest \
             ./react
-          docker push $REGISTRY/frontend:${{ github.sha }}
-          docker push $REGISTRY/frontend:latest
+          docker push $REGISTRY/invest/react/front:${{ github.sha }}
+          docker push $REGISTRY/invest/react/front:latest
 
       - name: Deploy to Frontend EC2
         uses: appleboy/ssh-action@v1
@@ -45,7 +46,7 @@ jobs:
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
               | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
 
-            docker pull ${{ secrets.ECR_REGISTRY }}/frontend:latest
+            docker pull ${{ secrets.ECR_REGISTRY }}/invest/react/front:latest
 
             docker stop frontend || true
             docker rm   frontend || true
@@ -53,6 +54,6 @@ jobs:
               --name frontend \
               --restart always \
               -p 80:80 \
-              ${{ secrets.ECR_REGISTRY }}/frontend:latest
+              ${{ secrets.ECR_REGISTRY }}/invest/react/front:latest
 
             docker image prune -f

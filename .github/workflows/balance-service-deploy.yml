@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'balance-service/**'
+  workflow_dispatch:
 
 jobs:
   deploy-balance:
