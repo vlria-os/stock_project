@@ -22,6 +22,13 @@ public interface TradesRepository extends JpaRepository<Trades, Long> {
             and t.stockCode = :stockCode
     """)
     Long sumSoldQuantity(@Param("userId") Long userId, @Param("stockCode") String stockCode);
+
+    @Query("""
+        select coalesce(sum(t.filledQuantity), 0)
+        from Trades t
+        where t.buyOrder.id = :orderId or t.sellOrder.id = :orderId
+    """)
+    Long sumFilledQuantityByOrderId(@Param("orderId") Long orderId);
 }
 
 

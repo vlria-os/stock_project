@@ -11,6 +11,6 @@ import java.util.Optional;
 
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
     Optional<Orders> findById(Long id);
-    List<Orders> findByOrderConditionAndExpiredAtAndStatus(OrderCondition orderCondition,
-                                                           LocalDate expiredAt, Status status);
+    List<Orders> findByOrderConditionAndExpiredAtAndStatusIn(OrderCondition orderCondition,
+                                                           LocalDate expiredAt, List<Status> statuses);
 }

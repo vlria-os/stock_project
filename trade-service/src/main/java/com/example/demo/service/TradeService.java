@@ -4,16 +4,22 @@ import com.example.demo.client.BalanceClient;
 import com.example.demo.client.dto.BalanceOrderRequest;
 import com.example.demo.client.dto.BalanceOrderResponse;
 import com.example.demo.client.dto.TradeRequest;
+import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.OrderCondition;
 import com.example.demo.order.enums.OrderType;
 import com.example.demo.order.enums.Side;
 import com.example.demo.order.enums.Status;
+import com.example.demo.order.repository.OrderHistoryRepository;
 import com.example.demo.order.repository.OrdersRepository;
 import com.example.demo.redis.OrderBookRepository;
 import com.example.demo.redis.dto.OrderBook;
+import com.example.demo.trade.entity.TradeHistory;
+import com.example.demo.trade.repository.TradeHistoryRepository;
 import com.example.demo.trade.repository.TradesRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +33,8 @@ public class TradeService {
     private final OrderMatchingEngine orderMatchingEngine;
     private final BalanceClient balanceClient;
     private final TradesRepository tradesRepository;
+    private final OrderHistoryRepository orderHistoryRepository;
+    private final TradeHistoryRepository tradeHistoryRepository;
 
     @Transactional
     public void placeOrder(Long userId, TradeRequest request){
@@ -115,6 +123,7 @@ public class TradeService {
             }
         }
 
+        //주문 insert
         Orders order=Orders.builder()
                 .userId(userId)
                 .stockCode(request.getStockCode())
@@ -129,10 +138,68 @@ public class TradeService {
 
         ordersRepository.save(order);
 
+        //주문 내역 insert
+        OrderHistory history=OrderHistory.builder()
+                .userId(order.getUserId())
+                .stockCode(order.getStockCode())
+                .orderType(order.getOrderType())
+                .orderCondition(order.getOrderCondition())
+                .side(order.getSide())
+                .price(order.getPrice())
+                .quantity(order.getQuantity())
+                .filledQuantity(0L)
+                .remainingQuantity(order.getQuantity())
+                .status(order.getStatus())
+                .build();
+
+        orderHistoryRepository.save(history);
+
         //redis 호가창에 등록
         orderBookRepository.addOrder(order);
 
         //체결 엔진 호출
         orderMatchingEngine.match(order);
+    }
+
+    @Transactional
+    public Long cancelOrder(Long orderId, Long userId){
+        Orders order=ordersRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 번호입니다."));
+
+        if (!userId.equals(order.getUserId())){
+            throw new IllegalArgumentException("주문을 취소할 권한이 없습니다.");
+        }
+
+        if (order.getOrderCondition() != OrderCondition.GTC && order.getStatus() != Status.PENDING){
+            throw new IllegalArgumentException("취소할 수 없는 주문입니다.");
+        }
+
+        orderBookRepository.removeOrder(order);
+
+        order.setStatus(Status.CANCELLED);
+        ordersRepository.save(order);
+
+        orderHistoryRepository.save(OrderHistory.builder()
+                .userId(order.getUserId())
+                .stockCode(order.getStockCode())
+                .orderType(order.getOrderType())
+                .orderCondition(order.getOrderCondition())
+                .side(order.getSide())
+                .price(order.getPrice())
+                .quantity(order.getQuantity())
+                .filledQuantity(0L)
+                .remainingQuantity(order.getQuantity())
+                .status(order.getStatus())
+                .build());
+
+        return orderId;
+    }
+
+    public Page<OrderHistory> getMyOrderHistory(Long userId, Status status, Pageable pageable){
+        return orderHistoryRepository.findMyOrders(userId, status, pageable);
+    }
+
+    public Page<TradeHistory> getMyTradeHistory(Long userId, Pageable pageable){
+        return tradeHistoryRepository.findByUserId(userId, pageable);
     }
 }

@@ -9,11 +9,9 @@ import com.example.demo.order.enums.Side;
 import com.example.demo.order.enums.Status;
 import com.example.demo.order.repository.OrdersRepository;
 import com.example.demo.redis.OrderBookRepository;
+import com.example.demo.redis.RedisLockManager;
 import com.example.demo.redis.dto.OrderBook;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.query.Order;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderMatchingEngine {
     private final OrderBookRepository orderBookRepository;
-    private final RedissonClient redissonClient;
+    private final RedisLockManager redisLockManager;
     private final RedisTemplate<String, String> redisTemplate;
     private final TradeEventProducer tradeEventProducer;
     private final OrdersRepository ordersRepository;
@@ -59,12 +57,12 @@ public class OrderMatchingEngine {
 
     //GTC
     private void matchGTCBuy(Orders order){
-        RLock myLock=redissonClient.getLock(String.format(LOCK_KEY, order.getId()));
-        myLock.lock();
+        String lockKey=String.format(LOCK_KEY, order.getId());
+        redisLockManager.lock(lockKey);
 
         List<OrderBook> sellOrders=getSellOrders(order);
         if (sellOrders == null || sellOrders.isEmpty()){
-            myLock.unlock();
+            redisLockManager.unlock(lockKey);
             return;
         }
 
@@ -72,12 +70,12 @@ public class OrderMatchingEngine {
     }
 
     private void matchGTCSell(Orders order){
-        RLock myLock=redissonClient.getLock(String.format(LOCK_KEY, order.getId()));
-        myLock.lock();
+        String lockKey=String.format(LOCK_KEY, order.getId());
+        redisLockManager.lock(lockKey);
 
         List<OrderBook> buyOrders=getBuyOrders(order);
         if (buyOrders == null || buyOrders.isEmpty()){
-            myLock.unlock();
+            redisLockManager.unlock(lockKey);
             return;
         }
 
@@ -86,8 +84,8 @@ public class OrderMatchingEngine {
 
     //FOK
     private void matchFOKBuy(Orders order){
-        RLock myLock=redissonClient.getLock(String.format(LOCK_KEY, order.getId()));
-        myLock.lock();
+        String lockKey=String.format(LOCK_KEY, order.getId());
+        redisLockManager.lock(lockKey);
 
         List<OrderBook> sellOrders=getSellOrders(order);
 
@@ -98,7 +96,7 @@ public class OrderMatchingEngine {
             order.setStatus(Status.CANCELLED);
             ordersRepository.save(order);
             orderBookRepository.removeOrder(order);
-            myLock.unlock();
+            redisLockManager.unlock(lockKey);
             return;
         }
 
@@ -106,8 +104,8 @@ public class OrderMatchingEngine {
     }
 
     private void matchFOKSell(Orders order){
-        RLock myLock=redissonClient.getLock(String.format(LOCK_KEY, order.getId()));
-        myLock.lock();
+        String lockKey=String.format(LOCK_KEY, order.getId());
+        redisLockManager.lock(lockKey);
 
         List<OrderBook> buyOrders=getBuyOrders(order);
 
@@ -118,7 +116,7 @@ public class OrderMatchingEngine {
             order.setStatus(Status.CANCELLED);
             ordersRepository.save(order);
             orderBookRepository.removeOrder(order);
-            myLock.unlock();
+            redisLockManager.unlock(lockKey);
             return;
         }
 
@@ -127,15 +125,15 @@ public class OrderMatchingEngine {
 
     //IOC
     private void matchIOCBuy(Orders order){
-        RLock myLock=redissonClient.getLock(String.format(LOCK_KEY, order.getId()));
-        myLock.lock();
+        String lockKey=String.format(LOCK_KEY, order.getId());
+        redisLockManager.lock(lockKey);
 
         List<OrderBook> sellOrders=getSellOrders(order);
         if (sellOrders == null || sellOrders.isEmpty()){
             order.setStatus(Status.CANCELLED);
             ordersRepository.save(order);
             orderBookRepository.removeOrder(order);
-            myLock.unlock();
+            redisLockManager.unlock(lockKey);
             return;
         }
 
@@ -143,15 +141,15 @@ public class OrderMatchingEngine {
     }
 
     private void matchIOCSell(Orders order){
-        RLock myLock=redissonClient.getLock(String.format(LOCK_KEY, order.getId()));
-        myLock.lock();
+        String lockKey=String.format(LOCK_KEY, order.getId());
+        redisLockManager.lock(lockKey);
 
         List<OrderBook> buyOrders=getBuyOrders(order);
         if (buyOrders == null || buyOrders.isEmpty()){
             order.setStatus(Status.CANCELLED);
             ordersRepository.save(order);
             orderBookRepository.removeOrder(order);
-            myLock.unlock();
+            redisLockManager.unlock(lockKey);
             return;
         }
 
@@ -171,12 +169,12 @@ public class OrderMatchingEngine {
 
         //1단계: lock 걸고 주문 수량 합산 + 매핑 저장
         for(OrderBook counterOrder:counterOrders){
-            RLock counterLock=redissonClient.getLock(String.format(LOCK_KEY, counterOrder.getOrderId()));
-            counterLock.lock();
+            String counterLockKey=String.format(LOCK_KEY, counterOrder.getOrderId());
+            redisLockManager.lock(counterLockKey);
 
             OrderBook fresh=orderBookRepository.getOrderBook(counterOrder.getOrderId());
             if (fresh == null){
-                counterLock.forceUnlock();
+                redisLockManager.unlock(counterLockKey);
                 continue;
             }
 
