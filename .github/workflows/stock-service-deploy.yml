@@ -1,0 +1,57 @@
+name: Stock Service Deploy
+
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'stock-service/**'
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: invest/spring/stock-service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.STOCK_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.STOCK_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push image
+        run: |
+          IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          docker build -t $IMAGE ./stock-service
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Deploy via Bastion
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BASTION_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BASTION_SSH_KEY }}
+          script: |
+            ssh -i ~/.ssh/aws-invest-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.STOCK_EC2_PRIVATE_IP }} "
+              aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+              docker pull ${{ env.IMAGE }}
+              docker stop stock-service || true
+              docker rm stock-service || true
+              docker run -d --name stock-service -p 8082:8082 \
+                -e DB_HOST=${{ secrets.DB_HOST }} \
+                -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+                -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                -e KIS_APP_KEY=${{ secrets.KIS_APP_KEY }} \
+                -e KIS_APP_SECRET=${{ secrets.KIS_APP_SECRET }} \
+                -e SPRING_PROFILES_ACTIVE=prod \
+                ${{ env.IMAGE }}
+            "
