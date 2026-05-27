@@ -4,7 +4,7 @@ name: Stock Service Deploy
     branches: [main]
     paths:
       - 'stock-service/**'
-workflow_dispatch:
+  workflow_dispatch:
 
 env:
   AWS_REGION: ap-northeast-2
