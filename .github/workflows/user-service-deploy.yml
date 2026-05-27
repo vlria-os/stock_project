@@ -4,6 +4,8 @@ name: User Service Deploy
     branches: [main]
     paths:
       - 'user-service/**'
+  workflow_dispatch:
+  
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: invest/spring/user-service
