@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Header from "./layout/Header";
+import Balance from "./page/balance/Balance.jsx";
 
 const PAGE_COMPONENTS = {
   dashboard: () => <div>대시보드 페이지</div>,
@@ -7,7 +8,7 @@ const PAGE_COMPONENTS = {
   market:    () => <div>시장 페이지</div>,
   search:    () => <div>종목검색 페이지</div>,
   news:      () => <div>뉴스 페이지</div>,
-  settings:  () => <div>설정 페이지</div>,
+  balance: () => Balance,
 };
 
 export default function App() {

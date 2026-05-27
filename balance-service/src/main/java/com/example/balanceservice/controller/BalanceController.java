@@ -1,5 +1,6 @@
 package com.example.balanceservice.controller;
 
+import com.example.balanceservice.domain.BalanceHistory;
 import com.example.balanceservice.dto.BalanceRequest;
 import com.example.balanceservice.service.BalanceService;
 import lombok.RequiredArgsConstructor;
@@ -14,24 +15,30 @@ import java.util.List;
 public class BalanceController {
     private final BalanceService balanceService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<Long> getBalance(@PathVariable Long userId) {
+    @GetMapping
+    public ResponseEntity<Long> getBalance(@RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(balanceService.getBalance(userId));
     }
 
-    @PostMapping("/{userId}/deposit")
+    @PostMapping("/deposit")
     public ResponseEntity<Void> deposit(
-            @PathVariable Long userId,
+            @RequestHeader("X-User-Id") Long userId,
             @RequestBody BalanceRequest request) {
         balanceService.deposit(userId, request.getAmount(), request.getIdempotencyKey());
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{userId}/withdraw")
+    @PostMapping("/withdraw")
     public ResponseEntity<Void> withdraw(
-            @PathVariable Long userId,
+            @RequestHeader("X-User-Id") Long userId,
             @RequestBody BalanceRequest request) {
         balanceService.withdraw(userId, request.getAmount(), request.getIdempotencyKey());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<BalanceHistory>> getHistory(
+            @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(balanceService.getHistory(userId));
     }
 }
