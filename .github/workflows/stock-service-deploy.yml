@@ -4,6 +4,8 @@ name: Stock Service Deploy
     branches: [main]
     paths:
       - 'stock-service/**'
+workflow_dispatch:
+
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: invest/spring/stock-service
