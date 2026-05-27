@@ -1,15 +1,25 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+// App.jsx
+import { useState } from "react";
+import Header from "./Header";
 
-function App() {
-  const [count, setCount] = useState(0)
+const PAGE_COMPONENTS = {
+  dashboard: () => <div>대시보드 페이지</div>,
+  portfolio: () => <div>포트폴리오 페이지</div>,
+  market:    () => <div>시장 페이지</div>,
+  search:    () => <div>종목검색 페이지</div>,
+  news:      () => <div>뉴스 페이지</div>,
+  settings:  () => <div>설정 페이지</div>,
+};
 
+export default function App() {
+  const [page, setPage] = useState("dashboard");
+  const PageComponent = PAGE_COMPONENTS[page];
   return (
-      <h1>Welcome Stock!</h1>
-  )
+    <>
+      <Header currentPage={page} onNavigate={setPage} />
+      <main style={{ padding: "32px 24px", maxWidth: 960, margin: "0 auto" }}>
+        <PageComponent />
+      </main>
+    </>
+  );
 }
-
-export default App
