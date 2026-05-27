@@ -45,9 +45,9 @@ jobs:
               docker stop user-service || true
               docker rm user-service || true
               docker run -d --name user-service -p 8081:8081 \
-                -e DB_HOST=${{ secrets.USER_DB_HOST }} \
-                -e DB_USERNAME=${{ secrets.USER_DB_USERNAME }} \
-                -e DB_PASSWORD=${{ secrets.USER_DB_PASSWORD }} \
+                -e USER_DB_HOST=${{ secrets.USER_DB_HOST }} \
+                -e USER_DB_USERNAME=${{ secrets.USER_DB_USERNAME }} \
+                -e USER_DB_PASSWORD=${{ secrets.USER_DB_PASSWORD }} \
                 -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
                 -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
                 -e SPRING_PROFILES_ACTIVE=prod \
