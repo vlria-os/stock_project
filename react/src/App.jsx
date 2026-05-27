@@ -1,5 +1,5 @@
 import { useState } from "react";
-import header from "./layout/header";
+import Header from "./layout/Header";
 
 const PAGE_COMPONENTS = {
   dashboard: () => <div>대시보드 페이지</div>,
@@ -15,7 +15,7 @@ export default function App() {
   const PageComponent = PAGE_COMPONENTS[page];
   return (
     <>
-      <header currentPage={page} onNavigate={setPage} />
+      <Header currentPage={page} onNavigate={setPage} />
       <main style={{ padding: "32px 24px", maxWidth: 960, margin: "0 auto" }}>
         <PageComponent />
       </main>

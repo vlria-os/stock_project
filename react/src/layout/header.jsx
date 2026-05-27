@@ -1,4 +1,3 @@
-// Header.jsx
 import { useState } from "react";
 
 const PAGES = [
@@ -10,25 +9,25 @@ const PAGES = [
   { id: "settings",  label: "설정",       icon: "⚙️" },
 ];
 
-export default function header({ currentPage, onNavigate }) {
+export default function Header({ currentPage, onNavigate }) {
   return (
-    <header style={styles.header}>
-      <div style={styles.logo}>📈 StockApp</div>
-      <nav style={styles.nav}>
-        {PAGES.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => onNavigate(p.id)}
-            style={{
-              ...styles.navBtn,
-              ...(currentPage === p.id ? styles.navBtnActive : {}),
-            }}
-          >
-            {p.icon} {p.label}
-          </button>
-        ))}
-      </nav>
-    </header>
+      <header style={styles.header}>
+        <div style={styles.logo}>📈 StockApp</div>
+        <nav style={styles.nav}>
+          {PAGES.map((p) => (
+              <button
+                  key={p.id}
+                  onClick={() => onNavigate(p.id)}
+                  style={{
+                    ...styles.navBtn,
+                    ...(currentPage === p.id ? styles.navBtnActive : {}),
+                  }}
+              >
+                {p.icon} {p.label}
+              </button>
+          ))}
+        </nav>
+      </header>
   );
 }
 
@@ -36,17 +35,21 @@ const styles = {
   header: {
     display: "flex", alignItems: "center", gap: 24,
     padding: "0 24px", height: 56,
-    background: "#fff", borderBottom: "1px solid #eee",
+    background: "var(--color-background-primary, #ffffff)",
+    borderBottom: "1px solid var(--color-border-tertiary, #eeeeee)",
     position: "sticky", top: 0, zIndex: 100,
   },
-  logo: { fontWeight: 600, fontSize: 16, whiteSpace: "nowrap" },
+  logo: { fontWeight: 600, fontSize: 16, whiteSpace: "nowrap",
+    color: "var(--color-text-primary, #111111)" },
   nav:  { display: "flex", gap: 4 },
   navBtn: {
     background: "none", border: "none", cursor: "pointer",
     padding: "6px 12px", borderRadius: 8,
-    fontSize: 14, color: "#666",
+    fontSize: 14, color: "var(--color-text-secondary, #666666)",
   },
   navBtnActive: {
-    background: "#f4f4f4", color: "#111", fontWeight: 500,
+    background: "var(--color-background-secondary, #f4f4f4)",
+    color: "var(--color-text-primary, #111111)",
+    fontWeight: 500,
   },
 };
