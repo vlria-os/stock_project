@@ -10,7 +10,7 @@ const PAGES = [
   { id: "settings",  label: "설정",       icon: "⚙️" },
 ];
 
-export default function Header({ currentPage, onNavigate }) {
+export default function header({ currentPage, onNavigate }) {
   return (
     <header style={styles.header}>
       <div style={styles.logo}>📈 StockApp</div>

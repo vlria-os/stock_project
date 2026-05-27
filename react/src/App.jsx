@@ -1,6 +1,5 @@
-// App.jsx
 import { useState } from "react";
-import Header from "./Header";
+import header from "./layout/header";
 
 const PAGE_COMPONENTS = {
   dashboard: () => <div>대시보드 페이지</div>,
@@ -16,7 +15,7 @@ export default function App() {
   const PageComponent = PAGE_COMPONENTS[page];
   return (
     <>
-      <Header currentPage={page} onNavigate={setPage} />
+      <header currentPage={page} onNavigate={setPage} />
       <main style={{ padding: "32px 24px", maxWidth: 960, margin: "0 auto" }}>
         <PageComponent />
       </main>
