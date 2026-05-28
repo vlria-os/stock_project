@@ -13,7 +13,7 @@ const PAGE_COMPONENTS = {
   market:    MarketPage,
   search:    SearchPage,
   news:      () => <div>뉴스 페이지</div>,
-  balance:   () => Balance,
+  balance:   Balance,
   login:     LoginPage,
   signup:    SignupPage,
 };
