@@ -10,12 +10,12 @@ import SearchPage from "./page/stock/SearchPage";
 const PAGE_COMPONENTS = {
   dashboard: () => <div>대시보드 페이지</div>,
   portfolio: () => <div>포트폴리오 페이지</div>,
-  market:    () => MarketPage,
-  search:    () => SearchPage,
+  market:    MarketPage,
+  search:    SearchPage,
   news:      () => <div>뉴스 페이지</div>,
-  balance:   () => Balance,
-  login:     () => LoginPage,
-  signup:    () => SignupPage,
+  balance:   Balance,
+  login:     LoginPage,
+  signup:    SignupPage,
 };
 
 // 로그인이 필요한 페이지 — 비로그인 시 로그인 페이지로 이동
