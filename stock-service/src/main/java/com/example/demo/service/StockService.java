@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.dto.KisChartApiResponse;
 import com.example.demo.dto.KisPriceApiResponse;
 import com.example.demo.dto.StockChartResponse;
+import com.example.demo.dto.StockListResponse;
 import com.example.demo.dto.StockPriceResponse;
 import com.example.demo.entity.Stock;
 import com.example.demo.kis.KisTokenService;
@@ -69,6 +70,13 @@ public class StockService {
                 .map(KisChartApiResponse::getOutput2)
                 .block();
     }
+    // 전체 종목 목록 조회
+    public List<StockListResponse> getAllStocks() {
+        return stockRepository.findAll().stream()
+                .map(StockListResponse::new)
+                .toList();
+    }
+
     // stocks 테이블 현재가 업데이트(스케줄러에서 호출)
     @Transactional
     public void updateStockCache(String stockCode) {
