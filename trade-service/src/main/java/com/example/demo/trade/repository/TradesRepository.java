@@ -1,7 +1,10 @@
 package com.example.demo.trade.repository;
 
 import com.example.demo.order.enums.Side;
+import com.example.demo.trade.dto.HoldingsResponse;
 import com.example.demo.trade.entity.Trades;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +32,29 @@ public interface TradesRepository extends JpaRepository<Trades, Long> {
         where t.buyOrder.id = :orderId or t.sellOrder.id = :orderId
     """)
     Long sumFilledQuantityByOrderId(@Param("orderId") Long orderId);
+
+    @Query(
+        value = """
+            select t.stockCode,
+                sum(case
+                        when t.buyOrder.userId = :userId then t.filledQuantity
+                        when t.sellOrder.userId = :userId then -t.filledQuantity
+                end) as holdings
+            from Trades t
+            where t.buyOrder.userId = :userId or t.sellOrder.userId = :userId
+            group by t.stockCode
+            having sum(case
+                        when t.buyOrder.userId = :userId then t.filledQuantity
+                        when t.sellOrder.userId = :userId then -t.filledQuantity
+                end) > 0
+        """,
+        countQuery = """
+            select count(distinct t.stockCode)
+            from Trades t
+            where t.buyOrder.userId = :userId or t.sellOrder.userId = :userId
+        """
+    )
+    Page<HoldingsResponse> myHoldings(@Param("userId") Long userId, Pageable pageable);
 }
 
 

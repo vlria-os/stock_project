@@ -1,9 +1,11 @@
 package com.example.demo.service;
 
 import com.example.demo.client.BalanceClient;
+import com.example.demo.client.StockClient;
 import com.example.demo.client.dto.BalanceOrderRequest;
 import com.example.demo.client.dto.BalanceOrderResponse;
 import com.example.demo.client.dto.TradeRequest;
+import com.example.demo.order.dto.OrderHistoryResponse;
 import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.OrderCondition;
@@ -14,6 +16,8 @@ import com.example.demo.order.repository.OrderHistoryRepository;
 import com.example.demo.order.repository.OrdersRepository;
 import com.example.demo.redis.OrderBookRepository;
 import com.example.demo.redis.dto.OrderBook;
+import com.example.demo.trade.dto.HoldingsResponse;
+import com.example.demo.trade.dto.TradeHistoryResponse;
 import com.example.demo.trade.entity.TradeHistory;
 import com.example.demo.trade.repository.TradeHistoryRepository;
 import com.example.demo.trade.repository.TradesRepository;
@@ -35,6 +39,7 @@ public class TradeService {
     private final TradesRepository tradesRepository;
     private final OrderHistoryRepository orderHistoryRepository;
     private final TradeHistoryRepository tradeHistoryRepository;
+    private final StockClient stockClient;
 
     @Transactional
     public void placeOrder(Long userId, TradeRequest request){
@@ -195,11 +200,36 @@ public class TradeService {
         return orderId;
     }
 
-    public Page<OrderHistory> getMyOrderHistory(Long userId, Status status, Pageable pageable){
-        return orderHistoryRepository.findMyOrders(userId, status, pageable);
+    public Page<OrderHistoryResponse> getMyOrderHistory(Long userId, Status status, Pageable pageable){
+        Page<OrderHistoryResponse> histories=orderHistoryRepository.findMyOrders(userId, status, pageable);
+
+        List<OrderHistoryResponse> contents=histories.getContent();
+        for (OrderHistoryResponse history:contents){
+            history.setStockName(stockClient.getStockName(history.getStockCode()));
+        }
+
+        return histories;
     }
 
-    public Page<TradeHistory> getMyTradeHistory(Long userId, Pageable pageable){
-        return tradeHistoryRepository.findByUserId(userId, pageable);
+    public Page<TradeHistoryResponse> getMyTradeHistory(Long userId, Pageable pageable){
+        Page<TradeHistoryResponse> histories=tradeHistoryRepository.findByUserId(userId, pageable);
+
+        List<TradeHistoryResponse> contents=histories.getContent();
+        for (TradeHistoryResponse history:contents){
+            history.setStockName(stockClient.getStockName(history.getStockCode()));
+        }
+
+        return histories;
+    }
+
+    public Page<HoldingsResponse> getMyHoldings(Long userId, Pageable pageable){
+        Page<HoldingsResponse> holdings=tradesRepository.myHoldings(userId, pageable);
+
+        List<HoldingsResponse> contents=holdings.getContent();
+        for (HoldingsResponse content:contents){
+            content.setStockName(stockClient.getStockName(content.getStockCode()));
+        }
+
+        return holdings;
     }
 }

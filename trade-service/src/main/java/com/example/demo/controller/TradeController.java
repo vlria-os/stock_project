@@ -1,10 +1,13 @@
 package com.example.demo.controller;
 
 import com.example.demo.client.dto.TradeRequest;
+import com.example.demo.order.dto.OrderHistoryResponse;
 import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.enums.Status;
 import com.example.demo.service.TradeService;
 import com.example.demo.sse.SseEmitterService;
+import com.example.demo.trade.dto.HoldingsResponse;
+import com.example.demo.trade.dto.TradeHistoryResponse;
 import com.example.demo.trade.entity.TradeHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -48,7 +51,7 @@ public class TradeController {
     public ResponseEntity<?> getMyOrderHistory(@RequestHeader("X-User-Id") Long userId,
                                                @RequestParam("status") Status status, Pageable pageable){
         try {
-            Page<OrderHistory> orderHistories=tradeService.getMyOrderHistory(userId, status, pageable);
+            Page<OrderHistoryResponse> orderHistories=tradeService.getMyOrderHistory(userId, status, pageable);
             return ResponseEntity.ok(orderHistories);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -58,8 +61,18 @@ public class TradeController {
     @GetMapping("/trades")
     public ResponseEntity<?> getMyTradeHistory(@RequestHeader("X-User-Id") Long userId, Pageable pageable){
         try {
-            Page<TradeHistory> tradeHistories=tradeService.getMyTradeHistory(userId, pageable);
+            Page<TradeHistoryResponse> tradeHistories=tradeService.getMyTradeHistory(userId, pageable);
             return ResponseEntity.ok(tradeHistories);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/holdings")
+    public ResponseEntity<?> getMyHoldings(@RequestHeader("X-User-Id") Long userId, Pageable pageable){
+        try {
+            Page<HoldingsResponse> responses=tradeService.getMyHoldings(userId, pageable);
+            return ResponseEntity.ok(responses);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
