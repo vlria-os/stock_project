@@ -9,7 +9,7 @@ const PAGES = [
   { id: "balance",  label: "입출금",       icon: "⚙️" },
 ];
 
-export default function Header({ currentPage, onNavigate }) {
+export default function Header({ currentPage, onNavigate, isAuthenticated, onLogin, onLogout }) {
   return (
       <header style={styles.header}>
         <div style={styles.logo}>📈 StockApp</div>
@@ -27,6 +27,10 @@ export default function Header({ currentPage, onNavigate }) {
               </button>
           ))}
         </nav>
+        {isAuthenticated
+          ? <button onClick={onLogout} style={styles.logoutBtn}>로그아웃</button>
+          : <button onClick={onLogin} style={styles.loginBtn}>로그인</button>
+        }
       </header>
   );
 }
@@ -51,5 +55,28 @@ const styles = {
     background: "var(--color-background-secondary, #f4f4f4)",
     color: "var(--color-text-primary, #111111)",
     fontWeight: 500,
+  },
+  logoutBtn: {
+    marginLeft: "auto",
+    background: "none",
+    border: "1px solid var(--color-border-tertiary, #eeeeee)",
+    cursor: "pointer",
+    padding: "5px 12px",
+    borderRadius: 8,
+    fontSize: 13,
+    color: "var(--color-text-secondary, #666666)",
+    whiteSpace: "nowrap",
+  },
+  loginBtn: {
+    marginLeft: "auto",
+    background: "var(--accent, #aa3bff)",
+    border: "none",
+    cursor: "pointer",
+    padding: "5px 16px",
+    borderRadius: 8,
+    fontSize: 13,
+    color: "#fff",
+    fontWeight: 600,
+    whiteSpace: "nowrap",
   },
 };
