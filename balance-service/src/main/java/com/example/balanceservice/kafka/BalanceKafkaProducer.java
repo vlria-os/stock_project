@@ -1,4 +1,4 @@
-package com.example.balanceservice.controller;
+package com.example.balanceservice.kafka;
 
 import com.example.balanceservice.event.TradeResultEvent;
 import lombok.RequiredArgsConstructor;
