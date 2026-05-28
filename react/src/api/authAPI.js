@@ -1,4 +1,4 @@
-const BASE = "http://localhost:8080/auth";
+const BASE = "http://52.95.252.64:8080/auth";
 
 async function authFetch(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
