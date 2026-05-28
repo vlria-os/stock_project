@@ -9,6 +9,12 @@ spring:
     discovery:
       enabled: false
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
       routes:
         - id: user-service
           uri: http://10.0.3.195:8081
@@ -17,8 +23,8 @@ spring:
           filters:
             - name: RequestRateLimiter
               args:
-                redis-rate-limiter.replenishRate: 10   # 초당 10개 허용
-                redis-rate-limiter.burstCapacity: 20   # 최대 순간 20개
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
                 redis-rate-limiter.requestedTokens: 1
         - id: balance-service
           uri: http://10.0.3.245:8083
