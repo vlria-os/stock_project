@@ -167,7 +167,7 @@ public class TradeService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 번호입니다."));
 
         if (!userId.equals(order.getUserId())){
-            throw new IllegalArgumentException("주문을 취소할 권한이 없습니다.");
+            throw new IllegalArgumentException("주문을 취소할 권한이 없습니다!");
         }
 
         if (order.getOrderCondition() != OrderCondition.GTC && order.getStatus() != Status.PENDING){
