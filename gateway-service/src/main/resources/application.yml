@@ -11,7 +11,7 @@ spring:
     gateway:
       routes:
         - id: user-service
-          uri: http://localhost:8081
+          uri: 10.0.3.195:8081
           predicates:
             - Path=/auth/**
           filters:
@@ -21,7 +21,7 @@ spring:
                 redis-rate-limiter.burstCapacity: 20   # 최대 순간 20개
                 redis-rate-limiter.requestedTokens: 1
         - id: balance-service
-          uri: http://localhost:8083
+          uri: 10.0.3.245:8083
           predicates:
             - Path=/api/balance/**
           filters:
@@ -31,7 +31,7 @@ spring:
                 redis-rate-limiter.burstCapacity: 20
                 redis-rate-limiter.requestedTokens: 1
         - id: trade-service
-          uri: http://localhost:8084
+          uri: 10.0.3.103:8084
           predicates:
             - Path=/api/trade/**
           filters:
