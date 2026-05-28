@@ -1,6 +1,9 @@
 package com.example.balanceservice.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,23 +17,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BalanceHistory {
+public class LinkedBalance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long historyId;
+    private Long id;
 
     private Long userId;
-
-    @Enumerated(EnumType.STRING)
-    private BalanceType type;
-
-    private Long amount;
-    private Long balanceAfter;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "linked_account_id")
-    private LinkedBalance linkedBalance;
+    private String bankName;
+    private String accountNumber;
 
     @CreationTimestamp
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

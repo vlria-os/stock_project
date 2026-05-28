@@ -24,11 +24,4 @@ public class RedisConfig {
 
         return template;
     }
-
-    @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory factory){
-        RedisMessageListenerContainer container=new RedisMessageListenerContainer();
-        container.setConnectionFactory(factory);
-        return container;
-    }
 }
