@@ -4,8 +4,10 @@ import com.example.balanceservice.controller.BalanceKafkaProducer;
 import com.example.balanceservice.domain.Balance;
 import com.example.balanceservice.domain.BalanceHistory;
 import com.example.balanceservice.domain.BalanceType;
+import com.example.balanceservice.domain.LinkedBalance;
 import com.example.balanceservice.repository.BalanceHistoryRepository;
 import com.example.balanceservice.repository.BalanceRepository;
+import com.example.balanceservice.repository.LInkedBalanceRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,6 +27,7 @@ public class BalanceService {
 
     private static final long LOCK_TTL = 3L;
     private static final long IDEMPOTENCY_TTL = 60 * 60 * 24L;
+    private final LInkedBalanceRepository lInkedBalanceRepository;
 
     private boolean tryLock(Long userId) {
         String key = "lock:balance:" + userId;
@@ -52,18 +55,21 @@ public class BalanceService {
     }
 
     // 충전
-    public void deposit(Long userId, Long amount, Long idempotencyKey) {
+    public void deposit(Long userId, Long amount, Long idempotencyKey, Long linkedBalanceId) {
         if (isDuplicate(idempotencyKey)) throw new IllegalStateException("중복 요청");
         if (!tryLock(userId)) throw new IllegalStateException("잠시 후 다시 시도해주세요");
         try {
             Balance balance = balanceRepository.findByUserId(userId)
                     .orElseThrow(() -> new IllegalArgumentException("계좌 없음"));
+            LinkedBalance linkedBalance = lInkedBalanceRepository.findById(linkedBalanceId)
+                    .orElseThrow(() -> new IllegalArgumentException("연결 계좌 없음"));
             balance.deposit(amount);
             balanceHistoryRepository.save(BalanceHistory.builder()
                     .userId(userId)
                     .type(BalanceType.DEPOSIT)
                     .amount(amount)
                     .balanceAfter(balance.getBalance())
+                    .linkedBalance(linkedBalance)
                     .build());
         } finally {
             unlock(userId);
@@ -71,18 +77,21 @@ public class BalanceService {
     }
 
     // 출금
-    public void withdraw(Long userId, Long amount, Long idempotencyKey) {
+    public void withdraw(Long userId, Long amount, Long idempotencyKey, Long linkedBalanceId) {
         if (isDuplicate(idempotencyKey)) throw new IllegalStateException("중복 요청");
         if (!tryLock(userId)) throw new IllegalStateException("잠시 후 다시 시도해주세요");
         try {
             Balance balance = balanceRepository.findByUserId(userId)
                     .orElseThrow(() -> new IllegalArgumentException("계좌 없음"));
+            LinkedBalance linkedBalance = lInkedBalanceRepository.findById(linkedBalanceId)
+                    .orElseThrow(() -> new IllegalArgumentException("연결 계좌 없음"));
             balance.withdraw(amount);
             balanceHistoryRepository.save(BalanceHistory.builder()
                     .userId(userId)
                     .type(BalanceType.WITHDRAW)
                     .amount(amount)
                     .balanceAfter(balance.getBalance())
+                    .linkedBalance(linkedBalance)
                     .build());
         } finally {
             unlock(userId);
