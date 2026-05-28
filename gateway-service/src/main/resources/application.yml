@@ -31,7 +31,7 @@ spring:
                 redis-rate-limiter.burstCapacity: 20
                 redis-rate-limiter.requestedTokens: 1
         - id: trade-service
-          uri: http://localhost:8084 #trade
+          uri: http://localhost:8084
           predicates:
             - Path=/api/trade/**
           filters:
