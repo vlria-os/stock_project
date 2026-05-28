@@ -41,10 +41,14 @@ jobs:
           username: ubuntu
           key: ${{ secrets.BASTION_SSH_KEY }}
           script: |
+            aws configure set aws_access_key_id ${{ secrets.TRADE_AWS_ACCESS_KEY_ID }}
+            aws configure set aws_secret_access_key ${{ secrets.TRADE_AWS_SECRET_ACCESS_KEY }}
+            aws configure set region ap-northeast-2
             aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             docker pull ${{ env.IMAGE }}
             docker stop gateway-service || true
             docker rm gateway-service || true
             docker run -d --name gateway-service -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE=prod \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
               ${{ env.IMAGE }}
