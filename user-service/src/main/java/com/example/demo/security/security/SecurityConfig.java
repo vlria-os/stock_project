@@ -20,6 +20,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
+                .cors(cors -> cors.configurationSource(request -> {
+                    var config = new org.springframework.web.cors.CorsConfiguration();
+                    config.addAllowedOrigin("*");
+                    config.addAllowedMethod("*");
+                    config.addAllowedHeader("*");
+                    return config;
+                }))
                 // CSRF 토큰 비활성화
                 // REST API + JWT 방식은 세션 안 쓰니까 CSRF 필요 없음
                 .csrf(csrf->csrf.disable())
