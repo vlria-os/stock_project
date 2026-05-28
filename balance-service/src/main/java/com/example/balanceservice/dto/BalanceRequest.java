@@ -6,4 +6,5 @@ import lombok.Getter;
 public class BalanceRequest {
     private Long amount;
     private Long idempotencyKey;
+    private Long linkedBalanceId;
 }

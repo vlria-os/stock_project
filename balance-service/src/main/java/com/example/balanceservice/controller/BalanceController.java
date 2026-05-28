@@ -24,7 +24,7 @@ public class BalanceController {
     public ResponseEntity<Void> deposit(
             @RequestHeader("X-User-Id") Long userId,
             @RequestBody BalanceRequest request) {
-        balanceService.deposit(userId, request.getAmount(), request.getIdempotencyKey());
+        balanceService.deposit(userId, request.getAmount(), request.getIdempotencyKey(), request.getLinkedBalanceId());
         return ResponseEntity.ok().build();
     }
 
@@ -32,7 +32,7 @@ public class BalanceController {
     public ResponseEntity<Void> withdraw(
             @RequestHeader("X-User-Id") Long userId,
             @RequestBody BalanceRequest request) {
-        balanceService.withdraw(userId, request.getAmount(), request.getIdempotencyKey());
+        balanceService.withdraw(userId, request.getAmount(), request.getIdempotencyKey(), request.getLinkedBalanceId());
         return ResponseEntity.ok().build();
     }
 
