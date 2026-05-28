@@ -1,6 +1,6 @@
 package com.example.balanceservice.service;
 
-import com.example.balanceservice.controller.BalanceKafkaProducer;
+import com.example.balanceservice.kafka.BalanceKafkaProducer;
 import com.example.balanceservice.domain.Balance;
 import com.example.balanceservice.domain.BalanceHistory;
 import com.example.balanceservice.domain.BalanceType;

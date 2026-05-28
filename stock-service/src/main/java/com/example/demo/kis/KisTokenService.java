@@ -35,7 +35,7 @@ public class KisTokenService {
         log.info("KIS Access Token 발급 요청");
 
         Map<String, String> requestBody = Map.of(
-                "grant_type", "client_credientials",
+                "grant_type", "client_credentials",
                 "appkey",appKey,
                 "appsecret",appSecret
         );
