@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.StockChartResponse;
+import com.example.demo.dto.StockListResponse;
 import com.example.demo.dto.StockPriceResponse;
 import com.example.demo.service.StockService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,12 @@ import java.util.List;
 @RequestMapping("/stocks")
 public class StockController {
     private final StockService stockService;
+
+    //전체 종목 목록 조회
+    @GetMapping
+    public ResponseEntity<List<StockListResponse>> getAllStocks() {
+        return ResponseEntity.ok(stockService.getAllStocks());
+    }
 
     //현재가 조회
     @GetMapping("/{code}/price")
