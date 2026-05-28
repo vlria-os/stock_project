@@ -12,9 +12,15 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "*"
-            allowedMethods: "*"
+            allowedOrigins: "http://13.124.206.135"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
             allowedHeaders: "*"
+            allowCredentials: true
       routes:
         - id: user-service
           uri: http://10.0.3.195:8081
@@ -46,9 +52,17 @@ spring:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
                 redis-rate-limiter.requestedTokens: 1
-
+        - id: stock-service
+          uri: http://10.0.3.110:8082
+          predicates:
+            - Path=/stocks/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
 jwt:
-  secret: 12345678901234567890123456789012
-
+  secret: ${JWT_SECRET}
 server:
   port: 8080
