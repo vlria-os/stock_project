@@ -5,6 +5,7 @@ import com.example.demo.dto.LoginResponse;
 import com.example.demo.dto.SignUpRequest;
 import com.example.demo.dto.UserResponse;
 import com.example.demo.entity.User;
+import com.example.demo.kafka.UserProducer;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.jwt.JwtUtil;
 import com.example.demo.security.redis.RedisService;
@@ -22,6 +23,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisService redisService;
+    private final UserProducer userProducer;
 
     //회원가입
     public void signUp(SignUpRequest request){
@@ -34,6 +36,9 @@ public class UserService {
                 .name(request.getName())
                 .build();
         userRepository.save(user);
+
+        //kafka 이벤트 발행
+        userProducer.sendUserCreated(user.getId());
     }
 
     //로그인
