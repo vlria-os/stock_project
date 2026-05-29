@@ -25,7 +25,13 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private static final List<String> WHITELIST = List.of(
             "/auth/signup",
             "/auth/login",
-            "/auth/reissue"
+            "/auth/reissue",
+            "/stocks"
+    );
+
+    //WHITELIST에 포함되더라도 인증이 필요한 경로들
+    private static final List<String> PROTECTED_PATHS = List.of(
+            "/stocks/wishlist"
     );
 
     public JwtAuthFilter(@Value("${jwt.secret}") String secret){
@@ -36,8 +42,10 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain){
         String path = exchange.getRequest().getURI().getPath();
 
-        //Whitelist 경로면 그냥 통과
-        if (WHITELIST.stream().anyMatch(path::startsWith)) {
+        //Whitelist 경로이고 보호 경로가 아니면 통과
+        boolean isWhitelisted = WHITELIST.stream().anyMatch(path::startsWith);
+        boolean isProtected = PROTECTED_PATHS.stream().anyMatch(path::startsWith);
+        if (isWhitelisted && !isProtected) {
             return chain.filter(exchange);
         }
 
