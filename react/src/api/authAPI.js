@@ -1,4 +1,4 @@
-const BASE = "http://52.95.252.64:8080/auth";
+const BASE = `${import.meta.env.VITE_GATEWAY_URL}/auth`;
 
 async function authFetch(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {

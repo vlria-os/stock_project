@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./layout/Header";
 import Balance from "./page/balance/Balance.jsx";
 import { AuthProvider, useAuth } from "./store/AuthContext";
@@ -6,6 +6,8 @@ import LoginPage from "./page/auth/LoginPage";
 import SignupPage from "./page/auth/SignupPage";
 import MarketPage from "./page/stock/MarketPage";
 import SearchPage from "./page/stock/SearchPage";
+import { connectTradeSSE } from "./api/sse.js";
+import toast, { Toaster } from "react-hot-toast";
 
 const PAGE_COMPONENTS = {
   dashboard: () => <div>대시보드 페이지</div>,
@@ -25,6 +27,18 @@ function MainApp() {
   const [page, setPage] = useState("dashboard");
   const { isAuthenticated, logout } = useAuth();
 
+  //sse
+  useEffect(() => {
+    if(!isAuthenticated) return;
+
+    const es=connectTradeSSE(
+      (data) => toast.success(`${data.price}원에 ${data.filledQuantity}주가 체결되었습니다.`),
+      (data) => toast.error(data.message)
+    );
+
+    return () => es.close();
+  }, [isAuthenticated]);
+
   const navigate = (target) => {
     if (PROTECTED.has(target) && !isAuthenticated) {
       setPage("login");
@@ -37,6 +51,7 @@ function MainApp() {
 
   return (
     <>
+      <Toaster position="bottom-right"/>
       <Header
         currentPage={page}
         onNavigate={navigate}

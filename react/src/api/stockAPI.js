@@ -1,4 +1,4 @@
-const BASE = "http://localhost:8080/stocks";
+const BASE = `${import.meta.env.VITE_GATEWAY_URL}/stocks`;
 
 async function stockFetch(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {

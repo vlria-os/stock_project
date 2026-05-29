@@ -1,5 +1,6 @@
 package com.example.demo.order.repository;
 
+import com.example.demo.order.dto.OrderHistoryResponse;
 import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.enums.Status;
 import org.springframework.data.domain.Page;
@@ -15,5 +16,5 @@ public interface OrderHistoryRepository extends JpaRepository<OrderHistory, Long
         where o.userId = :userId
             and (:status is null or o.status = :status)
     """)
-    Page<OrderHistory> findMyOrders(@Param("userId") Long userId, @Param("status") Status status, Pageable pageable);
+    Page<OrderHistoryResponse> findMyOrders(@Param("userId") Long userId, @Param("status") Status status, Pageable pageable);
 }
