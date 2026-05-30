@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getStocks, getWishlist } from "../../api/stockAPI";
 import { useAuth } from "../../store/AuthContext";
 import StockDetail from "./StockDetail";
@@ -12,12 +12,34 @@ export default function MarketPage() {
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [wishLoading, setWishLoading] = useState(false);
+  const [flashMap, setFlashMap] = useState({});
+  const prevStocksRef = useRef({});
 
   useEffect(() => {
-    getStocks()
-      .then(setAllStocks)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const fetchStocks = () =>
+      getStocks()
+        .then((data) => {
+          setAllStocks((prev) => {
+            const flashes = {};
+            data.forEach((s) => {
+              const old = prevStocksRef.current[s.code];
+              if (old && old !== s.currentPrice) {
+                flashes[s.code] = Number(s.currentPrice) > Number(old) ? "up" : "down";
+              }
+            });
+            if (Object.keys(flashes).length > 0) {
+              setFlashMap(flashes);
+              setTimeout(() => setFlashMap({}), 1000);
+            }
+            prevStocksRef.current = Object.fromEntries(data.map((s) => [s.code, s.currentPrice]));
+            return data;
+          });
+        })
+        .catch(() => {});
+
+    fetchStocks().finally(() => setLoading(false));
+    const interval = setInterval(fetchStocks, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -86,8 +108,10 @@ export default function MarketPage() {
               const isDown = change < 0;
               const clr = isUp ? "#ef4444" : isDown ? "#3b82f6" : "var(--text)";
               const active = selected?.code === st.code;
+              const flash = flashMap[st.code];
+              const flashStyle = flash === "up" ? s.flashUp : flash === "down" ? s.flashDown : {};
               return (
-                <button key={st.code} onClick={() => setSelected(st)} style={{ ...s.row, ...(active ? s.rowActive : {}) }}>
+                <button key={st.code} onClick={() => setSelected(st)} style={{ ...s.row, ...(active ? s.rowActive : {}), ...flashStyle }}>
                   <div style={{ flex: 1, textAlign: "left" }}>
                     <div style={s.stockName}>{st.name}</div>
                     <div style={s.stockMeta}>{st.code} · {st.market}</div>
@@ -195,4 +219,6 @@ const s = {
   stockName: { fontSize: 14, fontWeight: 600, color: "var(--text-h)", marginBottom: 2, textAlign: "left" },
   stockMeta: { fontSize: 12, color: "var(--text)", textAlign: "left" },
   stockPrice: { fontSize: 14, fontWeight: 600, color: "var(--text-h)", marginBottom: 2 },
+  flashUp: { backgroundColor: "rgba(239,68,68,0.15)", transition: "background-color 0.1s" },
+  flashDown: { backgroundColor: "rgba(59,130,246,0.15)", transition: "background-color 0.1s" },
 };
