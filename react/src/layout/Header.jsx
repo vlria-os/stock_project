@@ -27,9 +27,18 @@ export default function Header({ currentPage, onNavigate, isAuthenticated, onLog
               </button>
           ))}
         </nav>
+        {isAuthenticated && (
+          <button onClick={() => onNavigate("mypage")} style={{
+            ...styles.navBtn,
+            ...(currentPage === "mypage" ? styles.navBtnActive : {}),
+            marginLeft: "auto",
+          }}>
+            👤 마이페이지
+          </button>
+        )}
         {isAuthenticated
           ? <button onClick={onLogout} style={styles.logoutBtn}>로그아웃</button>
-          : <button onClick={onLogin} style={styles.loginBtn}>로그인</button>
+          : <button onClick={onLogin} style={{ ...styles.loginBtn, marginLeft: "auto" }}>로그인</button>
         }
       </header>
   );

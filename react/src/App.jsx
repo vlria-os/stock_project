@@ -6,6 +6,7 @@ import LoginPage from "./page/auth/LoginPage";
 import SignupPage from "./page/auth/SignupPage";
 import MarketPage from "./page/stock/MarketPage";
 import SearchPage from "./page/stock/SearchPage";
+import MyPage from "./page/mypage/MyPage";
 import { connectTradeSSE } from "./api/sse.js";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -18,10 +19,11 @@ const PAGE_COMPONENTS = {
   balance:   Balance,
   login:     LoginPage,
   signup:    SignupPage,
+  mypage:    MyPage,
 };
 
 // 로그인이 필요한 페이지 — 비로그인 시 로그인 페이지로 이동
-const PROTECTED = new Set(["balance", "portfolio"]);
+const PROTECTED = new Set(["balance", "portfolio", "mypage"]);
 
 function MainApp() {
   const [page, setPage] = useState("dashboard");
