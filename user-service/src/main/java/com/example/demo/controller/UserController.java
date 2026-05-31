@@ -35,7 +35,7 @@ public class UserController {
         Cookie refreshCookie = new Cookie("refreshToken", result.getRefreshToken());
         refreshCookie.setHttpOnly(true);
         refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(60*2); //2분 (테스트)
+        refreshCookie.setMaxAge(60*60*2); //2시간
         response.addCookie(refreshCookie);
 
         return ResponseEntity.ok(Map.of("accessToken", result.getAccessToken()));

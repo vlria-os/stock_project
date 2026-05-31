@@ -63,13 +63,13 @@ public class ApiRefreshController {
 
             // 6. Refresh Token 만료 1시간 미만이면 재발급
             if (isRefreshTokenExpiringSoon(claims)) {
-                String newRefreshToken = jwtUtil.generateToken(newClaims, 2);
-                redisService.save(userId, newRefreshToken, 2);
+                String newRefreshToken = jwtUtil.generateToken(newClaims, 120);
+                redisService.save(userId, newRefreshToken, 120);
 
                 Cookie cookie = new Cookie("refreshToken", newRefreshToken);
                 cookie.setHttpOnly(true);
                 cookie.setPath("/");
-                cookie.setMaxAge(60 * 2); //2분 (테스트)
+                cookie.setMaxAge(60 * 60 * 2);
                 response.addCookie(cookie);
             }
 
@@ -105,6 +105,6 @@ public class ApiRefreshController {
     private boolean isRefreshTokenExpiringSoon(Claims claims) {
         Date exp = claims.getExpiration();
         long remaining = exp.getTime() - System.currentTimeMillis();
-        return remaining < 60 * 1000; // 1분 미만 (테스트)
+        return remaining < 60 * 60 * 1000; // 1시간 미만
     }
 }

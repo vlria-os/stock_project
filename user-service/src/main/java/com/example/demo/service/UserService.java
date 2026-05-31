@@ -58,10 +58,10 @@ public class UserService {
         claims.put("userId", user.getId());
         claims.put("email", user.getEmail());
 
-        String accessToken = jwtUtil.generateToken(claims, 1); //1분 (테스트)
-        String refreshToken = jwtUtil.generateToken(claims, 2); //2분 (테스트)
+        String accessToken = jwtUtil.generateToken(claims, 30); //30분
+        String refreshToken = jwtUtil.generateToken(claims, 120); //2시간
 
-        redisService.save(user.getId(), refreshToken, 2);
+        redisService.save(user.getId(), refreshToken, 120);
         return new LoginResponse(accessToken, refreshToken);
     }
 
