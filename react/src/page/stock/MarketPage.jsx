@@ -14,14 +14,22 @@ export default function MarketPage() {
     const fetchStocks = () =>
       getStocks()
         .then((data) => {
+          console.log(`[${new Date().toLocaleTimeString()}] 주식 데이터 수신 (${data.length}개)`);
           setAllStocks((prev) => {
             const flashes = {};
+            const changed = [];
             data.forEach((s) => {
               const old = prevStocksRef.current[s.code];
               if (old && old !== s.currentPrice) {
                 flashes[s.code] = Number(s.currentPrice) > Number(old) ? "up" : "down";
+                changed.push(`${s.name}: ${Number(old).toLocaleString()} → ${Number(s.currentPrice).toLocaleString()} (${flashes[s.code] === "up" ? "▲" : "▼"})`);
               }
             });
+            if (changed.length > 0) {
+              console.log("[가격 변동]", changed.join(" | "));
+            } else {
+              console.log("[가격 변동] 없음");
+            }
             if (Object.keys(flashes).length > 0) {
               setFlashMap(flashes);
               setTimeout(() => setFlashMap({}), 1000);
