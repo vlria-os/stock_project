@@ -1,7 +1,17 @@
-const BASE_URL="http://52.95.252.64:8080/api/trade";
+const BASE_URL=import.meta.env.VITE_GATEWAY_URL;
 
-export function connectTradeSSE(onTrade, onTradeError) {
-    const eventSource=new EventSource(`${BASE_URL}/sse/connect`, {
+//sse 전용 쿠키 발급
+async function issueSseCookie(){
+    await fetch(`${BASE_URL}/api/auth/sse-cookie`, {
+        method: 'POST',
+        credentials: "include" //Refresh Token 쿠키 자동 전송
+    });
+}
+
+export async function connectTradeSSE(onTrade, onTradeError) {
+    await issueSseCookie(); //sse 연결 전에 쿠키 발급
+
+    const eventSource=new EventSource(`${BASE_URL}/api/trade/sse/connect`, {
         withCredentials: true
     });
 

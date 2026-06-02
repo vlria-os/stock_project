@@ -33,10 +33,13 @@ function MainApp() {
   useEffect(() => {
     if(!isAuthenticated) return;
 
-    const es=connectTradeSSE(
+    let es;
+    connectTradeSSE(
       (data) => toast.success(`${data.price}원에 ${data.filledQuantity}주가 체결되었습니다.`),
       (data) => toast.error(data.message)
-    );
+    ).then(eventSource => {
+      es=eventSource;
+    });
 
     return () => es.close();
   }, [isAuthenticated]);
