@@ -78,6 +78,10 @@ public class UserService {
                 .orElseThrow(()-> new IllegalStateException("존재하지 않는 회원입니다"));
         user.deactivate();
         userRepository.save(user);
-        userProducer.sendUserWithdrawn(userId);
+        try {
+            userProducer.sendUserWithdrawn(userId);
+        } catch (Exception e) {
+            // Kafka 실패해도 탈퇴는 완료된 것으로 처리
+        }
     }
 }
