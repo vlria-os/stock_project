@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.repository.UserRepository;
 import com.example.demo.security.jwt.CustomJwtException;
 import com.example.demo.security.jwt.JwtUtil;
 import com.example.demo.security.redis.RedisService;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class ApiRefreshController {
     private final JwtUtil jwtUtil;
     private final RedisService redisService;
+    private final UserRepository userRepository;
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(
@@ -54,14 +56,22 @@ public class ApiRefreshController {
                 return ResponseEntity.status(401).body(Map.of("error", "INVALID_REFRESH"));
             }
 
-            // 5. 새 Access Token 발급
+            // 5. 탈퇴 여부 확인
+            boolean isActive = userRepository.findById(userId)
+                    .map(user -> user.getIsActive())
+                    .orElse(false);
+            if (!isActive) {
+                return ResponseEntity.status(401).body(Map.of("error", "WITHDRAWN_USER"));
+            }
+
+            // 6. 새 Access Token 발급
             Map<String, Object> newClaims = Map.of(
                     "userId", userId,
                     "email", claims.get("email")
             );
             String newAccessToken = jwtUtil.generateToken(newClaims, 30);
 
-            // 6. Refresh Token 만료 1시간 미만이면 재발급
+            // 7. Refresh Token 만료 1시간 미만이면 재발급
             if (isRefreshTokenExpiringSoon(claims)) {
                 String newRefreshToken = jwtUtil.generateToken(newClaims, 120);
                 redisService.save(userId, newRefreshToken, 120);
