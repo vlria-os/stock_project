@@ -23,7 +23,7 @@ public class KisTokenService {
         Map<String, String> body=new HashMap<>();
         body.put("grant_type", "client_credentials");
         body.put("appkey", appKey);
-        body.put("appsecret", appSecret);
+        body.put("secretkey", appSecret);
 
         Map<String, String> response=kisAuthClient.getApprovalKey(body);
         return response.get("approval_key");
