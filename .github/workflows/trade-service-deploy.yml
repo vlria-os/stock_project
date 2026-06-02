@@ -51,6 +51,10 @@ jobs:
                 -e KAFKA_HOST=${{ secrets.KAFKA_HOST }} \
                 -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
                 -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                -e TRADE_KIS_APP_KEY=${{ secrets.TRADE_KIS_APP_KEY }} \
+                -e TRADE_KIS_APP_SECRET=${{ secrets.TRADE_KIS_APP_SECRET }} \
+                -e TRADE_KIS_REST_URL=${{ secrets.TRADE_KIS_REST_URL }} \
+                -e TRADE_KIS_WS_URL=${{ secrets.TRADE_KIS_WS_URL }} \
                 -e SPRING_PROFILES_ACTIVE=prod \
                 ${{ env.IMAGE }}
             "
