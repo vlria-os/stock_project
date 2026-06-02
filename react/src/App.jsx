@@ -31,17 +31,26 @@ function MainApp() {
 
   //sse
   useEffect(() => {
-    if(!isAuthenticated) return;
+      if (!isAuthenticated) return;
 
-    let es;
-    connectTradeSSE(
-      (data) => toast.success(`${data.price}원에 ${data.filledQuantity}주가 체결되었습니다.`),
-      (data) => toast.error(data.message)
-    ).then(eventSource => {
-      es=eventSource;
-    });
+      let es = null;
+      let cancelled = false;
 
-    return () => es.close();
+      connectTradeSSE(
+          (data) => toast.success(`${data.price}원에 ${data.filledQuantity}주가 체결되었습니다.`),
+          (data) => toast.error(data.message)
+      ).then(eventSource => {
+          if (cancelled) {
+              eventSource.close();  // 이미 로그아웃됐으면 바로 닫기
+              return;
+          }
+          es = eventSource;
+      });
+
+      return () => {
+          cancelled = true;
+          es?.close();
+      };
   }, [isAuthenticated]);
 
   const navigate = (target) => {
