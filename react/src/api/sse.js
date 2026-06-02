@@ -2,7 +2,7 @@ const BASE_URL=import.meta.env.VITE_GATEWAY_URL;
 
 //sse 전용 쿠키 발급
 async function issueSseCookie(){
-    await fetch(`${BASE_URL}/api/auth/sse-cookie`, {
+    await fetch(`${BASE_URL}/auth/sse-cookie`, {
         method: 'POST',
         credentials: "include" //Refresh Token 쿠키 자동 전송
     });
@@ -26,6 +26,7 @@ export async function connectTradeSSE(onTrade, onTradeError) {
 
     //시스템 에러
     eventSource.addEventListener("error", (e) => {
+        if(!e.data) return;
         const data=JSON.parse(e.data);
         onTradeError(data);
     });
