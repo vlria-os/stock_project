@@ -24,7 +24,7 @@ public class SseEmitterService {
         emitter.onTimeout(() -> emitters.remove(userId));
         emitter.onError(e -> emitters.remove(userId));
 
-        //연결 직후 더미 이벤트 전송
+        //연결 직후 더미 이벤트 전송(연결 확인용)
         try{
             emitter.send(SseEmitter.event().name("connect").data("SSE_CONNECTED"));
         } catch (IOException e) {
