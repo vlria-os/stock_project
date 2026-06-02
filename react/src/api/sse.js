@@ -9,7 +9,7 @@ async function issueSseCookie(){
 }
 
 export async function connectTradeSSE(onTrade, onTradeError) {
-    await issueSseCookie(); //sse 연결 전에 쿠키 발급
+    // await issueSseCookie(); //sse 연결 전에 쿠키 발급(https 처리 후 다시 동작)
 
     const eventSource=new EventSource(`${BASE_URL}/api/trade/sse/connect`, {
         withCredentials: true
