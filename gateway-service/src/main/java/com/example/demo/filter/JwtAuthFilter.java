@@ -3,6 +3,7 @@ package com.example.demo.filter;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import io.jsonwebtoken.Claims;
@@ -26,6 +27,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/auth/signup",
             "/auth/login",
             "/auth/reissue",
+            "/auth/sse-cookie",
             "/stocks"
     );
 
@@ -49,15 +51,28 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        // Authorization 헤더 확인
-        String authorization = exchange.getRequest().getHeaders().getFirst("Authorization");
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        //sse 경로는 쿠키에서, 나머지는 헤더에서 토큰 추출
+        String token=null;
+
+        if (path.startsWith("/api/trade/sse")){
+            HttpCookie cookie=exchange.getRequest().getCookies().getFirst("accessToken");
+            if (cookie != null){
+                token=cookie.getValue();
+            }
+        } else {
+            // Authorization 헤더 확인
+            String authorization = exchange.getRequest().getHeaders().getFirst("Authorization");
+            if (authorization != null && authorization.startsWith("Bearer ")){
+                token=authorization.substring(7);
+            }
+        }
+
+        if (token == null) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
+
         try {
-            // JWT 검증
-            String token = authorization.substring(7);
             Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
