@@ -61,4 +61,9 @@ public class WishlistService {
     public boolean isWishlisted(Long userId, String stockCode){
         return wishlistRepository.existsByUserIdAndStockCode(userId, stockCode);
     }
+
+    @Transactional
+    public void deleteByUserId(Long userId){
+        wishlistRepository.deleteByUserId(userId);
+    }
 }
