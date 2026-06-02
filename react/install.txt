@@ -1,2 +1,3 @@
 npm install axios
 npm install react-hot-toast
+npm install @stomp/stompjs sockjs-client
