@@ -26,7 +26,7 @@ public class LogoutController {
             @RequestHeader("Authorization") String authoriztaion,
             HttpServletResponse response){
         // Access Token에서 userId 꺼내기
-        String token = authoriztaion.replace("Bearer","");
+        String token = authoriztaion.substring(7);
         Claims claims = jwtUtil.validateToken(token);
         Long userId = ((Number)claims.get("userId")).longValue();
 

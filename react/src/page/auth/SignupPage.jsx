@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { signup as apiSignup, login as apiLogin } from "../../api/authAPI";
-import { useAuth } from "../../store/AuthContext";
+import { signup as apiSignup } from "../../api/authAPI";
 
 export default function SignupPage({ onNavigate }) {
-  const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "", name: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,9 +14,8 @@ export default function SignupPage({ onNavigate }) {
     setLoading(true);
     try {
       await apiSignup(form.email, form.password, form.name);
-      const data = await apiLogin(form.email, form.password);
-      login(data.accessToken);
-      onNavigate("dashboard");
+      alert("회원가입이 완료되었습니다.");
+      onNavigate("login");
     } catch (err) {
       setError(err?.data?.message || "회원가입에 실패했습니다. 다시 시도해주세요.");
     } finally {

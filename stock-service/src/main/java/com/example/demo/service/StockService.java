@@ -86,9 +86,12 @@ public class StockService {
             Optional<Stock> optionalStock = stockRepository.findByCode(stockCode);
 
             if(optionalStock.isPresent()) {
+                BigDecimal current = new BigDecimal(priceResponse.getCurrentPrice());
+                BigDecimal change = new BigDecimal(priceResponse.getPriceChange());
+                BigDecimal prev = current.subtract(change);
                 optionalStock.get().updatePrice(
-                        new BigDecimal(priceResponse.getCurrentPrice()),
-                        new BigDecimal(priceResponse.getCurrentPrice()),
+                        current,
+                        prev,
                         Long.parseLong(priceResponse.getVolume())
                 );
             }

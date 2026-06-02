@@ -13,7 +13,7 @@ public class UserCreatedConsumer {
     private final BalanceRepository balanceRepository;
 
     @KafkaListener(topics = "user-created", groupId = "balance-service")
-    public void consume(UserCreatedEvent event) {
-        balanceRepository.save(Balance.create(event.getUserId()));
+    public void consume(String userId) {
+        balanceRepository.save(Balance.create(Long.parseLong(userId)));
     }
 }

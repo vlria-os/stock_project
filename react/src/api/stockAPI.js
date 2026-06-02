@@ -1,39 +1,29 @@
+import instance from "./axiosInstance";
+
 const BASE = `${import.meta.env.VITE_GATEWAY_URL}/stocks`;
 
-async function stockFetch(path, options = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    ...options,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...options.headers },
-  });
-  if (res.status === 204) return null;
-  const data = await res.json().catch(() => null);
-  if (!res.ok) throw { status: res.status, data };
-  return data;
-}
+export const getStocks = () => instance.get(BASE).then((r) => r.data);
 
-export const getStocks = () => stockFetch("");
+export const getPrice = (code) => instance.get(`${BASE}/${code}/price`).then((r) => r.data);
 
-export const getPrice = (code) => stockFetch(`/${code}/price`);
-
-export const getChart = (code) => stockFetch(`/${code}/chart`);
+export const getChart = (code) => instance.get(`${BASE}/${code}/chart`).then((r) => r.data);
 
 export const getWishlist = (token) =>
-  stockFetch("/wishlist", { headers: { Authorization: `Bearer ${token}` } });
+  instance
+    .get(`${BASE}/wishlist`, { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data);
 
 export const addWishlist = (code, token) =>
-  stockFetch(`/wishlist/${code}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  instance
+    .post(`${BASE}/wishlist/${code}`, null, { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data);
 
 export const removeWishlist = (code, token) =>
-  stockFetch(`/wishlist/${code}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  instance
+    .delete(`${BASE}/wishlist/${code}`, { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data);
 
 export const checkWishlist = (code, token) =>
-  stockFetch(`/wishlist/${code}/check`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  instance
+    .get(`${BASE}/wishlist/${code}/check`, { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data);
