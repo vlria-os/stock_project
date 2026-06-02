@@ -78,5 +78,6 @@ public class UserService {
                 .orElseThrow(()-> new IllegalStateException("존재하지 않는 회원입니다"));
         user.deactivate();
         userRepository.save(user);
+        userProducer.sendUserWithdrawn(userId);
     }
 }

@@ -12,4 +12,8 @@ public class UserProducer {
     public void sendUserCreated(Long userId){
         kafkaTemplate.send("user-created", String.valueOf(userId));
     }
+
+    public void sendUserWithdrawn(Long userId){
+        kafkaTemplate.send("user.withdrawn", String.valueOf(userId));
+    }
 }
