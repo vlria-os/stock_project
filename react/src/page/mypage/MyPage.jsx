@@ -34,7 +34,9 @@ export default function MyPage({ onNavigate }) {
     if (!confirm("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
     try {
       await deleteMe(accessToken);
-      logout();
+      await logout();
+      alert("탈퇴가 완료되었습니다.");
+      onNavigate("login");
     } catch (_) {
       alert("회원탈퇴에 실패했습니다.");
     }
