@@ -26,6 +26,40 @@ public class ApiRefreshController {
     private final RedisService redisService;
     private final UserRepository userRepository;
 
+    @PostMapping("/sse-cookie")
+    public ResponseEntity<?> issueSseCookie(HttpServletRequest request, HttpServletResponse response){
+        //Refresh Token으로 사용자 검증
+        String refreshToken=getRefreshTokenFromCookie(request);
+        if (refreshToken == null || refreshToken.isBlank()){
+            return ResponseEntity.status(401).body(Map.of("error", "NULL_REFRESH"));
+        }
+
+        Claims claims=jwtUtil.validateToken(refreshToken);
+        Long userId=((Number) claims.get("userId")).longValue();
+
+        //Redis에 저장된 Refresh Token이랑 비교
+        String savedToken=redisService.get(userId);
+        if (savedToken == null || !savedToken.equals(refreshToken)){
+            return ResponseEntity.status(401).body(Map.of("error", "INVALID_REFRESH"));
+        }
+
+        //SSE 전용 AccessToken 발급 후 쿠키에만 저장
+        Map<String, Object> newClaims=Map.of(
+                "userId", userId,
+                "email", claims.get("email")
+        );
+
+        String sseAccessToken= jwtUtil.generateToken(newClaims, 30);
+
+        Cookie sseCookie=new Cookie("accessToken", sseAccessToken);
+        sseCookie.setHttpOnly(true);
+        sseCookie.setPath("/api/trade/sse"); //sse 경로에서만 전송
+        sseCookie.setMaxAge(60 * 30); //30분
+        response.addCookie(sseCookie);
+
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(
             @RequestHeader(value = "Authorization", required = false) String authorization,
