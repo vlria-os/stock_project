@@ -8,6 +8,15 @@ const tradeApi=axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
+tradeApi.interceptors.request.use((config) => {
+    const token=localStorage.getItem('token');
+    if(token){
+        config.headers.Authorization=`Bearer ${token}`;
+    }
+
+    return config;
+});
+
 export const order=async(param) => {
     const res=await tradeApi.post(`/order`, param);
     return res.data;
