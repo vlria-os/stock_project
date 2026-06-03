@@ -3,7 +3,7 @@ import { getPrice, getChart, checkWishlist, addWishlist, removeWishlist } from "
 import { useAuth } from "../../store/AuthContext";
 import MiniChart from "./MiniChart";
 
-export default function StockDetail({ stock }) {
+export default function StockDetail({ stock, onNavigate }) {
   const { accessToken, isAuthenticated } = useAuth();
   const [price, setPrice] = useState(null);
   const [chart, setChart] = useState([]);
@@ -64,7 +64,8 @@ export default function StockDetail({ stock }) {
     <div style={s.wrap}>
       <div style={s.header}>
         <div>
-          <span style={s.name}>{stock.name}</span>
+          <span style={s.name}
+            onClick={() => onNavigate?.("orderbook", { stockCode: stock.code })}>{stock.name}</span>
           <span style={s.code}>{stock.code}</span>
           <span style={{
             ...s.badge,
@@ -144,7 +145,7 @@ const s = {
     borderBottom: "1px solid var(--border)",
     gap: 8,
   },
-  name: { fontSize: 18, fontWeight: 700, color: "var(--text-h)", marginRight: 8 },
+  name: { fontSize: 18, fontWeight: 700, color: "var(--text-h)", marginRight: 8, cursor:"pointer" },
   code: { fontSize: 12, color: "var(--text)", marginRight: 8, fontFamily: "var(--mono)" },
   badge: { fontSize: 11, padding: "2px 6px", borderRadius: 4, fontWeight: 600 },
   wishBtn: {

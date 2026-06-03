@@ -41,7 +41,11 @@ const OrderBook = ({ stockCode }) => {
 
   return (
     <div>
-        
+        {orderBook ? (
+                <pre>{JSON.stringify(orderBook, null, 2)}</pre>
+        ) : (
+                <p>호가 데이터 로딩 중...</p>
+        )}
     </div>
   )
 }

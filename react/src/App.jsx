@@ -9,6 +9,11 @@ import SearchPage from "./page/stock/SearchPage";
 import MyPage from "./page/mypage/MyPage";
 import { connectTradeSSE } from "./api/sse.js";
 import toast, { Toaster } from "react-hot-toast";
+import OrderBook from "./page/trade/OrderBook.jsx";
+import Order from "./page/trade/Order.jsx";
+import Holdings from "./page/trade/Holdings.jsx";
+import OrderList from "./page/trade/OrderList.jsx";
+import TradeList from "./page/trade/TradeList.jsx";
 
 const PAGE_COMPONENTS = {
   dashboard: () => <div>대시보드 페이지</div>,
@@ -20,13 +25,22 @@ const PAGE_COMPONENTS = {
   login:     LoginPage,
   signup:    SignupPage,
   mypage:    MyPage,
+  orderbook: OrderBook,
+  order: Order,
+  holdings: Holdings,
+  orders: OrderList,
+  trades: TradeList
 };
 
 // 로그인이 필요한 페이지 — 비로그인 시 로그인 페이지로 이동
-const PROTECTED = new Set(["balance", "portfolio", "mypage"]);
+const PROTECTED = new Set(["balance", "portfolio", "mypage",
+  "order", "holdings", "orders", "trades"
+]);
 
 function MainApp() {
   const [page, setPage] = useState("dashboard");
+  const [props, setProps] = useState({});
+
   const { isAuthenticated, logout } = useAuth();
 
   //sse
@@ -53,11 +67,12 @@ function MainApp() {
       };
   }, [isAuthenticated]);
 
-  const navigate = (target) => {
+  const navigate = (target, props = {}) => {
     if (PROTECTED.has(target) && !isAuthenticated) {
       setPage("login");
     } else {
       setPage(target);
+      setProps(props);
     }
   };
 
@@ -74,7 +89,7 @@ function MainApp() {
         onLogout={logout}
       />
       <main style={{ padding: "32px 24px", maxWidth: 960, margin: "0 auto" }}>
-        <PageComponent onNavigate={navigate} />
+        <PageComponent onNavigate={navigate} {...props}/>
       </main>
     </>
   );
