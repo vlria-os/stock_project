@@ -1,0 +1,11 @@
+# requirements.txt
+fastapi
+uvicorn
+langchain
+langchain-openai
+chromadb
+beautifulsoup4
+requests
+confluent-kafka
+pydantic-settings
+python-dotenv
