@@ -17,7 +17,7 @@ const OrderBook = ({ stockCode }) => {
             fetch(`${import.meta.env.VITE_GATEWAY_URL}/api/trade/orderbook/subscribe/${stockCode}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
         },
@@ -34,7 +34,7 @@ const OrderBook = ({ stockCode }) => {
         fetch(`${import.meta.env.VITE_GATEWAY_URL}/api/trade/orderbook/unsubscribe/${stockCode}`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
 
