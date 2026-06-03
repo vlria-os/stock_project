@@ -1,22 +1,19 @@
 import { Client } from '@stomp/stompjs';
 import React, { useEffect, useState } from 'react'
-import SockJS from 'sockjs-client';
 
 const OrderBook = ({ stockCode }) => {
   const [orderBook, setOrderBook] = useState(null);
   const [stompClient, setStompClient] = useState(null);
 
   useEffect(() => {
-    //1. websocket 연결
-    const client=new Client({
-        webSocketFactory: () => new SockJS(`${import.meta.env.VITE_GATEWAY_URL}/ws`),
+    //websocket 연결
+    const client = new Client({
+        brokerURL: `${import.meta.env.VITE_GATEWAY_URL.replace('http://', 'ws://')}/ws`,
         onConnect: () => {
-            //2. 호가 구독
             client.subscribe("/topic/orderbook", (message) => {
                 setOrderBook(JSON.parse(message.body));
             });
-
-            //3. 백엔드에 kis 구독 요청
+        
             fetch(`/api/trade/orderbook/subscribe/${stockCode}`, {
                 method: 'POST'
             });
