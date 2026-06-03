@@ -15,7 +15,7 @@ const Order = ({ stockCode, stockName }) => {
         alert(`${stockName} ${quantity}주 주문 완료`);
     },
     onError: (error) => {
-        alert(`${stockName} ${quantity}주 주문 실패`);
+        alert(error);
     }
   });
 
