@@ -18,7 +18,7 @@ public class StockScheduler {
     private final StockService stockService;
     private final StockRepository stockRepository;
 
-    @Scheduled(fixedDelay = 30000) //30초
+    @Scheduled(cron = "0 */1 9-15 * * MON-FRI", zone = "Asia/Seoul") //주식 장 시간 내 1분마다
     public void updateAllStockPrices(){
         List<Stock> stocks=stockRepository.findAll();
 
