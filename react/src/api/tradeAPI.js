@@ -9,17 +9,17 @@ const tradeApi=axios.create({
 });
 
 export const order=async(param) => {
-    const res=await tradeApi.post(`${BASE_URL}/order`, param);
+    const res=await tradeApi.post(`/order`, param);
     return res.data;
 }
 
 export const cancelOrder=async(id) => {
-    const res=await tradeApi.delete(`${BASE_URL}/order/${id}`);
+    const res=await tradeApi.delete(`/order/${id}`);
     return res.data;
 }
 
 export const orders=async(status, page, sort) => {
-    const res=await tradeApi.get(`${BASE_URL}/orders`, {
+    const res=await tradeApi.get(`/orders`, {
         params: {
             status: status,
             page: page,
@@ -32,7 +32,7 @@ export const orders=async(status, page, sort) => {
 }
 
 export const trades=async(page, sort) => {
-    const res=await tradeApi.get(`${BASE_URL}/trades`, {
+    const res=await tradeApi.get(`/trades`, {
         params: {
             page: page,
             sort: sort,
@@ -44,7 +44,7 @@ export const trades=async(page, sort) => {
 }
 
 export const holdings=async(page) => {
-    const res=await tradeApi.get(`${BASE_URL}/holdings`, {
+    const res=await tradeApi.get(`/holdings`, {
         params: {
             page: page,
             size: 10
