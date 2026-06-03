@@ -81,7 +81,7 @@ public class TradeController {
     @GetMapping(value = "/sse/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter connect(@RequestHeader(value = "X-User-Id", required = false) Long userId){
         if (userId == null){
-            userId=0L;
+            userId=0L; //임시
         }
         return sseEmitterService.connect(userId);
     }
