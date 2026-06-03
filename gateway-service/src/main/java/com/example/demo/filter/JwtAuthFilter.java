@@ -45,6 +45,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain){
         String path = exchange.getRequest().getURI().getPath();
+        log.info("Request path: {}", path);
 
         //Whitelist 경로이고 보호 경로가 아니면 통과
         boolean isWhitelisted = WHITELIST.stream().anyMatch(path::startsWith);
