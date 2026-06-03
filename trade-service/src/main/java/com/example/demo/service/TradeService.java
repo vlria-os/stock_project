@@ -42,6 +42,10 @@ public class TradeService {
 
     @Transactional
     public void placeOrder(Long userId, TradeRequest request){
+        System.out.println("orderType: " + request.getOrderType());
+        System.out.println("orderCondition: " + request.getOrderCondition());
+        System.out.println("조건: " + (request.getOrderType() != OrderType.LIMIT && request.getOrderCondition() != OrderCondition.GTC));
+
         //시장가 + GTC 조합 검즙
         if (request.getOrderType() == OrderType.MARKET && request.getOrderCondition() == OrderCondition.GTC){
             throw new IllegalArgumentException("시장가 주문은 GTC를 지원하지 않습니다.");
