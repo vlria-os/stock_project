@@ -15,7 +15,10 @@ const OrderBook = ({ stockCode }) => {
             });
         
             fetch(`${import.meta.env.VITE_GATEWAY_URL}/api/trade/orderbook/subscribe/${stockCode}`, {
-                method: 'POST'
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
             });
         },
         onDisconnect: () => {
@@ -29,7 +32,10 @@ const OrderBook = ({ stockCode }) => {
     //페이지 이탈 시 구독 해제
     return () => {
         fetch(`${import.meta.env.VITE_GATEWAY_URL}/api/trade/orderbook/unsubscribe/${stockCode}`, {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
         });
 
         client.deactivate();
