@@ -9,6 +9,9 @@ spring:
     discovery:
       enabled: false
     gateway:
+      httpclient:
+        websocket:
+          max-frame-payload-length: 65536
       globalcors:
         corsConfigurations:
           '[/**]':
