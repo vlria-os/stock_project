@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { getStocks } from "../../api/stockAPI";
 import StockDetail from "./StockDetail";
 
-export default function MarketPage() {
+export default function MarketPage({ onNavigate }) {
   const [allStocks, setAllStocks] = useState([]);
   const [selected, setSelected] = useState(null);
   const [filter, setFilter] = useState("");
@@ -97,7 +97,7 @@ export default function MarketPage() {
           )}
         </div>
         <div style={s.detailPanel}>
-          <StockDetail stock={selected} />
+          <StockDetail stock={selected} onNavigate={onNavigate}/>
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ const OrderBook = ({ stockCode }) => {
   useEffect(() => {
     //1. websocket 연결
     const client=new Client({
-        webSocketFactory: () => new SockJS(`${import.meta.env.VITE_TRADE_SERVICE_URL}/ws`),
+        webSocketFactory: () => new SockJS(`${import.meta.env.VITE_GATEWAY_URL}/ws`),
         onConnect: () => {
             //2. 호가 구독
             client.subscribe("/topic/orderbook", (message) => {
@@ -41,7 +41,11 @@ const OrderBook = ({ stockCode }) => {
 
   return (
     <div>
-        
+        {orderBook ? (
+                <pre>{JSON.stringify(orderBook, null, 2)}</pre>
+        ) : (
+                <p>호가 데이터 로딩 중...</p>
+        )}
     </div>
   )
 }
