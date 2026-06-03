@@ -120,6 +120,10 @@ export default function StockDetail({ stock, onNavigate }) {
             </div>
           )}
           {chart.length > 0 && <MiniChart data={chart} />}
+          <div>
+            <button type="button"
+              onClick={() => onNavigate?.("order", { stockCode: stock.code, stockName: stock.name })}>주문하기</button>
+          </div>
         </>
       )}
     </div>
