@@ -29,6 +29,8 @@ const Order = ({ stockCode, stockName }) => {
     type == "" || condition == null || price == null ||
     quantity <= 0 || side == "";
 
+  const isMarket=type !== "" && type === "MARKET";
+
   return (
     <div>
         <div className='order-stock-box'>
@@ -49,7 +51,8 @@ const Order = ({ stockCode, stockName }) => {
                 <button type='button' value='GTC'
                     onClick={(e) => {
                         setCondition(e.target.value)
-                    }}>GTC</button>
+                    }}
+                    disabled={isMarket}>GTC</button>
                 <button type='button' value='IOC'
                     onClick={(e) => {
                         setCondition(e.target.value)
