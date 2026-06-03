@@ -92,7 +92,7 @@ const Order = ({ stockCode, stockName }) => {
             <div className='order-button-area'>
                 <button type='button'
                     onClick={handleOrder}
-                    disabled={notReady}>주문하기</button>
+                    disabled={notReady}>주문</button>
             </div>
         </div>
     </div>
