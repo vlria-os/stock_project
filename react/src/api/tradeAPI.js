@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL="http://52.95.252.64:8080/api/trade";
+const BASE_URL=`${import.meta.env.VITE_GATEWAY_URL}/api/trade`;
 
 const tradeApi=axios.create({
     baseURL: BASE_URL,
