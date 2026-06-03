@@ -21,7 +21,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.STOCK_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Check files
-        run: ls -la ./stock-service/src/main/java/com/example/demo/kafka/
+        run: |
+          ls -la ./stock-service/src/main/java/com/example/demo/kafka/
+          cat ./stock-service/src/main/java/com/example/demo/kafka/UserEventConsumer.java
       - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
