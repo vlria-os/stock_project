@@ -9,6 +9,9 @@ spring:
     discovery:
       enabled: false
     gateway:
+      httpclient:
+        websocket:
+          max-frame-payload-length: 65536
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -19,6 +22,7 @@ spring:
               - PUT
               - DELETE
               - OPTIONS
+              - HEAD
             allowedHeaders: "*"
             allowCredentials: true
       routes:
@@ -53,15 +57,9 @@ spring:
                 redis-rate-limiter.burstCapacity: 20
                 redis-rate-limiter.requestedTokens: 1
         - id: trade-service-ws
-          uri: ws://10.0.3.103:8084
+          uri: http://10.0.3.103:8084
           predicates:
             - Path=/ws/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-                redis-rate-limiter.requestedTokens: 1
         - id: stock-service
           uri: http://10.0.3.110:8082
           predicates:

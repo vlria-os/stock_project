@@ -21,6 +21,8 @@ public class UserEventConsumer {
     @Getter
     private final List<String> eventLog = Collections.synchronizedList(new ArrayList<>());
 
+
+
     @KafkaListener(topics = "user.withdrawn", groupId = "stock-service")
     public void handleUserWithdrawn(String userId){
         log.info("유저 탈퇴 이벤트 수신 - raw: [{}]", userId);
