@@ -27,6 +27,12 @@ jobs:
       - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+      - name: Test build
+        run: |
+          cd ./stock-service
+          chmod +x gradlew
+          ./gradlew bootJar -x test
+          jar tf build/libs/*.jar | grep -i "UserEvent\|kafka"
       - name: Build & Push image
         run: |
           IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
