@@ -29,7 +29,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/auth/reissue",
             "/auth/sse-cookie",
             "/stocks",
-            "/api/trade/sse"
+            "/api/trade/sse",
+            "/ws"
     );
 
     //WHITELIST에 포함되더라도 인증이 필요한 경로들
