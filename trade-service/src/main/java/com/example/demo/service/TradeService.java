@@ -18,7 +18,6 @@ import com.example.demo.redis.OrderBookRepository;
 import com.example.demo.redis.dto.OrderBook;
 import com.example.demo.trade.dto.HoldingsResponse;
 import com.example.demo.trade.dto.TradeHistoryResponse;
-import com.example.demo.trade.entity.TradeHistory;
 import com.example.demo.trade.repository.TradeHistoryRepository;
 import com.example.demo.trade.repository.TradesRepository;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +54,7 @@ public class TradeService {
                     : orderBookRepository.getSellOrdersAtOrBelow(request.getStockCode(), request.getPrice());
 
             //지정가 GTC를 제외하고 호가창 비어있을 때 예외
-            if (!(request.getOrderType() == OrderType.LIMIT && request.getOrderCondition() == OrderCondition.GTC)
+            if ((request.getOrderType() != OrderType.LIMIT && request.getOrderCondition() != OrderCondition.GTC)
                     && (sellOrders == null || sellOrders.isEmpty())){
                 throw new IllegalArgumentException("체결 가능한 매도 주문이 없습니다.");
             }
