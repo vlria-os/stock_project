@@ -12,13 +12,14 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "http://13.124.206.135"
+            allowedOriginPatterns: "*"
             allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
+              - HEAD
             allowedHeaders: "*"
             allowCredentials: true
       routes:
