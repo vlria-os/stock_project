@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const API = "/api/balance";
+const API = "http://52.95.252.64:8080/api/balance";
 
 async function apiFetch(path, options = {}) {
     const token = localStorage.getItem("token");
