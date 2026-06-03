@@ -5,8 +5,10 @@ COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
 COPY src src
+RUN find src -name "*.java" | grep -i kafka || echo "=== KAFKA FILES NOT FOUND IN DOCKER CONTEXT ==="
 RUN chmod +x gradlew
 RUN ./gradlew bootJar -x test
+RUN jar tf build/libs/*.jar | grep -i "UserEvent" || echo "=== UserEvent NOT IN JAR ==="
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
