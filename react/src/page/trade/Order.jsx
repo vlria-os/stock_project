@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const Order = () => {
+const Order = ({ stockCode, stockName }) => {
   const [type, setType]=useState("");
   const [condition, setCondition]=useState("");
   const [price, setPrice]=useState("");
@@ -10,7 +10,7 @@ const Order = () => {
   return (
     <div>
         <div className='order-stock-box'>
-            
+
         </div>
         <div className='order-box'>
             <div className='order-type-area'>

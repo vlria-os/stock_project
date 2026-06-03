@@ -14,7 +14,7 @@ const OrderBook = ({ stockCode }) => {
                 setOrderBook(JSON.parse(message.body));
             });
         
-            fetch(`/api/trade/orderbook/subscribe/${stockCode}`, {
+            fetch(`${import.meta.env.VITE_GATEWAY_URL}/api/trade/orderbook/subscribe/${stockCode}`, {
                 method: 'POST'
             });
         },
@@ -28,7 +28,7 @@ const OrderBook = ({ stockCode }) => {
 
     //페이지 이탈 시 구독 해제
     return () => {
-        fetch(`/api/trade/orderbook/unsubscribe/${stockCode}`, {
+        fetch(`${import.meta.env.VITE_GATEWAY_URL}/api/trade/orderbook/unsubscribe/${stockCode}`, {
             method: 'POST'
         });
 
