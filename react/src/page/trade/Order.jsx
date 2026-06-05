@@ -26,7 +26,7 @@ const Order = ({ stockCode, stockName }) => {
   }
 
   const notReady=stockCode == null || stockCode == "" ||
-    type == "" || condition == null || price == null ||
+    orderType == "" || orderCondition == null || price == null ||
     quantity <= 0 || side == "";
 
   const isMarket=type !== "" && type === "MARKET";
