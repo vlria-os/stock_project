@@ -1,4 +1,4 @@
-package com.example.demo.kafka.event;
+package com.example.demo.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class TradeCompletedEvent {
+public class Stock {
     private String stockCode;
+    private Long remainingQuantity;
     private Long price;
-    private Long filledQuantity;
-    private boolean isSystemSeller;
 }

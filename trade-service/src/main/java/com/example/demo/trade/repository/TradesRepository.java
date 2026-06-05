@@ -1,6 +1,5 @@
 package com.example.demo.trade.repository;
 
-import com.example.demo.order.enums.Side;
 import com.example.demo.trade.dto.HoldingsResponse;
 import com.example.demo.trade.entity.Trades;
 import org.springframework.data.domain.Page;

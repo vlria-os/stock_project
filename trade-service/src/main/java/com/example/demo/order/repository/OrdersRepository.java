@@ -13,4 +13,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
     Optional<Orders> findById(Long id);
     List<Orders> findByOrderConditionAndExpiredAtAndStatusIn(OrderCondition orderCondition,
                                                            LocalDate expiredAt, List<Status> statuses);
+
+    List<Orders> findByUserIdAndStatusIn(Long userId, List<Status> statuses);
+    List<Orders> findByStatusInAndOrderCondition(List<Status> statuses, OrderCondition orderCondition);
 }

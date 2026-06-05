@@ -40,6 +40,8 @@ public class BalanceEventConsumer {
     private static final String LOCK_KEY = "order:lock:%d";
     private static final String DONE_KEY = "order:ioc:done:%d";
 
+    private static final Long SYSTEM_USER_ID = 14L;
+
     @KafkaListener(topics = "balance.trade.success", groupId = "trade-service")
     public void handleBalanceSuccess(BalanceResponseEvent event){
         Long buyOrderId=event.getBuyOrderId();
@@ -140,6 +142,8 @@ public class BalanceEventConsumer {
         tradeEventProducer.sendTradeResult(TradeCompletedEvent.builder()
                 .stockCode(buyOrder.getStockCode())
                 .price(price)
+                .filledQuantity(filledQuantity)
+                .isSystemSeller(sellOrder.getUserId().equals(SYSTEM_USER_ID))
                 .build());
 
     }
