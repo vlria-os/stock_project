@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react'
 import { order } from '../../api/tradeAPI';
+import './css/order.css';
 
 const Order = ({ stockCode, stockName }) => {
   const [orderType, setOrderType]=useState("");
@@ -37,30 +38,36 @@ const Order = ({ stockCode, stockName }) => {
   return (
     <div>
         <div className='order-stock-box'>
-            <span>{stockName}</span>
+            <span className='order-stock-name'>{stockName}</span>
+            <span className='order-stock-code'>{stockCode}</span>
         </div>
         <div className='order-box'>
             <div className='order-type-area'>
                 <button type='button' value='MARKET'
+                    className={`order-type-btn ${orderType === 'MARKET' ? 'acive':''}`}
                     onClick={(e) => {
                         setOrderType(e.target.value)
                     }}>시장가</button>
                 <button type='button' value='LIMIT'
+                    className={`order-type-btn ${orderType === 'LIMIT' ? 'acive':''}`}
                     onClick={(e) => {
                         setOrderType(e.target.value)
                     }}>지정가</button>
             </div>
             <div className='order-condition-area'>
                 <button type='button' value='GTC'
+                    className={`order-condition-btn ${orderCondition === 'GTC' ? 'acive':''}`}
                     onClick={(e) => {
                         setOrderCondition(e.target.value)
                     }}
                     disabled={isMarket}>GTC</button>
                 <button type='button' value='IOC'
+                    className={`order-condition-btn ${orderCondition === 'IOC' ? 'acive':''}`}
                     onClick={(e) => {
                         setOrderCondition(e.target.value)
                     }}>IOC</button>
                 <button type='button' value='FOK'
+                    className={`order-condition-btn ${orderCondition === 'FOK' ? 'acive':''}`}
                     onClick={(e) => {
                         setOrderCondition(e.target.value)
                     }}>FOK</button>
@@ -73,7 +80,9 @@ const Order = ({ stockCode, stockName }) => {
             </div>
             <div className='order-price-area'>
                 <input type='text' className='order-price-input'
-                    placeholder='가격을 입력하세요' value={price} onChange={(e) => {
+                    placeholder={orderType === 'MARKET' ? "시장가로 자동 체결됩니다":"가격을 입력하세요"}
+                    value={price} 
+                    onChange={(e) => {
                         setPrice(e.target.value)
                     }} disabled={isMarket}/>
             </div>
@@ -93,10 +102,12 @@ const Order = ({ stockCode, stockName }) => {
             </div>
             <div className='order-side-area'>
                 <button type='button' value='BUY'
+                    className={`order-side-btn ${side === 'BUY' ? 'active':''}`}
                     onClick={(e) => {
                         setSide(e.target.value)
                     }}>매수</button>
                 <button type='button' value='SELL'
+                    className={`order-side-btn ${side === 'SELL' ? 'active-sell':''}`}
                     onClick={(e) => {
                         setSide(e.target.value)
                     }}>매도</button>
@@ -104,7 +115,9 @@ const Order = ({ stockCode, stockName }) => {
             <div className='order-button-area'>
                 <button type='button'
                     onClick={handleOrder}
-                    disabled={notReady}>주문</button>
+                    disabled={notReady}>
+                    {orderMutation.isPending ? '처리 중':'주문'}
+                </button>
             </div>
         </div>
     </div>
