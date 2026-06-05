@@ -89,14 +89,10 @@ public class TradeService {
                 }
             }
 
-            BalanceOrderResponse response=balanceClient.orderBalance(
-                    BalanceOrderRequest.builder()
-                            .userId(userId)
-                            .amount(amount)
-                            .build()
-            );
+            //잔고 확인
+            Long balance=balanceClient.orderBalance();
 
-            if (!response.isSuccess()){
+            if (amount < balance){
                 throw new IllegalArgumentException("잔고가 부족합니다.");
             }
         } else {

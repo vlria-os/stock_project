@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "balance-service", url = "${balance.service.url}")
 public interface BalanceClient {
 
-    @PostMapping("/api/balance/order")
-    BalanceOrderResponse orderBalance(@RequestBody BalanceOrderRequest request);
+    @PostMapping("/api/balance")
+    Long orderBalance();
 }
