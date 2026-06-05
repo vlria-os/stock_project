@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.client.StockClient;
 import com.example.demo.client.dto.Stock;
-import com.example.demo.client.dto.StockListResponse;
 import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.OrderCondition;
@@ -44,7 +43,7 @@ public class OrderBookInitializer {
 
         for (int i=0; i<maxRetry; i++){
             try {
-                StockListResponse stocks=stockClient.getStockList();
+                List<Stock> stocks=stockClient.getStockList();
                 initOrderBook(stocks);
                 log.info("호가창 초기화 완료!");
                 return;
@@ -57,7 +56,7 @@ public class OrderBookInitializer {
         log.error("호가창 초기화 최종 실패 - 수동 개입 필요");
     }
 
-    private void initOrderBook(StockListResponse response){
+    private void initOrderBook(List<Stock> stocks){
         //1. 시스템 계정의 PENDING + PARTIALLY_FILLED 주문 전부 취소
         List<Orders> systemOrders=ordersRepository
                 .findByUserIdAndStatusIn(SYSTEM_USER_ID, List.of(Status.PENDING, Status.PARTIALLY_FILLED));
@@ -107,17 +106,17 @@ public class OrderBookInitializer {
         }
 
         //3. 시스템 계정 매도 주문 생성
-        for (Stock stock:response.getStocks()){
-            if (stock.getRemainingQuantity() <= 0) continue;
+        for (Stock stock:stocks){
+            if (stock.getRemainingShares() <= 0) continue;
 
             Orders systemOrder=Orders.builder()
                     .userId(SYSTEM_USER_ID)
-                    .stockCode(stock.getStockCode())
+                    .stockCode(stock.getCode())
                     .side(Side.SELL)
                     .orderType(OrderType.LIMIT)
                     .orderCondition(OrderCondition.GTC)
-                    .price(stock.getPrice())
-                    .quantity(stock.getRemainingQuantity())
+                    .price(stock.getListingPrice())
+                    .quantity(stock.getRemainingShares())
                     .status(Status.PENDING).build();
 
             ordersRepository.save(systemOrder);
@@ -125,14 +124,14 @@ public class OrderBookInitializer {
 
             orderHistoryRepository.save(OrderHistory.builder()
                     .userId(SYSTEM_USER_ID)
-                    .stockCode(stock.getStockCode())
+                    .stockCode(stock.getCode())
                     .orderType(OrderType.LIMIT)
                     .orderCondition(OrderCondition.GTC)
                     .side(Side.SELL)
-                    .price(stock.getPrice())
-                    .quantity(stock.getRemainingQuantity())
+                    .price(stock.getListingPrice())
+                    .quantity(stock.getRemainingShares())
                     .filledQuantity(0L)
-                    .remainingQuantity(stock.getRemainingQuantity())
+                    .remainingQuantity(stock.getRemainingShares())
                     .status(Status.PENDING)
                     .build());
         }

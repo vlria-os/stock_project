@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class Stock {
-    private String stockCode;
-    private Long remainingQuantity;
-    private Long price;
+    private String code;
+    private Long remainingShares;
+    private Long listingPrice;
 }
