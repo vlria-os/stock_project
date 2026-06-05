@@ -5,6 +5,7 @@ import com.example.demo.dto.KisPriceApiResponse;
 import com.example.demo.dto.StockChartResponse;
 import com.example.demo.dto.StockListResponse;
 import com.example.demo.dto.StockPriceResponse;
+import com.example.demo.dto.TradeExecutedEvent;
 import com.example.demo.entity.Stock;
 import com.example.demo.kis.KisTokenService;
 import com.example.demo.repository.StockRepository;
@@ -75,6 +76,23 @@ public class StockService {
         return stockRepository.findAll().stream()
                 .map(StockListResponse::new)
                 .toList();
+    }
+
+    // 체결 이벤트 처리 (Kafka TradeEventConsumer에서 호출)
+    @Transactional
+    public void handleTradeExecution(TradeExecutedEvent event) {
+        stockRepository.findByCode(event.getStockCode()).ifPresent(stock -> {
+            if (event.isSystemSeller()) {
+                stock.deductShares(event.getQuantity());
+                log.info("시스템 매도 체결 - stockCode={}, 차감수량={}, 잔여수량={}",
+                        event.getStockCode(), event.getQuantity(), stock.getRemainingShares());
+            }
+            stock.updatePrice(
+                    BigDecimal.valueOf(event.getPrice()),
+                    stock.getCurrentPrice(),
+                    (long) event.getQuantity()
+            );
+        });
     }
 
     // stocks 테이블 현재가 업데이트(스케줄러에서 호출)
