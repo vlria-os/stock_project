@@ -8,6 +8,7 @@ const Order = ({ stockCode, stockName }) => {
   const [price, setPrice]=useState("");
   const [quantity, setQuantity]=useState(0);
   const [side, setSide]=useState("");
+  const [expiredAt, setExpiredAt]=useState("");
 
   const orderMutation=useMutation({
     mutationFn: order,
@@ -21,7 +22,7 @@ const Order = ({ stockCode, stockName }) => {
 
   const handleOrder=()=>{
     orderMutation.mutate({
-        stockCode, orderType, orderCondition, price, quantity, side
+        stockCode, orderType, orderCondition, price, quantity, side, expiredAt
     });
   }
 
@@ -30,6 +31,8 @@ const Order = ({ stockCode, stockName }) => {
     quantity <= 0 || side == "";
 
   const isMarket=orderType !== "" && orderType === "MARKET";
+
+  const isNotGTC=orderCondition !== "" && orderCondition !== "GTC";
 
   return (
     <div>
@@ -62,11 +65,17 @@ const Order = ({ stockCode, stockName }) => {
                         setOrderCondition(e.target.value)
                     }}>FOK</button>
             </div>
+            <div className='order-expiredAt-area'>
+                <input type='datetime' value={expiredAt} disabled={isNotGTC}
+                    onChange={(e) => {
+                        setExpiredAt(e.target.value);
+                    }}/>
+            </div>
             <div className='order-price-area'>
                 <input type='text' className='order-price-input'
                     placeholder='가격을 입력하세요' value={price} onChange={(e) => {
                         setPrice(e.target.value)
-                    }}/>
+                    }} disabled={isMarket}/>
             </div>
             <div className='order-quantity-area'>
                 <div className='order-quantity-box'>
