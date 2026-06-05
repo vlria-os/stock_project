@@ -26,6 +26,11 @@ public class User {
     @Builder.Default
     private Boolean isActive = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private UserRole role = UserRole.USER;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
