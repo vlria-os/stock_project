@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 import { order } from '../../api/tradeAPI';
 
 const Order = ({ stockCode, stockName }) => {
-  const [type, setType]=useState("");
-  const [condition, setCondition]=useState("");
+  const [orderType, setOrderType]=useState("");
+  const [orderCondition, setOrderCondition]=useState("");
   const [price, setPrice]=useState("");
   const [quantity, setQuantity]=useState(0);
   const [side, setSide]=useState("");
@@ -21,7 +21,7 @@ const Order = ({ stockCode, stockName }) => {
 
   const handleOrder=()=>{
     orderMutation.mutate({
-        stockCode, type, condition, price, quantity, side
+        stockCode, orderType, orderCondition, price, quantity, side
     });
   }
 
@@ -40,26 +40,26 @@ const Order = ({ stockCode, stockName }) => {
             <div className='order-type-area'>
                 <button type='button' value='MARKET'
                     onClick={(e) => {
-                        setType(e.target.value)
+                        setOrderType(e.target.value)
                     }}>시장가</button>
                 <button type='button' value='LIMIT'
                     onClick={(e) => {
-                        setType(e.target.value)
+                        setOrderType(e.target.value)
                     }}>지정가</button>
             </div>
             <div className='order-condition-area'>
                 <button type='button' value='GTC'
                     onClick={(e) => {
-                        setCondition(e.target.value)
+                        setOrderCondition(e.target.value)
                     }}
                     disabled={isMarket}>GTC</button>
                 <button type='button' value='IOC'
                     onClick={(e) => {
-                        setCondition(e.target.value)
+                        setOrderCondition(e.target.value)
                     }}>IOC</button>
                 <button type='button' value='FOK'
                     onClick={(e) => {
-                        setCondition(e.target.value)
+                        setOrderCondition(e.target.value)
                     }}>FOK</button>
             </div>
             <div className='order-price-area'>
