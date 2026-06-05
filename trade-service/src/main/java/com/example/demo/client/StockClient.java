@@ -10,10 +10,10 @@ import java.util.List;
 @FeignClient(name = "stock-service", url = "${stock.service.url}")
 public interface StockClient {
 
-    @GetMapping("/stock/name")
+    @GetMapping("/api/stock/name")
     String getStockName(@RequestParam("stockCode") String stockCode);
 
-    @GetMapping("/stock/list")
+    @GetMapping("/api/stock/list")
     List<Stock> getStockList();
 
 }
