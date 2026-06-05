@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getStocks } from "../../api/stockAPI";
 import StockDetail from "./StockDetail";
 
-export default function SearchPage() {
+export default function SearchPage({ onNavigate }) {
   const [allStocks, setAllStocks] = useState([]);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
