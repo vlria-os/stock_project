@@ -120,10 +120,13 @@ export default function StockDetail({ stock, onNavigate }) {
             </div>
           )}
           {chart.length > 0 && <MiniChart data={chart} />}
-          <div>
-            <button type="button"
-              onClick={() => onNavigate?.("order", { stockCode: stock.code, stockName: stock.name })}>주문하기</button>
-          </div>
+          <button
+            type="button"
+            onClick={() => onNavigate?.("order", { stockCode: stock.code, stockName: stock.name })}
+            style={s.orderBtn}
+          >
+            주문하기
+          </button>
         </>
       )}
     </div>
@@ -177,4 +180,16 @@ const s = {
   },
   priceCell: { display: "flex", flexDirection: "column", gap: 4, fontSize: 14 },
   priceLabel: { fontSize: 11, color: "var(--text)" },
+  orderBtn: {
+    marginTop: 20,
+    width: "100%",
+    padding: "12px 0",
+    background: "#ef4444",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 15,
+    fontWeight: 700,
+    cursor: "pointer",
+  },
 };
