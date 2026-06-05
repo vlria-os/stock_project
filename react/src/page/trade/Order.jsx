@@ -66,7 +66,7 @@ const Order = ({ stockCode, stockName }) => {
                     }}>FOK</button>
             </div>
             <div className='order-expiredAt-area'>
-                <input type='datetime' value={expiredAt} disabled={isNotGTC}
+                <input type='date' value={expiredAt} disabled={isNotGTC}
                     onChange={(e) => {
                         setExpiredAt(e.target.value);
                     }}/>
