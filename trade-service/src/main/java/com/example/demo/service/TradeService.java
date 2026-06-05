@@ -92,7 +92,7 @@ public class TradeService {
             //잔고 확인
             Long balance=balanceClient.orderBalance(userId);
 
-            if (amount < balance){
+            if (amount > balance){
                 throw new IllegalArgumentException("잔고가 부족합니다.");
             }
         } else {
