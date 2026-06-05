@@ -1,11 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.KisChartApiResponse;
-import com.example.demo.dto.KisPriceApiResponse;
-import com.example.demo.dto.StockChartResponse;
-import com.example.demo.dto.StockListResponse;
-import com.example.demo.dto.StockPriceResponse;
-import com.example.demo.dto.TradeExecutedEvent;
+import com.example.demo.dto.*;
 import com.example.demo.entity.Stock;
 import com.example.demo.kis.KisTokenService;
 import com.example.demo.repository.StockRepository;
@@ -33,6 +28,24 @@ public class StockService {
 
     @Value("${kis.app-secret}")
     private String appSecret;
+
+    //종목 코드, 잔여 발행 수량, 기준가 조회
+    public List<TradeStockResponse> getStocksForTrade(){
+        return stockRepository.findAll().stream().map(
+                stock -> {
+                    return TradeStockResponse.builder()
+                            .code(stock.getCode())
+                            .remainingShares((long) stock.getRemainingShares())
+                            .listingPrice(stock.getListingPrice().longValue())
+                            .build();
+                }
+        ).toList();
+    }
+
+    //종목 이름 조회
+    public String getStockName(String code){
+        return stockRepository.findByCode(code).orElseThrow().getName();
+    }
 
     //현재가 조회
     public StockPriceResponse getStockPrice(String stockCode) {
