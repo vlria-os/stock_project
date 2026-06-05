@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react'
 import { order } from '../../api/tradeAPI';
-import './css/order.css';
 
 const Order = ({ stockCode, stockName }) => {
   const [orderType, setOrderType]=useState("");
