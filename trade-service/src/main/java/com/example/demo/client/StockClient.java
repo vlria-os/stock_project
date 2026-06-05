@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "stock-service", url = "${stock.service.url}")
 public interface StockClient {
 
-    @GetMapping("/api/stock/name")
+    @GetMapping("/stock/name")
     String getStockName(@RequestParam("stockCode") String stockCode);
 
-    @GetMapping("/api/stock/list")
+    @GetMapping("/stock/list")
     StockListResponse getStockList();
 
 }
