@@ -35,6 +35,12 @@ public class Stock {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "total_shares", nullable = false)
+    private int totalShares;
+    @Column(name = "remaining_shares", nullable = false)
+    private int remainingShares;
+    @Column(name = "listing_price", precision = 15, scale = 2)
+    private BigDecimal listingPrice;
 
     // 스케줄러가 KIS API로 현재가 업데이트할 때 사용
     public void updatePrice(BigDecimal currentPrice, BigDecimal prevPrice, Long volume){
@@ -42,5 +48,10 @@ public class Stock {
         this.prevPrice = prevPrice;
         this.volume = volume;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    // 시스템 매도 체결 시 잔여 수량 차감
+    public void deductShares(int quantity) {
+        this.remainingShares = Math.max(0, this.remainingShares - quantity);
     }
 }
