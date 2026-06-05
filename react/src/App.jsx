@@ -86,7 +86,7 @@ function MainApp() {
         onNavigate={navigate}
         isAuthenticated={isAuthenticated}
         onLogin={() => setPage("login")}
-        onLogout={logout}
+        onLogout={() => { logout(); setPage("login"); }}
       />
       <main style={{ padding: "32px 24px", maxWidth: 960, margin: "0 auto" }}>
         <PageComponent onNavigate={navigate} {...props}/>
