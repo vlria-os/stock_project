@@ -102,7 +102,7 @@ public class BalanceService {
     public void executeTrade(Long buyOrderId, Long buyerId, Long sellerId, Long amount) {
         if (isDuplicate(buyOrderId)) throw new IllegalStateException("중복 요청");
 
-        boolean isSystem = sellerId == 0L;
+        boolean isSystem = sellerId == 14L;
 
         Long firstId = isSystem ? buyerId : Math.min(buyerId, sellerId);
         Long secondId = isSystem ? null : Math.max(buyerId, sellerId);
