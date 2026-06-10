@@ -72,24 +72,19 @@ public class OrderBookRepository {
         redisTemplate.opsForHash().put(detailKey(orderId), "remainingQuantity", String.valueOf(remainingQuantity));
     }
 
-    @SuppressWarnings("unchecked")
     private List<OrderBook> toOrderBooks(Set<String> paddedIds){
         if (paddedIds == null || paddedIds.isEmpty()) return Collections.emptyList();
 
-        List<String> paddedIdList=new ArrayList<>(paddedIds);
+        List<String> paddedIdList = new ArrayList<>(paddedIds);
+        List<OrderBook> orderBooks = new ArrayList<>();
 
-        List<Object> results=redisTemplate.executePipelined((RedisCallback<?>) connection -> {
-            paddedIdList.forEach(paddedId ->
-                    redisTemplate.opsForHash().entries(detailKey(fromPaddedId(paddedId))));
+        for (String paddedId : paddedIdList) {
+            Long orderId = fromPaddedId(paddedId);
+            Map<Object, Object> map = redisTemplate.opsForHash().entries(detailKey(orderId));
+            if (map == null || map.isEmpty()) continue;
 
-            return null;
-        });
-
-        List<OrderBook> orderBooks=new ArrayList<>();
-        for (int i=0; i<paddedIdList.size(); i++){
-            Map<Object, Object> map=(Map<Object, Object>) results.get(i);
             orderBooks.add(OrderBook.builder()
-                    .orderId(fromPaddedId(paddedIdList.get(i)))
+                    .orderId(orderId)
                     .userId(Long.parseLong((String) map.get("userId")))
                     .price(Long.parseLong((String) map.get("price")))
                     .remainingQuantity(Long.parseLong((String) map.get("remainingQuantity")))
