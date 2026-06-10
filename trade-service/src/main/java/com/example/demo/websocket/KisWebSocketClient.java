@@ -60,7 +60,6 @@ public class KisWebSocketClient {
             @Override
             public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
                 try {
-                    // PINGPONG 또는 JSON 응답 무시
                     if (text.startsWith("{") || text.startsWith("0|H0STASP0|000")) return;
 
                     String[] parts = text.split("\\|");
@@ -75,21 +74,21 @@ public class KisWebSocketClient {
                     orderBook.put("stockCode", fields[0]);
                     orderBook.put("time", fields[1]);
 
-                    // 매도 호가 (10개, 높은 순)
+                    // 매도 호가 (ASKP1~10: index 3~12, 잔량: index 23~32)
                     List<Map<String, Object>> askPrices = new ArrayList<>();
                     for (int i = 0; i < 10; i++) {
                         Map<String, Object> ask = new HashMap<>();
-                        ask.put("price", fields[2 + i]);
-                        ask.put("volume", fields[22 + i]);
+                        ask.put("price", fields[3 + i]);
+                        ask.put("volume", fields[23 + i]);
                         askPrices.add(ask);
                     }
 
-                    // 매수 호가 (10개, 높은 순)
+                    // 매수 호가 (BIDP1~10: index 13~22, 잔량: index 33~42)
                     List<Map<String, Object>> bidPrices = new ArrayList<>();
                     for (int i = 0; i < 10; i++) {
                         Map<String, Object> bid = new HashMap<>();
-                        bid.put("price", fields[12 + i]);
-                        bid.put("volume", fields[32 + i]);
+                        bid.put("price", fields[13 + i]);
+                        bid.put("volume", fields[33 + i]);
                         bidPrices.add(bid);
                     }
 
