@@ -40,32 +40,26 @@ public class OrderBookRepository {
     }
 
     public void addOrder(Orders order){
-        String bookKey=bookKey(order.getStockCode(), order.getSide());
-        String detailKey=detailKey(order.getId());
-        double score=calcScore(order.getSide(), order.getPrice());
+        String bookKey = bookKey(order.getStockCode(), order.getSide());
+        String detailKey = detailKey(order.getId());
+        double score = calcScore(order.getSide(), order.getPrice());
 
-        Map<String, String> map=new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("orderId", String.valueOf(order.getId()));
         map.put("price", order.getPrice().toString());
         map.put("remainingQuantity", String.valueOf(order.getQuantity()));
         map.put("userId", String.valueOf(order.getUserId()));
 
-        redisTemplate.executePipelined((RedisCallback<?>) connection -> {
-            redisTemplate.opsForZSet().add(bookKey, toPaddedId(order.getId()), score);
-            redisTemplate.opsForHash().putAll(detailKey, map);
-            return null;
-        });
+        redisTemplate.opsForZSet().add(bookKey, toPaddedId(order.getId()), score);
+        redisTemplate.opsForHash().putAll(detailKey, map);
     }
 
     public void removeOrder(Orders order){
-        String bookKey=bookKey(order.getStockCode(), order.getSide());
-        String detailKey=detailKey(order.getId());
+        String bookKey = bookKey(order.getStockCode(), order.getSide());
+        String detailKey = detailKey(order.getId());
 
-        redisTemplate.executePipelined((RedisCallback<?>) connection -> {
-            redisTemplate.opsForZSet().remove(bookKey, toPaddedId(order.getId()));
-            redisTemplate.delete(detailKey);
-            return null;
-        });
+        redisTemplate.opsForZSet().remove(bookKey, toPaddedId(order.getId()));
+        redisTemplate.delete(detailKey);
     }
 
     public void updateQuantity(Long orderId, Long remainingQuantity){
