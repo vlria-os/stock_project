@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper; // 올바른 import
 @RequiredArgsConstructor
 public class BalanceKafkaProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void sendTradeResult(Long buyOrderId,Long buyerId, Long sellerId, Long amount, boolean success) {
         TradeResultEvent event = TradeResultEvent.builder()
