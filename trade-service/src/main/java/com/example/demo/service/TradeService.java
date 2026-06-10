@@ -159,7 +159,25 @@ public class TradeService {
         orderHistoryRepository.save(history);
 
         //redis 호가창에 등록
-        orderBookRepository.addOrder(order);
+        if (order.getOrderType() == OrderType.MARKET) {
+            Long marketPrice;
+            if (order.getSide() == Side.BUY) {
+                List<OrderBook> sellOrders = orderBookRepository.getSellOrdersForMarket(order.getStockCode());
+                if (sellOrders == null || sellOrders.isEmpty()) {
+                    throw new IllegalArgumentException("체결 가능한 매도 주문이 없습니다.");
+                }
+                marketPrice = sellOrders.get(0).getPrice();
+            } else {
+                List<OrderBook> buyOrders = orderBookRepository.getBuyOrdersForMarket(order.getStockCode());
+                if (buyOrders == null || buyOrders.isEmpty()) {
+                    throw new IllegalArgumentException("체결 가능한 매수 주문이 없습니다.");
+                }
+                marketPrice = buyOrders.get(0).getPrice();
+            }
+            orderBookRepository.addOrder(order, marketPrice);
+        } else {
+            orderBookRepository.addOrder(order);
+        }
 
         //체결 엔진 호출
         orderMatchingEngine.match(order);

@@ -4,7 +4,6 @@ import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.Side;
 import com.example.demo.redis.dto.OrderBook;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -39,14 +38,18 @@ public class OrderBookRepository {
         return Long.parseLong(paddedId);
     }
 
-    public void addOrder(Orders order){
+    public void addOrder(Orders order) {
+        addOrder(order, order.getPrice());
+    }
+
+    public void addOrder(Orders order, Long price) {
         String bookKey = bookKey(order.getStockCode(), order.getSide());
         String detailKey = detailKey(order.getId());
-        double score = calcScore(order.getSide(), order.getPrice());
+        double score = calcScore(order.getSide(), price);
 
         Map<String, String> map = new HashMap<>();
         map.put("orderId", String.valueOf(order.getId()));
-        map.put("price", order.getPrice().toString());
+        map.put("price", String.valueOf(price));
         map.put("remainingQuantity", String.valueOf(order.getQuantity()));
         map.put("userId", String.valueOf(order.getUserId()));
 
