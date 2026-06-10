@@ -1,8 +1,11 @@
 package com.example.balanceservice.dto;
 
-import lombok.Getter;
+import lombok.*;
 
-@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Builder
 public class TradeRequest {
     private Long buyOrderId;
     private Long buyerId;
