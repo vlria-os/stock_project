@@ -148,7 +148,7 @@ public class BalanceEventConsumer {
 
     }
 
-    @KafkaListener(topics = "balance.trade.error", groupId = "trade-service")
+    @KafkaListener(topics = "balance.trade.fail", groupId = "trade-service")
     public void handleBalanceError(BalanceResponseEvent event){
         Long buyOrderId=event.getBuyOrderId();
         Long sellOrderId=Long.parseLong(

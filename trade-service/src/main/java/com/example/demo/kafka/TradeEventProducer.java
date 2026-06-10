@@ -12,7 +12,7 @@ public class TradeEventProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendBalanceRequest(BalanceRequestEvent event){
-        kafkaTemplate.send("balance.request", event);
+        kafkaTemplate.send("balance.trade.request", event);
     }
 
     public void sendTradeResult(TradeCompletedEvent event){
