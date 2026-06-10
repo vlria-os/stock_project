@@ -44,31 +44,60 @@ const OrderBook = ({ stockCode }) => {
   }, [stockCode]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '300px', fontFamily: 'monospace' }}>
+    <div style={{
+        width: '280px',
+        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+        fontSize: '13px',
+        backgroundColor: '#fff',
+        borderRadius: '12px',
+        overflow: 'hidden'
+    }}>
         {orderBook ? (
             <>
-                <div style={{ textAlign: 'center', marginBottom: '8px' }}>
-                    {orderBook.stockCode} {orderBook.time}
-                </div>
-
                 {/* 매도 호가 - 높은 가격부터 */}
                 {[...orderBook.askPrices].reverse().map((ask, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#e8f4f8', padding: '2px 8px' }}>
-                        <span style={{ color: 'blue' }}>{Number(ask.volume).toLocaleString()}</span>
-                        <span>{Number(ask.price).toLocaleString()}</span>
+                    <div key={i} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '5px 16px',
+                        backgroundColor: i % 2 === 0 ? '#fff5f5' : '#fff8f8',
+                        position: 'relative'
+                    }}>
+                        <span style={{ color: '#999', fontSize: '12px' }}>
+                            {Number(ask.volume).toLocaleString()}
+                        </span>
+                        <span style={{ color: '#e5333a', fontWeight: '600' }}>
+                            {Number(ask.price).toLocaleString()}
+                        </span>
                     </div>
                 ))}
 
+                {/* 구분선 */}
+                <div style={{ height: '1px', backgroundColor: '#eee' }} />
+
                 {/* 매수 호가 */}
                 {orderBook.bidPrices.map((bid, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#fff0f0', padding: '2px 8px' }}>
-                        <span>{Number(bid.price).toLocaleString()}</span>
-                        <span style={{ color: 'red' }}>{Number(bid.volume).toLocaleString()}</span>
+                    <div key={i} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '5px 16px',
+                        backgroundColor: i % 2 === 0 ? '#f5f8ff' : '#f8faff',
+                    }}>
+                        <span style={{ color: '#1763e8', fontWeight: '600' }}>
+                            {Number(bid.price).toLocaleString()}
+                        </span>
+                        <span style={{ color: '#999', fontSize: '12px' }}>
+                            {Number(bid.volume).toLocaleString()}
+                        </span>
                     </div>
                 ))}
             </>
         ) : (
-            <p>호가 데이터 로딩 중...</p>
+            <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+                호가 데이터 로딩 중...
+            </div>
         )}
     </div>
   )
