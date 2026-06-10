@@ -13,7 +13,7 @@ public interface StockClient {
     @GetMapping("/api/stock/name")
     String getStockName(@RequestParam("stockCode") String stockCode);
 
-    @GetMapping("/api/stock/list")
+    @GetMapping("/api/stock/orderbook")
     List<Stock> getStockList();
 
 }
