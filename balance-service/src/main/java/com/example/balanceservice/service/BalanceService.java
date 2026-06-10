@@ -102,11 +102,13 @@ public class BalanceService {
     public void executeTrade(Long buyOrderId, Long buyerId, Long sellerId, Long amount) {
         if (isDuplicate(buyOrderId)) throw new IllegalStateException("중복 요청");
 
-        Long firstId = Math.min(buyerId, sellerId);
-        Long secondId = Math.max(buyerId, sellerId);
+        boolean isSystem = sellerId == 0L;
+
+        Long firstId = isSystem ? buyerId : Math.min(buyerId, sellerId);
+        Long secondId = isSystem ? null : Math.max(buyerId, sellerId);
 
         if (!tryLock(firstId)) throw new IllegalStateException("잠시 후 다시 시도해주세요");
-        if (!tryLock(secondId)) {
+        if (!isSystem && !tryLock(secondId)) {
             unlock(firstId);
             throw new IllegalStateException("잠시 후 다시 시도해주세요");
         }
@@ -114,38 +116,45 @@ public class BalanceService {
         try {
             Balance buyer = balanceRepository.findByUserId(buyerId)
                     .orElseThrow(() -> new IllegalArgumentException("계좌 없음"));
-            Balance seller = balanceRepository.findByUserId(sellerId)
-                    .orElseThrow(() -> new IllegalArgumentException("계좌 없음"));
 
             try {
                 buyer.withdrawLocked(amount);
-                seller.deposit(amount);
 
                 balanceHistoryRepository.save(BalanceHistory.builder()
                         .userId(buyerId).type(BalanceType.BUY_CONFIRM)
                         .amount(amount).balanceAfter(buyer.getBalance()).build());
-                balanceHistoryRepository.save(BalanceHistory.builder()
-                        .userId(sellerId).type(BalanceType.SELL_CONFIRM)
-                        .amount(amount).balanceAfter(seller.getBalance()).build());
 
-                // 성공 발행
+                if (!isSystem) {
+                    Balance seller = balanceRepository.findByUserId(sellerId)
+                            .orElseThrow(() -> new IllegalArgumentException("계좌 없음"));
+                    seller.deposit(amount);
+                    balanceHistoryRepository.save(BalanceHistory.builder()
+                            .userId(sellerId).type(BalanceType.SELL_CONFIRM)
+                            .amount(amount).balanceAfter(seller.getBalance()).build());
+                }
+
                 kafkaProducer.sendTradeResult(buyOrderId, buyerId, sellerId, amount, true);
 
             } catch (Exception e) {
                 balanceHistoryRepository.save(BalanceHistory.builder()
                         .userId(buyerId).type(BalanceType.BUY_FAIL)
                         .amount(amount).balanceAfter(buyer.getBalance()).build());
-                balanceHistoryRepository.save(BalanceHistory.builder()
-                        .userId(sellerId).type(BalanceType.SELL_FAIL)
-                        .amount(amount).balanceAfter(seller.getBalance()).build());
 
-                // 실패 발행
+                if (!isSystem) {
+                    Balance seller = balanceRepository.findByUserId(sellerId).orElse(null);
+                    if (seller != null) {
+                        balanceHistoryRepository.save(BalanceHistory.builder()
+                                .userId(sellerId).type(BalanceType.SELL_FAIL)
+                                .amount(amount).balanceAfter(seller.getBalance()).build());
+                    }
+                }
+
                 kafkaProducer.sendTradeResult(buyOrderId, buyerId, sellerId, amount, false);
                 throw e;
             }
         } finally {
             unlock(firstId);
-            unlock(secondId);
+            if (!isSystem && secondId != null) unlock(secondId);
         }
     }
 
