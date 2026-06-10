@@ -83,12 +83,12 @@ const OrderList = ({ onNavigate }) => {
                       ) : (
                         data?.content?.map((order, index) => {
                           const isPending=order.status === "PENDING" && order.orderCondition === "GTC";
-                          const isLimit=order.price !== null && order.price !== "";
+                          const isLimit=order.orderType === "LIMIT";
 
                           return (
                             <tr>
                               <td>{index + 1}</td><td>{order.stockCode}</td><td>{order.orderType}</td>
-                              <td>{order.orderCondition}</td><td>{order.side}</td><td>{isLimit ? order.price : 0}</td>
+                              <td>{order.orderCondition}</td><td>{order.side}</td><td>{isLimit ? order.price : "0"}</td>
                               <td>{order.quantity}</td><td>{order.filledQuantity}</td>
                               <td>{order.remainingQuantity}</td><td>{order.status}</td>
                               <td>{dayjs(order.createdAt).format("YYYY-MM-DD HH:mm:ss")}</td>
