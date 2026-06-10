@@ -49,7 +49,8 @@ public class TradeController {
 
     @GetMapping("/orders")
     public ResponseEntity<?> getMyOrderHistory(@RequestHeader("X-User-Id") Long userId,
-                                               @RequestParam("status") Status status, Pageable pageable){
+                                               @RequestParam(value = "status", required = false) Status status,
+                                               Pageable pageable){
         try {
             Page<OrderHistoryResponse> orderHistories=tradeService.getMyOrderHistory(userId, status, pageable);
             return ResponseEntity.ok(orderHistories);
