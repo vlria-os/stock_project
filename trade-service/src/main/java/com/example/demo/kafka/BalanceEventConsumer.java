@@ -37,7 +37,7 @@ public class BalanceEventConsumer {
     private final SseEmitterService sseEmitterService;
     private final OrderHistoryRepository orderHistoryRepository;
     private final TradeHistoryRepository tradeHistoryRepository;
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     private static final String MATCH_KEY = "order:match:%d";
     private static final String LOCK_KEY = "order:lock:%d";
