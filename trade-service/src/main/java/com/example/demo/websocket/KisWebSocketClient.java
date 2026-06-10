@@ -13,7 +13,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -58,8 +60,44 @@ public class KisWebSocketClient {
             @Override
             public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
                 try {
-                    messagingTemplate.convertAndSend("/topic/orderbook", text);
-                } catch (Exception e){
+                    // PINGPONG 또는 JSON 응답 무시
+                    if (text.startsWith("{") || text.startsWith("0|H0STASP0|000")) return;
+
+                    String[] parts = text.split("\\|");
+                    if (parts.length < 4) return;
+
+                    String trId = parts[1];
+                    if (!"H0STASP0".equals(trId)) return;
+
+                    String[] fields = parts[3].split("\\^");
+
+                    Map<String, Object> orderBook = new HashMap<>();
+                    orderBook.put("stockCode", fields[0]);
+                    orderBook.put("time", fields[1]);
+
+                    // 매도 호가 (10개, 높은 순)
+                    List<Map<String, Object>> askPrices = new ArrayList<>();
+                    for (int i = 0; i < 10; i++) {
+                        Map<String, Object> ask = new HashMap<>();
+                        ask.put("price", fields[2 + i]);
+                        ask.put("volume", fields[22 + i]);
+                        askPrices.add(ask);
+                    }
+
+                    // 매수 호가 (10개, 높은 순)
+                    List<Map<String, Object>> bidPrices = new ArrayList<>();
+                    for (int i = 0; i < 10; i++) {
+                        Map<String, Object> bid = new HashMap<>();
+                        bid.put("price", fields[12 + i]);
+                        bid.put("volume", fields[32 + i]);
+                        bidPrices.add(bid);
+                    }
+
+                    orderBook.put("askPrices", askPrices);
+                    orderBook.put("bidPrices", bidPrices);
+
+                    messagingTemplate.convertAndSend("/topic/orderbook", objectMapper.writeValueAsString(orderBook));
+                } catch (Exception e) {
                     log.error("메시지 처리 오류", e);
                 }
             }
