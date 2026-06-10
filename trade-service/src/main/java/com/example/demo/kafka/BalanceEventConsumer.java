@@ -15,11 +15,13 @@ import com.example.demo.trade.entity.TradeHistory;
 import com.example.demo.trade.entity.Trades;
 import com.example.demo.trade.repository.TradeHistoryRepository;
 import com.example.demo.trade.repository.TradesRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.redisson.api.RedissonClient;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 
@@ -35,6 +37,7 @@ public class BalanceEventConsumer {
     private final SseEmitterService sseEmitterService;
     private final OrderHistoryRepository orderHistoryRepository;
     private final TradeHistoryRepository tradeHistoryRepository;
+    private final ObjectMapper objectMapper;
 
     private static final String MATCH_KEY = "order:match:%d";
     private static final String LOCK_KEY = "order:lock:%d";
@@ -43,7 +46,9 @@ public class BalanceEventConsumer {
     private static final Long SYSTEM_USER_ID = 14L;
 
     @KafkaListener(topics = "balance.trade.success", groupId = "trade-service")
-    public void handleBalanceSuccess(BalanceResponseEvent event){
+    public void handleBalanceSuccess(String message) throws JsonProcessingException {
+        BalanceResponseEvent event = objectMapper.readValue(message, BalanceResponseEvent.class);
+
         Long buyOrderId=event.getBuyOrderId();
         Long amount=event.getAmount();
 
@@ -149,7 +154,9 @@ public class BalanceEventConsumer {
     }
 
     @KafkaListener(topics = "balance.trade.fail", groupId = "trade-service")
-    public void handleBalanceError(BalanceResponseEvent event){
+    public void handleBalanceError(String message) throws JsonProcessingException{
+        BalanceResponseEvent event = objectMapper.readValue(message, BalanceResponseEvent.class);
+
         Long buyOrderId=event.getBuyOrderId();
         Long sellOrderId=Long.parseLong(
                 redisTemplate.opsForValue().get(String.format(MATCH_KEY, buyOrderId))
