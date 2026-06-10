@@ -30,10 +30,10 @@ export const cancelOrder=async(id) => {
 export const orders=async(status, page, sort) => {
     const res=await tradeApi.get(`/orders`, {
         params: {
-            status: status,
             page: page,
             sort: sort,
-            size: 10
+            size: 10,
+            ...(status && { status })
         }
     });
 
