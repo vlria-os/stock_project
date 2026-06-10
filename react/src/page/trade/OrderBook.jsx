@@ -11,6 +11,7 @@ const OrderBook = ({ stockCode }) => {
         brokerURL: `${import.meta.env.VITE_GATEWAY_URL.replace('http://', 'ws://')}/ws`,
         onConnect: () => {
             client.subscribe("/topic/orderbook", (message) => {
+                console.log("받은 데이터:", message.body);
                 setOrderBook(JSON.parse(message.body));
             });
         
