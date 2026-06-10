@@ -16,5 +16,5 @@ public interface OrderHistoryRepository extends JpaRepository<OrderHistory, Long
         where o.userId = :userId
             and (:status is null or o.status = :status)
     """)
-    Page<OrderHistoryResponse> findMyOrders(@Param("userId") Long userId, @Param("status") Status status, Pageable pageable);
+    Page<OrderHistory> findMyOrders(@Param("userId") Long userId, @Param("status") Status status, Pageable pageable);
 }

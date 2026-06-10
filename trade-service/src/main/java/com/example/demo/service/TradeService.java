@@ -218,7 +218,22 @@ public class TradeService {
     }
 
     public Page<OrderHistoryResponse> getMyOrderHistory(Long userId, Status status, Pageable pageable){
-        Page<OrderHistoryResponse> histories=orderHistoryRepository.findMyOrders(userId, status, pageable);
+        Page<OrderHistoryResponse> histories=orderHistoryRepository.findMyOrders(userId, status, pageable).map(
+                history -> OrderHistoryResponse.builder()
+                        .id(history.getId())
+                        .userId(history.getUserId())
+                        .stockCode(history.getStockCode())
+                        .side(history.getSide())
+                        .orderCondition(history.getOrderCondition())
+                        .orderType(history.getOrderType())
+                        .quantity(history.getQuantity())
+                        .price(history.getPrice())
+                        .filledQuantity(history.getFilledQuantity())
+                        .remainingQuantity(history.getRemainingQuantity())
+                        .status(history.getStatus())
+                        .createdAt(history.getCreatedAt())
+                        .build()
+        );
 
         List<OrderHistoryResponse> contents=histories.getContent();
         for (OrderHistoryResponse history:contents){
@@ -229,7 +244,20 @@ public class TradeService {
     }
 
     public Page<TradeHistoryResponse> getMyTradeHistory(Long userId, Pageable pageable){
-        Page<TradeHistoryResponse> histories=tradeHistoryRepository.findByUserId(userId, pageable);
+        Page<TradeHistoryResponse> histories=tradeHistoryRepository.findByUserId(userId, pageable).map(
+                history -> TradeHistoryResponse.builder()
+                        .id(history.getId())
+                        .userId(history.getUserId())
+                        .stockCode(history.getStockCode())
+                        .side(history.getSide())
+                        .orderCondition(history.getOrderCondition())
+                        .orderType(history.getOrderType())
+                        .quantity(history.getQuantity())
+                        .price(history.getPrice())
+                        .totalAmount(history.getTotalAmount())
+                        .createdAt(history.getCreatedAt())
+                        .build()
+        );
 
         List<TradeHistoryResponse> contents=histories.getContent();
         for (TradeHistoryResponse history:contents){

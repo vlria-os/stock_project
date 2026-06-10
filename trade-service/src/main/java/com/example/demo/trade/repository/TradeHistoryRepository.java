@@ -7,5 +7,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TradeHistoryRepository extends JpaRepository<TradeHistory, Long> {
-    Page<TradeHistoryResponse> findByUserId(Long userId, Pageable pageable);
+    Page<TradeHistory> findByUserId(Long userId, Pageable pageable);
 }
