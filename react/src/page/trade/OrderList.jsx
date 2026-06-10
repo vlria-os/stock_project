@@ -85,6 +85,8 @@ const OrderList = ({ onNavigate }) => {
                           const isPending=order.status === "PENDING" && order.orderCondition === "GTC";
                           const isLimit=order.orderType === "LIMIT";
 
+                          console.log("userId: " + order.userId);
+
                           return (
                             <tr>
                               <td>{index + 1}</td><td>{order.stockCode}</td><td>{order.orderType}</td>
@@ -102,6 +104,11 @@ const OrderList = ({ onNavigate }) => {
                     }
                   </tbody>
                 </table>
+              </div>
+              <div className='orders-paging-area'>
+                  <button type='button' disabled={data?.first}>
+                    이전
+                  </button>
               </div>
             </div>
           )}
