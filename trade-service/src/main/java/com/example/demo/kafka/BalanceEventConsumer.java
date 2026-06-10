@@ -45,7 +45,8 @@ public class BalanceEventConsumer {
 
     private static final Long SYSTEM_USER_ID = 14L;
 
-    @KafkaListener(topics = "balance.trade.success", groupId = "trade-service")
+    @KafkaListener(topics = "balance.trade.success", groupId = "trade-service",
+            properties = {"value.deserializer=org.apache.kafka.common.serialization.StringDeserializer"})
     public void handleBalanceSuccess(String message) throws JsonProcessingException {
         BalanceResponseEvent event = objectMapper.readValue(message, BalanceResponseEvent.class);
 
@@ -153,7 +154,8 @@ public class BalanceEventConsumer {
 
     }
 
-    @KafkaListener(topics = "balance.trade.fail", groupId = "trade-service")
+    @KafkaListener(topics = "balance.trade.fail", groupId = "trade-service",
+            properties = {"value.deserializer=org.apache.kafka.common.serialization.StringDeserializer"})
     public void handleBalanceError(String message) throws JsonProcessingException{
         BalanceResponseEvent event = objectMapper.readValue(message, BalanceResponseEvent.class);
 
