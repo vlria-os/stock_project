@@ -54,6 +54,11 @@ export default function MyPage({ onNavigate }) {
           <div style={s.userEmail}>{user?.email}</div>
         </div>
       </div>
+      <div>
+        <button type="button" onClick={() => {
+          onNavigate("orders");
+        }}>주문 내역</button>
+      </div>
 
       <div style={s.layout}>
         {/* 관심종목 목록 */}
