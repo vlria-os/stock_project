@@ -7,6 +7,7 @@ import SignupPage from "./page/auth/SignupPage";
 import MarketPage from "./page/stock/MarketPage";
 import SearchPage from "./page/stock/SearchPage";
 import MyPage from "./page/mypage/MyPage";
+import AIPage from "./page/ai/AIPage";
 import { connectTradeSSE } from "./api/sse.js";
 import toast, { Toaster } from "react-hot-toast";
 import OrderBook from "./page/trade/OrderBook.jsx";
@@ -29,7 +30,8 @@ const PAGE_COMPONENTS = {
   order: Order,
   holdings: Holdings,
   orders: OrderList,
-  trades: TradeList
+  trades: TradeList,
+  ai: AIPage,
 };
 
 // 로그인이 필요한 페이지 — 비로그인 시 로그인 페이지로 이동

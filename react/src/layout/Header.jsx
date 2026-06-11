@@ -6,6 +6,7 @@ const PAGES = [
   { id: "market",    label: "시장",       icon: "🌍" },
   { id: "news",      label: "뉴스",       icon: "📰" },
   { id: "balance",  label: "입출금",       icon: "⚙️" },
+  { id: "ai",       label: "AI 어시스턴트", icon: "🤖" },
 ];
 
 export default function Header({ currentPage, onNavigate, isAuthenticated, onLogin, onLogout }) {
