@@ -34,7 +34,7 @@ export const orders=async(stockCode, page, sort, orderId) => {
             page: page,
             sort: sort,
             size: 10,
-            ...(status && { status }),
+            ...(stockCode && { stockCode }),
             ...(orderId && { orderId })
         }
     });
