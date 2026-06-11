@@ -11,7 +11,7 @@ const TradeList = () => {
   
   const { data, isLoading, isError } = useQuery({
     queryKey: ['trades', page, sort, stockCode, tradeId],
-    queryFn: () => trades(stockCode, page, sort, tradeId)
+    queryFn: () => trades(page, sort, tradeId, stockCode)
   });
 
   return (
@@ -67,7 +67,7 @@ const TradeList = () => {
                             <tr>
                               <td>{index + 1}</td>
                               <td>
-                                <button type='button' onClick={() => setOrderId(trade.orderId)}>
+                                <button type='button' onClick={() => setTradeId(trade.orderId)}>
                                   {trade.orderId}
                                 </button>
                               </td>
