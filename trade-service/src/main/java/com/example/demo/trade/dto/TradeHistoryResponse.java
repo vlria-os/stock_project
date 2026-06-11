@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TradeHistoryResponse {
     private Long id;
+    private Long tradeId;
     private Long userId;
     private String stockCode;
     private String stockName;

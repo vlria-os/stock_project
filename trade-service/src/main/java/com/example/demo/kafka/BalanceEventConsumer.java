@@ -68,7 +68,7 @@ public class BalanceEventConsumer {
         long filledQuantity=amount/price;
 
         //체결 테이블 insert
-        tradesRepository.save(Trades.builder()
+        Trades trade=tradesRepository.save(Trades.builder()
                 .buyOrder(buyOrder)
                 .sellOrder(sellOrder)
                 .stockCode(buyOrder.getStockCode())
@@ -79,6 +79,7 @@ public class BalanceEventConsumer {
 
         //체결 내역 insert
         tradeHistoryRepository.save(TradeHistory.builder()
+                .trade(trade)
                 .userId(buyOrder.getUserId())
                 .stockCode(buyOrder.getStockCode())
                 .side(buyOrder.getSide())
@@ -90,6 +91,7 @@ public class BalanceEventConsumer {
                 .build());
 
         tradeHistoryRepository.save(TradeHistory.builder()
+                .trade(trade)
                 .userId(sellOrder.getUserId())
                 .stockCode(sellOrder.getStockCode())
                 .side(sellOrder.getSide())
@@ -109,6 +111,7 @@ public class BalanceEventConsumer {
         //주문 내역 insert
         long buyTotalFilled=tradesRepository.sumFilledQuantityByOrderId(buyOrderId);
         orderHistoryRepository.save(OrderHistory.builder()
+                .order(buyOrder)
                 .userId(buyOrder.getUserId())
                 .stockCode(buyOrder.getStockCode())
                 .orderType(buyOrder.getOrderType())
@@ -123,6 +126,7 @@ public class BalanceEventConsumer {
 
         long sellTotalFilled= tradesRepository.sumFilledQuantityByOrderId(sellOrderId);
         orderHistoryRepository.save(OrderHistory.builder()
+                .order(sellOrder)
                 .userId(sellOrder.getUserId())
                 .stockCode(sellOrder.getStockCode())
                 .orderType(sellOrder.getOrderType())
@@ -178,6 +182,7 @@ public class BalanceEventConsumer {
         //주문 내역 insert
         long buyTotalFilled=tradesRepository.sumFilledQuantityByOrderId(buyOrderId);
         orderHistoryRepository.save(OrderHistory.builder()
+                .order(buyOrder)
                 .userId(buyOrder.getUserId())
                 .stockCode(buyOrder.getStockCode())
                 .orderType(buyOrder.getOrderType())
@@ -192,6 +197,7 @@ public class BalanceEventConsumer {
 
         long sellTotalFilled= tradesRepository.sumFilledQuantityByOrderId(sellOrderId);
         orderHistoryRepository.save(OrderHistory.builder()
+                .order(sellOrder)
                 .userId(sellOrder.getUserId())
                 .stockCode(sellOrder.getStockCode())
                 .orderType(sellOrder.getOrderType())

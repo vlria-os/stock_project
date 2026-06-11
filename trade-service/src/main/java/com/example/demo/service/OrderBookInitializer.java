@@ -73,6 +73,7 @@ public class OrderBookInitializer {
             orderBookRepository.removeOrder(order);
 
             orderHistoryRepository.save(OrderHistory.builder()
+                    .order(order)
                     .userId(order.getUserId())
                     .stockCode(order.getStockCode())
                     .orderType(order.getOrderType())
@@ -123,6 +124,7 @@ public class OrderBookInitializer {
             orderBookRepository.addOrder(systemOrder);
 
             orderHistoryRepository.save(OrderHistory.builder()
+                    .order(systemOrder)
                     .userId(SYSTEM_USER_ID)
                     .stockCode(stock.getCode())
                     .orderType(OrderType.LIMIT)

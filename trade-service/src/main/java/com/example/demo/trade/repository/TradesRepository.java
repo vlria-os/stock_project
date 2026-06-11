@@ -53,7 +53,7 @@ public interface TradesRepository extends JpaRepository<Trades, Long> {
             where t.buyOrder.userId = :userId or t.sellOrder.userId = :userId
         """
     )
-    Page<HoldingsResponse> myHoldings(@Param("userId") Long userId, Pageable pageable);
+    Page<Trades> myHoldings(@Param("userId") Long userId, Pageable pageable);
 }
 
 

@@ -1,5 +1,6 @@
 package com.example.demo.trade.entity;
 
+import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.OrderCondition;
 import com.example.demo.order.enums.OrderType;
 import com.example.demo.order.enums.Side;
@@ -19,6 +20,10 @@ public class TradeHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trade_id", nullable = false)
+    private Trades trade;
 
     @Column(nullable = false)
     private Long userId;

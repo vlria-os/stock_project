@@ -44,6 +44,7 @@ public class OrderScheduler {
             ordersRepository.save(order);
 
             orderHistoryRepository.save(OrderHistory.builder()
+                    .order(order)
                     .userId(order.getUserId())
                     .stockCode(order.getStockCode())
                     .orderType(order.getOrderType())

@@ -2,8 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.client.BalanceClient;
 import com.example.demo.client.StockClient;
-import com.example.demo.client.dto.BalanceOrderRequest;
-import com.example.demo.client.dto.BalanceOrderResponse;
 import com.example.demo.client.dto.TradeRequest;
 import com.example.demo.order.dto.OrderHistoryResponse;
 import com.example.demo.order.entity.OrderHistory;
@@ -144,6 +142,7 @@ public class TradeService {
 
         //주문 내역 insert
         OrderHistory history=OrderHistory.builder()
+                .order(order)
                 .userId(order.getUserId())
                 .stockCode(order.getStockCode())
                 .orderType(order.getOrderType())
@@ -202,6 +201,7 @@ public class TradeService {
         ordersRepository.save(order);
 
         orderHistoryRepository.save(OrderHistory.builder()
+                .order(order)
                 .userId(order.getUserId())
                 .stockCode(order.getStockCode())
                 .orderType(order.getOrderType())
@@ -221,6 +221,7 @@ public class TradeService {
         Page<OrderHistoryResponse> histories=orderHistoryRepository.findMyOrders(userId, status, pageable).map(
                 history -> OrderHistoryResponse.builder()
                         .id(history.getId())
+                        .orderId(history.getOrder().getId())
                         .userId(history.getUserId())
                         .stockCode(history.getStockCode())
                         .side(history.getSide())
@@ -247,6 +248,7 @@ public class TradeService {
         Page<TradeHistoryResponse> histories=tradeHistoryRepository.findByUserId(userId, pageable).map(
                 history -> TradeHistoryResponse.builder()
                         .id(history.getId())
+                        .tradeId(history.getTrade().getId())
                         .userId(history.getUserId())
                         .stockCode(history.getStockCode())
                         .side(history.getSide())
@@ -268,7 +270,12 @@ public class TradeService {
     }
 
     public Page<HoldingsResponse> getMyHoldings(Long userId, Pageable pageable){
-        Page<HoldingsResponse> holdings=tradesRepository.myHoldings(userId, pageable);
+        Page<HoldingsResponse> holdings=tradesRepository.myHoldings(userId, pageable).map(
+                holding -> HoldingsResponse.builder()
+                        .stockCode(holding.getStockCode())
+                        .holdings(holding.getFilledQuantity())
+                        .build()
+        );
 
         List<HoldingsResponse> contents=holdings.getContent();
         for (HoldingsResponse content:contents){

@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @Builder
 public class OrderHistoryResponse {
     private Long id;
+    private Long orderId;
     private Long userId;
     private String stockCode;
     private String stockName;
