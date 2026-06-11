@@ -241,11 +241,11 @@ public class TradeService {
         return histories;
     }
 
-    public Page<TradeHistoryResponse> getMyTradeHistory(Long userId, Long tradeId, String stockCode, Pageable pageable){
-        Page<TradeHistoryResponse> histories=tradeHistoryRepository.findByUserId(userId, tradeId, stockCode, pageable).map(
+    public Page<TradeHistoryResponse> getMyTradeHistory(Long userId, Long orderId, String stockCode, Pageable pageable){
+        Page<TradeHistoryResponse> histories=tradeHistoryRepository.findByUserId(userId, orderId, stockCode, pageable).map(
                 history -> TradeHistoryResponse.builder()
                         .id(history.getId())
-                        .tradeId(history.getTrade().getId())
+                        .orderId(history.getOrder().getId())
                         .userId(history.getUserId())
                         .stockCode(history.getStockCode())
                         .stockName(stockClient.getStockName(history.getStockCode()))

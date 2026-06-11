@@ -22,8 +22,8 @@ public class TradeHistory {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trade_id", nullable = false)
-    private Trades trade;
+    @JoinColumn(name = "order_id", nullable = false)
+    private Orders order;
 
     @Column(nullable = false)
     private Long userId;

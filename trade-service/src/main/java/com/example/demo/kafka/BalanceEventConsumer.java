@@ -68,7 +68,7 @@ public class BalanceEventConsumer {
         long filledQuantity=amount/price;
 
         //체결 테이블 insert
-        Trades trade=tradesRepository.save(Trades.builder()
+        tradesRepository.save(Trades.builder()
                 .buyOrder(buyOrder)
                 .sellOrder(sellOrder)
                 .stockCode(buyOrder.getStockCode())
@@ -79,7 +79,7 @@ public class BalanceEventConsumer {
 
         //체결 내역 insert
         tradeHistoryRepository.save(TradeHistory.builder()
-                .trade(trade)
+                .order(buyOrder)
                 .userId(buyOrder.getUserId())
                 .stockCode(buyOrder.getStockCode())
                 .side(buyOrder.getSide())
@@ -91,7 +91,7 @@ public class BalanceEventConsumer {
                 .build());
 
         tradeHistoryRepository.save(TradeHistory.builder()
-                .trade(trade)
+                .order(sellOrder)
                 .userId(sellOrder.getUserId())
                 .stockCode(sellOrder.getStockCode())
                 .side(sellOrder.getSide())

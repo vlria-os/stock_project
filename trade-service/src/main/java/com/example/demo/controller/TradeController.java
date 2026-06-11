@@ -70,12 +70,12 @@ public class TradeController {
 
     @GetMapping("/trades")
     public ResponseEntity<?> getMyTradeHistory(@RequestHeader("X-User-Id") Long userId,
-                                               @RequestParam(value = "tradeId", required = false) String tradeId,
+                                               @RequestParam(value = "orderId", required = false) String orderId,
                                                @RequestParam(value = "stockCode", required = false) String stockCode,
                                                Pageable pageable){
         Long id;
-        if (tradeId != null && !tradeId.isBlank()){
-            id=Long.parseLong(tradeId);
+        if (orderId != null && !orderId.isBlank()){
+            id=Long.parseLong(orderId);
         } else {
             id=null;
         }

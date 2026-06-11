@@ -13,9 +13,9 @@ public interface TradeHistoryRepository extends JpaRepository<TradeHistory, Long
         select t
         from TradeHistory t
         where t.userId = :userId
-            and (:tradeId is null or t.trade.id = :tradeId)
+            and (:orderId is null or t.order.id = :orderId)
                 and (:stockCode is null or t.stockCode = :stockCode)
     """)
-    Page<TradeHistory> findByUserId(@Param("userId") Long userId, @Param("tradeId") Long tradeId,
+    Page<TradeHistory> findByUserId(@Param("userId") Long userId, @Param("orderId") Long orderId,
                                     @Param("stockCode") String stockCode, Pageable pageable);
 }
