@@ -14,7 +14,9 @@ public interface OrderHistoryRepository extends JpaRepository<OrderHistory, Long
         select o
         from OrderHistory o
         where o.userId = :userId
-            and (:status is null or o.status = :status)
+            and (:orderId is null or o.order.id = :orderId)
+                and (:stockCode is null or o.stockCode = :stockCode)
     """)
-    Page<OrderHistory> findMyOrders(@Param("userId") Long userId, @Param("status") Status status, Pageable pageable);
+    Page<OrderHistory> findMyOrders(@Param("userId") Long userId, @Param("orderId") Long orderId,
+                                    String stockCode, Pageable pageable);
 }

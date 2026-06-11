@@ -50,10 +50,11 @@ public class TradeController {
 
     @GetMapping("/orders")
     public ResponseEntity<?> getMyOrderHistory(@RequestHeader("X-User-Id") Long userId,
-                                               @RequestParam(value = "status", required = false) Status status,
+                                               @RequestParam(value = "orderId", required = false) Long orderId,
+                                               @RequestParam(value = "stockCode", required = false) String stockCode,
                                                Pageable pageable){
         try {
-            Page<OrderHistoryResponse> orderHistories=tradeService.getMyOrderHistory(userId, status, pageable);
+            Page<OrderHistoryResponse> orderHistories=tradeService.getMyOrderHistory(userId, orderId, stockCode, pageable);
             return ResponseEntity.ok(orderHistories);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

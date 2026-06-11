@@ -218,8 +218,8 @@ public class TradeService {
         return orderId;
     }
 
-    public Page<OrderHistoryResponse> getMyOrderHistory(Long userId, Status status, Pageable pageable){
-        Page<OrderHistoryResponse> histories=orderHistoryRepository.findMyOrders(userId, status, pageable).map(
+    public Page<OrderHistoryResponse> getMyOrderHistory(Long userId, Long orderId, String stockCode, Pageable pageable){
+        Page<OrderHistoryResponse> histories=orderHistoryRepository.findMyOrders(userId, orderId, stockCode, pageable).map(
                 history -> OrderHistoryResponse.builder()
                         .id(history.getId())
                         .orderId(history.getOrder().getId())
