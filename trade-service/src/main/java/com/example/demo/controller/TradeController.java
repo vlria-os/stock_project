@@ -69,9 +69,19 @@ public class TradeController {
     }
 
     @GetMapping("/trades")
-    public ResponseEntity<?> getMyTradeHistory(@RequestHeader("X-User-Id") Long userId, Pageable pageable){
+    public ResponseEntity<?> getMyTradeHistory(@RequestHeader("X-User-Id") Long userId,
+                                               @RequestParam(value = "tradeId", required = false) String tradeId,
+                                               @RequestParam(value = "stockCode", required = false) String stockCode,
+                                               Pageable pageable){
+        Long id;
+        if (tradeId != null && !tradeId.isBlank()){
+            id=Long.parseLong(tradeId);
+        } else {
+            id=null;
+        }
+
         try {
-            Page<TradeHistoryResponse> tradeHistories=tradeService.getMyTradeHistory(userId, pageable);
+            Page<TradeHistoryResponse> tradeHistories=tradeService.getMyTradeHistory(userId, id, stockCode, pageable);
             return ResponseEntity.ok(tradeHistories);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
