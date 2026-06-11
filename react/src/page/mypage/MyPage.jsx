@@ -58,6 +58,9 @@ export default function MyPage({ onNavigate }) {
         <button type="button" onClick={() => {
           onNavigate("orders");
         }}>주문 내역</button>
+        <button type="button" onClick={() => {
+          onNavigate("trades");
+        }}>체결 내역</button>
       </div>
 
       <div style={s.layout}>

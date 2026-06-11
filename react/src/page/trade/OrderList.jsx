@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react'
-import { cancelOrder, orders } from '../../api/tradeAPI';
+import { orders } from '../../api/tradeAPI';
 import dayjs from 'dayjs';
 
 const OrderList = ({ onNavigate }) => {

@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react'
 import { trades } from '../../api/tradeAPI';
 import dayjs from 'dayjs';
-import React from 'react';
 
 const TradeList = () => {
   const [stockCode, setStockCode]=useState("");
