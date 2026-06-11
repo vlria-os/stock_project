@@ -28,13 +28,14 @@ export const cancelOrder=async(id) => {
     return res.data;
 }
 
-export const orders=async(status, page, sort) => {
+export const orders=async(stockCode, page, sort, orderId) => {
     const res=await tradeApi.get(`/orders`, {
         params: {
             page: page,
             sort: sort,
             size: 10,
-            ...(status && { status })
+            ...(status && { status }),
+            ...(orderId && { orderId })
         }
     });
 

@@ -4,13 +4,14 @@ import { cancelOrder, orders } from '../../api/tradeAPI';
 import dayjs from 'dayjs';
 
 const OrderList = ({ onNavigate }) => {
-  const [status, setStatus]=useState("");
+  const [stockCode, setStockCode]=useState("");
+  const [orderId, setOrderId]=useState("");
   const [page, setPage]=useState(0);
   const [sort, setSort]=useState('id,desc');
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['orders', page, sort, status],
-    queryFn: () => orders(status, page, sort)
+    queryKey: ['orders', page, sort, stockCode, orderId],
+    queryFn: () => orders(stockCode, page, sort, orderId)
   });
 
   return (
@@ -24,14 +25,15 @@ const OrderList = ({ onNavigate }) => {
           ) : (
             <div className='orders-box'>
               <div className='orders-navi'>
-                <div className='orders-status-box'>
-                  <button type='button' onClick={() => setStatus('')}>전체</button>
-                  <button type='button' onClick={() => setStatus('PENDING')}>대기</button>
-                  <button type='button' onClick={() => setStatus('FILLED')}>체결</button>
-                  <button type='button' onClick={() => setStatus('CANCELLED')}>취소</button>
-                  <button type='button' onClick={() => setStatus('FAILED')}>실패</button>
-                  <button type='button' onClick={() => setStatus('PARTIALLY_FILLED')}>부분 체결</button>
-                  <button type='button' onClick={() => setStatus('PARTIALLY_CANCELLED')}>부분 취소</button>
+                <div className='orders-all-btn'>
+                  <button type='button' onClick={() => {
+                    setOrderId('');
+                    setStockCode('');
+                  }}>전체 보기</button>
+                </div>
+                <div className='orders-stockCode-box'>
+                  <input type='text' placeholder='종목 코드를 검색하세요.' value={stockCode}
+                    onChange={(e) => setStockCode(e.target.value)}/>
                 </div>
                 <div className='orders-sort-box'>
                   <select value={sort} onChange={(e) => {
