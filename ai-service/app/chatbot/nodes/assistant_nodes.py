@@ -12,7 +12,7 @@ def get_stock_info(stock_code: str):
     except:
         return None
     
-def answer_investment_question(user_id: str, question: str, stock_code: str = None):
+def answer_investment_question(question: str, stock_code: str = None):
     context = ""
     if stock_code:
         stock_info = get_stock_info(stock_code)

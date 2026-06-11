@@ -6,11 +6,10 @@ from chatbot.nodes.assistant_nodes import answer_investment_question
 app=FastAPI(title="AI Service")
 
 class AssistantRequest(BaseModel) :
-    user_id : str
     question : str
     stock_code : Optional[str] = None
-    
+
 @app.post("/ai/assistant")
 def assistant(req: AssistantRequest):
-    answer = answer_investment_question(req.user_id, req.question, req.stock_code)
+    answer = answer_investment_question(req.question, req.stock_code)
     return {"answer": answer}
