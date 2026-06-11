@@ -27,7 +27,7 @@ const TradeList = () => {
               <div className='trades-navi'>
                 <div className='trades-all-btn'>
                   <button type='button' onClick={() => {
-                    setTradeId('');
+                    setOrderId('');
                     setStockCode('');
                   }}>전체 보기</button>
                 </div>
