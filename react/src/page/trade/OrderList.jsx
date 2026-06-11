@@ -46,7 +46,7 @@ const OrderList = ({ onNavigate }) => {
                 <table className='orders-table'>
                   <thead>
                     <tr>
-                      <th>번호</th><th>주문 ID</th><th>주문 종목</th><th>주문 유형</th><th>주문 조건</th>
+                      <th>번호</th><th>주문 ID</th><th>주문 종목</th><th>주문 조건</th>
                       <th>매매 구분</th><th>주문 가격</th><th>주문 수량</th><th>체결 수량</th>
                       <th>잔여 수량</th><th>주문 상태</th><th>주문 일시</th>
                     </tr>
@@ -68,10 +68,11 @@ const OrderList = ({ onNavigate }) => {
                           return (
                             <tr>
                               <td>{index + 1}</td>
-                              <td>{order.orderId}</td><td>{order.stockName}</td><td>{order.orderType}</td>
-                              <td>{order.orderCondition}</td><td>{order.side}</td><td>{isLimit ? order.price : "0"}</td>
-                              <td>{order.quantity}</td><td>{order.filledQuantity}</td>
-                              <td>{order.remainingQuantity}</td><td>{order.status}</td>
+                              <td>{order.orderId}</td><td>{order.stockName}</td>
+                              <td>{order.orderCondition}</td><td>{order.side === "BUY" ? "매수":"매도"}</td>
+                              <td>{isLimit ? order.price : "시장가"}</td>
+                              <td>{order.quantity}주</td><td>{order.filledQuantity}주</td>
+                              <td>{order.remainingQuantity}주</td><td>{order.status}</td>
                               <td>{dayjs(order.createdAt).format("YYYY-MM-DD HH:mm:ss")}</td>
                             </tr>
                           )
