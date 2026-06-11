@@ -4,6 +4,7 @@ import com.example.demo.client.BalanceClient;
 import com.example.demo.client.StockClient;
 import com.example.demo.client.dto.TradeRequest;
 import com.example.demo.order.dto.OrderHistoryResponse;
+import com.example.demo.order.dto.OrderPendingResponse;
 import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.OrderCondition;
@@ -224,22 +225,18 @@ public class TradeService {
                         .orderId(history.getOrder().getId())
                         .userId(history.getUserId())
                         .stockCode(history.getStockCode())
+                        .stockName(stockClient.getStockName(history.getStockCode()))
                         .side(history.getSide())
                         .orderCondition(history.getOrderCondition())
                         .orderType(history.getOrderType())
                         .quantity(history.getQuantity())
-                        .price(history.getPrice())
+                        .price(history.getPrice() != null ? history.getPrice():null)
                         .filledQuantity(history.getFilledQuantity())
                         .remainingQuantity(history.getRemainingQuantity())
                         .status(history.getStatus())
                         .createdAt(history.getCreatedAt())
                         .build()
         );
-
-        List<OrderHistoryResponse> contents=histories.getContent();
-        for (OrderHistoryResponse history:contents){
-            history.setStockName(stockClient.getStockName(history.getStockCode()));
-        }
 
         return histories;
     }
@@ -251,6 +248,7 @@ public class TradeService {
                         .tradeId(history.getTrade().getId())
                         .userId(history.getUserId())
                         .stockCode(history.getStockCode())
+                        .stockName(stockClient.getStockName(history.getStockCode()))
                         .side(history.getSide())
                         .orderCondition(history.getOrderCondition())
                         .orderType(history.getOrderType())
@@ -261,11 +259,6 @@ public class TradeService {
                         .build()
         );
 
-        List<TradeHistoryResponse> contents=histories.getContent();
-        for (TradeHistoryResponse history:contents){
-            history.setStockName(stockClient.getStockName(history.getStockCode()));
-        }
-
         return histories;
     }
 
@@ -273,15 +266,35 @@ public class TradeService {
         Page<HoldingsResponse> holdings=tradesRepository.myHoldings(userId, pageable).map(
                 holding -> HoldingsResponse.builder()
                         .stockCode(holding.getStockCode())
+                        .stockName(stockClient.getStockName(holding.getStockCode()))
                         .holdings(holding.getFilledQuantity())
                         .build()
         );
 
-        List<HoldingsResponse> contents=holdings.getContent();
-        for (HoldingsResponse content:contents){
-            content.setStockName(stockClient.getStockName(content.getStockCode()));
-        }
-
         return holdings;
+    }
+
+    public Page<OrderPendingResponse> getPendingOrders(Long userId, Pageable pageable){
+        Page<OrderPendingResponse> responses=ordersRepository.findByUserIdAndStatusAndOrderCondition(
+                userId, Status.PENDING, OrderCondition.GTC, pageable
+        ).map(
+                order -> OrderPendingResponse.builder()
+                        .id(order.getId())
+                        .userId(order.getUserId())
+                        .stockCode(order.getStockCode())
+                        .stockName(stockClient.getStockName(order.getStockCode()))
+                        .side(order.getSide())
+                        .orderType(order.getOrderType())
+                        .orderCondition(order.getOrderCondition())
+                        .price(order.getPrice() != null ? order.getPrice():null)
+                        .quantity(order.getQuantity())
+                        .status(order.getStatus())
+                        .createdAt(order.getCreatedAt())
+                        .expiredAt(order.getExpiredAt() != null ? order.getExpiredAt():null)
+                        .build()
+
+        );
+
+        return responses;
     }
 }

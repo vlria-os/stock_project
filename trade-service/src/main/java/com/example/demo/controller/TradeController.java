@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.client.dto.TradeRequest;
 import com.example.demo.order.dto.OrderHistoryResponse;
+import com.example.demo.order.dto.OrderPendingResponse;
 import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.enums.Status;
 import com.example.demo.service.TradeService;
@@ -73,6 +74,16 @@ public class TradeController {
     public ResponseEntity<?> getMyHoldings(@RequestHeader("X-User-Id") Long userId, Pageable pageable){
         try {
             Page<HoldingsResponse> responses=tradeService.getMyHoldings(userId, pageable);
+            return ResponseEntity.ok(responses);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<?> getPendingOrders(@RequestHeader("X-User-Id") Long userId, Pageable pageable){
+        try {
+            Page<OrderPendingResponse> responses=tradeService.getPendingOrders(userId, pageable);
             return ResponseEntity.ok(responses);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
