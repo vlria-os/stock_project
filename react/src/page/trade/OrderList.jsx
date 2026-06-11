@@ -46,7 +46,7 @@ const OrderList = ({ onNavigate }) => {
                 <table className='orders-table'>
                   <thead>
                     <tr>
-                      <th>번호</th><th>주문 종목</th><th>주문 유형</th><th>주문 조건</th>
+                      <th>번호</th><th>주문 ID</th><th>주문 종목</th><th>주문 유형</th><th>주문 조건</th>
                       <th>매매 구분</th><th>주문 가격</th><th>주문 수량</th><th>체결 수량</th>
                       <th>잔여 수량</th><th>주문 상태</th><th>주문 일시</th>
                     </tr>
@@ -67,7 +67,8 @@ const OrderList = ({ onNavigate }) => {
 
                           return (
                             <tr>
-                              <td>{index + 1}</td><td>{order.stockName}</td><td>{order.orderType}</td>
+                              <td>{index + 1}</td>
+                              <td>{order.orderId}</td><td>{order.stockName}</td><td>{order.orderType}</td>
                               <td>{order.orderCondition}</td><td>{order.side}</td><td>{isLimit ? order.price : "0"}</td>
                               <td>{order.quantity}</td><td>{order.filledQuantity}</td>
                               <td>{order.remainingQuantity}</td><td>{order.status}</td>
