@@ -77,7 +77,7 @@ const TradeList = () => {
                                 </button>
                               </td>
                               <td>{trade.orderCondition}</td><td>{trade.side === "BUY" ? "매수":"매도"}</td>
-                              <td>{isLimit ? trade.price : "시장가"}</td>
+                              <td>{trade.price}</td>
                               <td>{trade.quantity}주</td><td>{trade.totalAmount}</td>
                               <td>{dayjs(trade.createdAt).format("YYYY-MM-DD HH:mm:ss")}</td>
                             </tr>
