@@ -9,6 +9,7 @@ export default function StockDetail({ stock, onNavigate }) {
   const [chart, setChart] = useState([]);
   const [wished, setWished] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [priceError, setPriceError] = useState(false);
 
   useEffect(() => {
     if (!stock) return;
@@ -16,12 +17,14 @@ export default function StockDetail({ stock, onNavigate }) {
     setPrice(null);
     setChart([]);
     setWished(false);
+    setPriceError(false);
 
     const calls = [getPrice(stock.code), getChart(stock.code)];
     if (isAuthenticated) calls.push(checkWishlist(stock.code, accessToken));
 
     Promise.allSettled(calls).then((results) => {
       if (results[0].status === "fulfilled") setPrice(results[0].value);
+      else setPriceError(true);
       if (results[1].status === "fulfilled") setChart(results[1].value || []);
       if (results[2]?.status === "fulfilled") setWished(results[2].value?.wishlisted || false);
       setLoading(false);
@@ -89,6 +92,11 @@ export default function StockDetail({ stock, onNavigate }) {
         <div style={s.loading}>불러오는 중...</div>
       ) : (
         <>
+          {priceError && (
+            <div style={s.priceError}>
+              현재가 조회 불가 (서버 오류)
+            </div>
+          )}
           {price && (
             <div style={s.priceBox}>
               <div style={s.priceMain}>
@@ -180,6 +188,15 @@ const s = {
   },
   priceCell: { display: "flex", flexDirection: "column", gap: 4, fontSize: 14 },
   priceLabel: { fontSize: 11, color: "var(--text)" },
+  priceError: {
+    padding: "12px 16px",
+    marginBottom: 16,
+    background: "rgba(239,68,68,0.08)",
+    border: "1px solid rgba(239,68,68,0.2)",
+    borderRadius: 8,
+    fontSize: 13,
+    color: "#ef4444",
+  },
   orderBtn: {
     marginTop: 20,
     width: "100%",

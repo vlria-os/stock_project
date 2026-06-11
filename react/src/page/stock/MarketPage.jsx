@@ -49,7 +49,7 @@ export default function MarketPage({ onNavigate }) {
         while (next === prev && allStocks.length > 1);
         return next;
       });
-    }, 4000);
+    }, 9000);
     return () => clearInterval(timer);
   }, [selected, allStocks.length]);
 
