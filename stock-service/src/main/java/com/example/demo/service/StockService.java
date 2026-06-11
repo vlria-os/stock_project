@@ -47,23 +47,33 @@ public class StockService {
         return stockRepository.findByCode(code).orElseThrow().getName();
     }
 
-    //현재가 조회
+    //현재가 조회 (KIS API 실패 시 DB 캐시 반환)
     public StockPriceResponse getStockPrice(String stockCode) {
-        String token = kisTokenService.getAccessToken();
-        String uri = "/uapi/domestic-stock/v1/quotations/inquire-price"
-                + "?fid_cond_mrkt_div_code=J&fid_input_iscd=" + stockCode;
+        try {
+            String token = kisTokenService.getAccessToken();
+            String uri = "/uapi/domestic-stock/v1/quotations/inquire-price"
+                    + "?fid_cond_mrkt_div_code=J&fid_input_iscd=" + stockCode;
 
-        WebClient.RequestHeadersSpec<?> request = kisWebClient.get().uri(uri);
+            StockPriceResponse response = kisWebClient.get().uri(uri)
+                    .header("Authorization", "Bearer " + token)
+                    .header("appkey", appKey)
+                    .header("appsecret", appSecret)
+                    .header("tr_id", "FHKST01010100")
+                    .retrieve()
+                    .bodyToMono(KisPriceApiResponse.class)
+                    .map(KisPriceApiResponse::getOutput)
+                    .block();
 
-        return request
-                .header("Authorization", "Bearer " + token)
-                .header("appkey", appKey)
-                .header("appsecret", appSecret)
-                .header("tr_id", "FHKST01010100")
-                .retrieve()
-                .bodyToMono(KisPriceApiResponse.class)
-                .map(KisPriceApiResponse::getOutput)
-                .block();
+            if (response != null && response.getCurrentPrice() != null) {
+                return response;
+            }
+        } catch (Exception e) {
+            log.warn("KIS API 호출 실패, DB 캐시 반환: stockCode={}", stockCode, e);
+        }
+
+        return stockRepository.findByCode(stockCode)
+                .map(StockPriceResponse::new)
+                .orElseThrow(() -> new RuntimeException("종목을 찾을 수 없습니다: " + stockCode));
     }
     //차트조회(일봉 기준 30일)
     public List<StockChartResponse> getStockChart(String stockCode) {

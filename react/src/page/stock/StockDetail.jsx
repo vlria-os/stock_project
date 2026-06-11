@@ -127,6 +127,15 @@ export default function StockDetail({ stock, onNavigate }) {
           >
             주문하기
           </button>
+          {onNavigate && (
+            <button
+              type="button"
+              onClick={() => onNavigate("ai", { stockCode: stock.code, stockName: stock.name })}
+              style={s.aiBtn}
+            >
+              🤖 AI에게 물어보기 →
+            </button>
+          )}
         </>
       )}
     </div>
@@ -190,6 +199,18 @@ const s = {
     borderRadius: 8,
     fontSize: 15,
     fontWeight: 700,
+    cursor: "pointer",
+  },
+  aiBtn: {
+    marginTop: 8,
+    width: "100%",
+    padding: "10px 0",
+    background: "none",
+    color: "var(--accent, #aa3bff)",
+    border: "1px solid var(--accent, #aa3bff)",
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 600,
     cursor: "pointer",
   },
 };

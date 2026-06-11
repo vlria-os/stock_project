@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import Header from "./layout/Header";
 import Balance from "./page/balance/Balance.jsx";
+import DashboardPage from "./page/dashboard/DashboardPage";
 import { AuthProvider, useAuth } from "./store/AuthContext";
 import LoginPage from "./page/auth/LoginPage";
 import SignupPage from "./page/auth/SignupPage";
 import MarketPage from "./page/stock/MarketPage";
 import SearchPage from "./page/stock/SearchPage";
 import MyPage from "./page/mypage/MyPage";
+import AIPage from "./page/ai/AIPage";
 import { connectTradeSSE } from "./api/sse.js";
 import toast, { Toaster } from "react-hot-toast";
 import OrderBook from "./page/trade/OrderBook.jsx";
@@ -16,7 +18,7 @@ import OrderList from "./page/trade/OrderList.jsx";
 import TradeList from "./page/trade/TradeList.jsx";
 
 const PAGE_COMPONENTS = {
-  dashboard: () => <div>대시보드 페이지</div>,
+  dashboard: DashboardPage,
   portfolio: () => <div>포트폴리오 페이지</div>,
   market:    MarketPage,
   search:    SearchPage,
@@ -29,7 +31,8 @@ const PAGE_COMPONENTS = {
   order: Order,
   holdings: Holdings,
   orders: OrderList,
-  trades: TradeList
+  trades: TradeList,
+  ai: AIPage,
 };
 
 // 로그인이 필요한 페이지 — 비로그인 시 로그인 페이지로 이동
