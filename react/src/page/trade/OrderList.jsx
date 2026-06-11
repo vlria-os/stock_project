@@ -31,10 +31,6 @@ const OrderList = ({ onNavigate }) => {
                     setStockCode('');
                   }}>전체 보기</button>
                 </div>
-                <div className='orders-stockCode-box'>
-                  <input type='text' placeholder='종목 코드를 검색하세요.' value={stockCode}
-                    onChange={(e) => setStockCode(e.target.value)}/>
-                </div>
                 <div className='orders-sort-box'>
                   <select value={sort} onChange={(e) => {
                     setSort(e.target.value);
@@ -70,7 +66,16 @@ const OrderList = ({ onNavigate }) => {
                           return (
                             <tr>
                               <td>{index + 1}</td>
-                              <td>{order.orderId}</td><td>{order.stockName}</td>
+                              <td>
+                                <button type='button' onClick={() => setOrderId(order.orderId)}>
+                                  {order.orderId}
+                                </button>
+                              </td>
+                              <td>
+                                <button type='button' onClick={() => setStockCode(order.stockCode)}>
+                                  {order.stockName}
+                                </button>
+                              </td>
                               <td>{order.orderCondition}</td><td>{order.side === "BUY" ? "매수":"매도"}</td>
                               <td>{isLimit ? order.price : "시장가"}</td>
                               <td>{order.quantity}주</td><td>{order.filledQuantity}주</td>
