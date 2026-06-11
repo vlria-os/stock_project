@@ -42,14 +42,14 @@ export const orders=async(stockCode, page, sort, orderId) => {
     return res.data;
 }
 
-export const trades=async(page, sort, tradeId, stockCode) => {
+export const trades=async(page, sort, orderId, stockCode) => {
     const res=await tradeApi.get(`/trades`, {
         params: {
             page: page,
             sort: sort,
             size: 10,
             ...(stockCode && { stockCode }),
-            ...(tradeId && { tradeId })
+            ...(orderId && { orderId })
         }
     });
 

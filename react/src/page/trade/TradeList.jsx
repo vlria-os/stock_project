@@ -5,13 +5,13 @@ import dayjs from 'dayjs';
 
 const TradeList = () => {
   const [stockCode, setStockCode]=useState("");
-  const [tradeId, setTradeId]=useState("");
+  const [orderId, setOrderId]=useState("");
   const [page, setPage]=useState(0);
   const [sort, setSort]=useState('id,desc');
   
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['trades', page, sort, stockCode, tradeId],
-    queryFn: () => trades(page, sort, tradeId, stockCode)
+    queryKey: ['trades', page, sort, stockCode, orderId],
+    queryFn: () => trades(page, sort, orderId, stockCode)
   });
 
   return (
@@ -44,7 +44,7 @@ const TradeList = () => {
                 <table className='trades-table'>
                   <thead>
                     <tr>
-                      <th>번호</th><th>체결 ID</th><th>체결 종목</th><th>주문 조건</th>
+                      <th>번호</th><th>주문 ID</th><th>체결 종목</th><th>주문 조건</th>
                       <th>매매 구분</th><th>주문 가격</th><th>체결 수량</th><th>체결 금액</th>
                       <th>체결 일시</th>
                     </tr>
@@ -67,8 +67,8 @@ const TradeList = () => {
                             <tr>
                               <td>{index + 1}</td>
                               <td>
-                                <button type='button' onClick={() => setTradeId(trade.orderId)}>
-                                  {trade.tradeId}
+                                <button type='button' onClick={() => setOrderId(trade.orderId)}>
+                                  {trade.orderId}
                                 </button>
                               </td>
                               <td>
