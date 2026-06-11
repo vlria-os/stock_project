@@ -68,7 +68,7 @@ const TradeList = () => {
                               <td>{index + 1}</td>
                               <td>
                                 <button type='button' onClick={() => setTradeId(trade.orderId)}>
-                                  {trade.orderId}
+                                  {trade.tradeId}
                                 </button>
                               </td>
                               <td>
