@@ -1,4 +1,5 @@
 import axios from "axios";
+import { signup } from "./authAPI";
 
 const BASE_URL=`${import.meta.env.VITE_GATEWAY_URL}/api/trade`;
 
@@ -56,6 +57,18 @@ export const holdings=async(page) => {
     const res=await tradeApi.get(`/holdings`, {
         params: {
             page: page,
+            size: 10
+        }
+    });
+
+    return res.data;
+}
+
+export const pendingOrders=async(page, sort) => {
+    const res=await tradeApi.get(`/pending`, {
+        params: {
+            page: page,
+            sort: sort,
             size: 10
         }
     });
