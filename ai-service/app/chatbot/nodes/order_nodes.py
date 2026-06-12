@@ -69,4 +69,23 @@ def validate_order(state: dict) -> dict:
         
     return {**state, "missing_fields": missing}
 
+def ask_user(state: dict) -> dict:
+    #missing_fields가 있으면 첫 번째 필드 질문
+    #gtc_confirmed가 false면 만료일 질문
+    if state.get("missing_fields"):
+        field = state["missing_fields"][0]
+        question = MISSING_FIELD_QUESTIONS[field]
+    else:
+        question = "만료일을 설정하시겠어요? (예: 2026-09-20 / 아니오)"
+        
+    state["messages"].append({"role": "assistant", "content": question})
+    return {**state, "result": question}
 
+def check_gtc(state: dict) -> dict:
+    order = state["order"]
+    
+    #gtc가 아니거나 이미 만료일 있으면 스킵
+    if order.get("order_condition") != "GTC" or order.get("expired_at"):
+        return {**state, "gtc_confirmed": True}
+    
+    return {**state, "gtc_confirmed": False}
