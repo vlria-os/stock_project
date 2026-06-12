@@ -18,7 +18,7 @@ const PendingOrders = ({ onNavigate }) => {
     mutationFn: cancelOrder,
     onSuccess: (res) => {
         alert(res + "번 주문을 취소했습니다.");
-        queryClient.invalidateQueries({ queryKey: ['pendingsOrders']});
+        queryClient.invalidateQueries({ queryKey: ['pendingOrders']});
         onNavigate("pendingOrders", { onNavigate: onNavigate });
     },
     onError: (error) => {
