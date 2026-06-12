@@ -3,8 +3,16 @@ from pydantic import BaseModel
 from typing import Optional
 from app.news_service.agent import analyze_stock
 from chatbot.nodes.assistant_nodes import answer_investment_question
+from fastapi.middleware.cors import CORSMiddleware
 
 app=FastAPI(title="AI Service")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://43.203.225.254:5173"],  # React 개발 서버
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class AssistantRequest(BaseModel) :
     question : str
