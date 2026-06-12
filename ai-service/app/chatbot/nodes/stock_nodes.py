@@ -6,7 +6,7 @@ async def fetch_stock(state: dict) -> dict:
     
     async with httpx.AsyncClient() as client:
         response=await client.get(
-            f"{STOCK_SERVICE_URL}/api/stock",
+            f"{STOCK_SERVICE_URL}/api/stock/code",
             params={"name": stock_name}
         )
         data = response.json()
