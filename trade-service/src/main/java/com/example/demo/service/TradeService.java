@@ -267,7 +267,7 @@ public class TradeService {
                 holding -> HoldingsResponse.builder()
                         .stockCode(holding.getStockCode())
                         .stockName(stockClient.getStockName(holding.getStockCode()))
-                        .holdings(holding.getFilledQuantity())
+                        .holdings(holding.getHoldings())
                         .build()
         );
 
