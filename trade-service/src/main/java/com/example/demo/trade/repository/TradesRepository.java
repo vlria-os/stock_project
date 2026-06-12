@@ -1,5 +1,6 @@
 package com.example.demo.trade.repository;
 
+import com.example.demo.trade.dto.HoldingsProjection;
 import com.example.demo.trade.dto.HoldingsResponse;
 import com.example.demo.trade.entity.Trades;
 import org.springframework.data.domain.Page;
@@ -53,7 +54,7 @@ public interface TradesRepository extends JpaRepository<Trades, Long> {
             where t.buyOrder.userId = :userId or t.sellOrder.userId = :userId
         """
     )
-    Page<Trades> myHoldings(@Param("userId") Long userId, Pageable pageable);
+    Page<HoldingsProjection> myHoldings(@Param("userId") Long userId, Pageable pageable);
 }
 
 
