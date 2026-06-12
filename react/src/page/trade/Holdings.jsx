@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { holdings } from '../../api/tradeAPI';
 
 const Holdings = () => {
-  const [page, setPage]=useState("");
+  const [page, setPage]=useState(0);
   
   const { data, isLoading, isError } = useQuery({
     queryKey: ['holdings', page],
