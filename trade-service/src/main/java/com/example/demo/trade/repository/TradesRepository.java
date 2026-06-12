@@ -1,7 +1,6 @@
 package com.example.demo.trade.repository;
 
 import com.example.demo.trade.dto.HoldingsProjection;
-import com.example.demo.trade.dto.HoldingsResponse;
 import com.example.demo.trade.entity.Trades;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +34,7 @@ public interface TradesRepository extends JpaRepository<Trades, Long> {
 
     @Query(
         value = """
-            select t.stockCode,
+            select t.stockCode as stockCode,
                 sum(case
                         when t.buyOrder.userId = :userId then t.filledQuantity
                         when t.sellOrder.userId = :userId then -t.filledQuantity
