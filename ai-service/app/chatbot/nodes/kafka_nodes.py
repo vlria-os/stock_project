@@ -1,4 +1,4 @@
-from kafka_client import get_producer, get_consumer
+from app.chatbot.kafka_client import get_producer, get_consumer
 import json
 import uuid
 

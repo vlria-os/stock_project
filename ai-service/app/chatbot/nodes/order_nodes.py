@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
-from schemas import OrderType, OrderCondition
-from config import OPENAI_API_KEY
+from app.chatbot.schemas import OrderType, OrderCondition
+from app.chatbot.config import OPENAI_API_KEY
 import json
 
 llm=ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY)
