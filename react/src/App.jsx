@@ -16,6 +16,7 @@ import Order from "./page/trade/Order.jsx";
 import Holdings from "./page/trade/Holdings.jsx";
 import OrderList from "./page/trade/OrderList.jsx";
 import TradeList from "./page/trade/TradeList.jsx";
+import PendingOrders from "./page/trade/PendingOrders.jsx";
 
 const PAGE_COMPONENTS = {
   dashboard: DashboardPage,
@@ -32,6 +33,7 @@ const PAGE_COMPONENTS = {
   holdings: Holdings,
   orders: OrderList,
   trades: TradeList,
+  pendingOrders: PendingOrders,
   ai: AIPage,
 };
 

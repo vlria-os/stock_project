@@ -66,6 +66,11 @@ export default function MyPage({ onNavigate }) {
         }}>
           보유 주식
         </button>
+        <button type="button" onClick={() => {
+          onNavigate("pendingOrders", { onNavigate: onNavigate })
+        }}>
+          미체결 주문
+        </button>
       </div>
 
       <div style={s.layout}>

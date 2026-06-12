@@ -28,7 +28,7 @@ const Holdings = () => {
                   {
                     data?.content?.map((stock) => {
                       return <tr>
-                        <th>{stock.stockName}</th><td>{stock.holdings}</td>
+                        <th>{stock.stockName}</th><td>{stock.holdings}주</td>
                       </tr>
                     })
                   }
