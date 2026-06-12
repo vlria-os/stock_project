@@ -1,9 +1,6 @@
-from confluent_kafka import Producer, Consumer
-from config import KAFKA_HOST
+from kafka_client import get_producer, get_consumer
 import json
 import uuid
-
-producer=Producer({'bootstrap.servers': KAFKA_HOST})
 
 def produce_order(state: dict) -> dict:
     order = state["order"]
@@ -20,6 +17,7 @@ def produce_order(state: dict) -> dict:
         "expiredAt": order.get("expired_at")
     }
     
+    producer=get_producer()
     producer.produce(
         "chat.order.request",
         value=json.dumps(payload),
@@ -32,11 +30,7 @@ def produce_order(state: dict) -> dict:
 def wait_result(state: dict) -> dict:
     chat_order_id=state["chat_order_id"]
     
-    consumer=Consumer({
-        'bootstrap.servers': KAFKA_HOST,
-        'group.id': f"chatbot-result-{chat_order_id}",
-        'auto.offset.reset': 'latest'
-    })
+    consumer=get_consumer(f"chatbot-result-{chat_order_id}")
     consumer.subscribe(["chat.order.result"])
     
     result=None
@@ -51,7 +45,7 @@ def wait_result(state: dict) -> dict:
     consumer.close()
     return {**state, "order_result": result}
 
-def response(state: dict) -> dict:
+def respond(state: dict) -> dict:
     result=state.get("order_result")
     
     if not result:

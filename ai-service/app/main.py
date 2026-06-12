@@ -4,6 +4,7 @@ from typing import Optional
 from app.news_service.agent import analyze_stock
 from chatbot.nodes.assistant_nodes import answer_investment_question
 from fastapi.middleware.cors import CORSMiddleware
+from chatbot.graph import graph
 
 app=FastAPI(title="AI Service")
 
@@ -45,3 +46,34 @@ async def analyze(req: AnalyzeRequest):
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+#################### 자연어 주문 챗봇 #####################
+
+class ChatRequest(BaseModel):
+    user_id: str
+    thread_id: str
+    message: str
+    
+@app.post("/chat")
+async def chat(request: ChatRequest):
+    config={"configurable": {"thread_id": request.thread_id}}
+    
+    state=graph.get_state(config).values
+    messages=state.get("messages", []) if state else []
+    messages.append({"role": "user", "content": request.message})
+    
+    result=await graph.ainvoke(
+        {
+            "user_id": request.user_id,
+            "messages": messages,
+            "order": {},
+            "missing_fields": [],
+            "gtc_confirmed": False,
+            "chat_order_id": None,
+            "order_result": None,
+            "result": None,
+        },
+        config=config
+    )
+    
+    return {"message": result["result"]}

@@ -1,17 +1,8 @@
-import httpx
-from config import STOCK_SERVICE_URL
+from stock_client import get_stock_code
 
 async def fetch_stock(state: dict) -> dict:
     stock_name = state["order"]["stock_name"]
-    
-    async with httpx.AsyncClient() as client:
-        response=await client.get(
-            f"{STOCK_SERVICE_URL}/api/stock/code",
-            params={"name": stock_name}
-        )
-        data = response.json()
-        
-    stock_code = data.get("code")
+    stock_code = await get_stock_code(stock_name)
     
     if not stock_code:
         state["message"].append({
