@@ -22,4 +22,5 @@ public class TradeRequest {
     private Long price;
     private Long quantity;
     private LocalDate expiredAt;
+    private String chatOrderId;
 }
