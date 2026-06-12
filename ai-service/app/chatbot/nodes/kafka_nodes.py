@@ -54,7 +54,7 @@ def respond(state: dict) -> dict:
         side="매수" if state["order"]["order_side"] == "BUY" else "매도"
         message=f"{result['stockName']} {result['quantity']}주 {side} 주문이 체결되었습니다."
     else:
-        message=f"{result['stockName']} 주문이 실패했어요. 잔고 혹은 보유 수량을 확인하세요."
+        message=result.get("message", f"{result['stockName']} 주문이 실패했어요. 잔고 혹은 보유 수량을 확인하세요.")
         
     state["message"].append({"role": "assistant", "content": message})
     return {**state, "result": message}

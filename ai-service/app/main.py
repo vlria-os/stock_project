@@ -58,8 +58,9 @@ class ChatRequest(BaseModel):
 async def chat(request: ChatRequest):
     config={"configurable": {"thread_id": request.thread_id}}
     
-    state=graph.get_state(config).values
-    messages=state.get("messages", []) if state else []
+    #이전 state 복원
+    current_state=graph.get_state(config)
+    messages=current_state.values.get("messages", []) if current_state.values else []
     messages.append({"role": "user", "content": request.message})
     
     result=await graph.ainvoke(
