@@ -15,6 +15,8 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class TradeRequest {
+    private Long userId;
+    private String stockName;
     private String stockCode;
     private Side side;
     private OrderType orderType;

@@ -14,4 +14,5 @@ public class ChatOrderResult {
     private boolean success;
     private String stockName;
     private Long quantity;
+    private String message;
 }

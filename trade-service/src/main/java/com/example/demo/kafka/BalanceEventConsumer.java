@@ -1,7 +1,9 @@
 package com.example.demo.kafka;
 
+import com.example.demo.client.StockClient;
 import com.example.demo.kafka.event.BalanceResponseEvent;
 import com.example.demo.kafka.event.TradeCompletedEvent;
+import com.example.demo.order.dto.ChatOrderResult;
 import com.example.demo.order.entity.OrderHistory;
 import com.example.demo.order.entity.Orders;
 import com.example.demo.order.enums.OrderCondition;
@@ -37,6 +39,7 @@ public class BalanceEventConsumer {
     private final SseEmitterService sseEmitterService;
     private final OrderHistoryRepository orderHistoryRepository;
     private final TradeHistoryRepository tradeHistoryRepository;
+    private final StockClient stockClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String MATCH_KEY = "order:match:%d";
@@ -148,6 +151,34 @@ public class BalanceEventConsumer {
         sseEmitterService.sendTradeResult(buyOrder.getUserId(), filledQuantity, price);
         sseEmitterService.sendTradeResult(sellOrder.getUserId(), filledQuantity, price);
 
+        //매수 챗봇 주문 확인
+        String buyChatOrderId=redisTemplate.opsForValue().get(String.format("chat:order:%d", buyOrderId));
+        if (buyChatOrderId != null){
+            tradeEventProducer.sendChatOrderResult(ChatOrderResult.builder()
+                    .chatOrderId(buyChatOrderId)
+                    .success(true)
+                    .stockName(stockClient.getStockName(buyOrder.getStockCode()))
+                    .quantity(filledQuantity)
+                    .message("주문이 체결되었습니다.")
+                    .build());
+
+            redisTemplate.delete(String.format("chat:order:%d", buyOrderId));
+        }
+
+        //매도 챗봇 주문 확인
+        String sellChatOrderId = redisTemplate.opsForValue().get(String.format("chat:order:%d", sellOrderId));
+        if (sellChatOrderId != null) {
+            tradeEventProducer.sendChatOrderResult(ChatOrderResult.builder()
+                    .chatOrderId(sellChatOrderId)
+                    .success(true)
+                    .stockName(stockClient.getStockName(sellOrder.getStockCode()))
+                    .quantity(filledQuantity)
+                    .message("주문이 체결되었습니다.")
+                    .build());
+
+            redisTemplate.delete(String.format("chat:order:%d", sellOrderId));
+        }
+
         //stock service에 kafka 발행
         tradeEventProducer.sendTradeResult(TradeCompletedEvent.builder()
                 .stockCode(buyOrder.getStockCode())
@@ -216,6 +247,34 @@ public class BalanceEventConsumer {
 
         sseEmitterService.sendTradeError(buyOrder.getUserId(), buyOrderId);
         sseEmitterService.sendTradeError(sellOrder.getUserId(), sellOrderId);
+
+        //매수 챗봇 주문 확인
+        String buyChatOrderId=redisTemplate.opsForValue().get(String.format("chat:order:%d", buyOrderId));
+        if (buyChatOrderId != null){
+            tradeEventProducer.sendChatOrderResult(ChatOrderResult.builder()
+                    .chatOrderId(buyChatOrderId)
+                    .success(false)
+                    .stockName(stockClient.getStockName(buyOrder.getStockCode()))
+                    .quantity(buyOrder.getQuantity())
+                    .message("주문 체결에 실패했습니다.")
+                    .build());
+
+            redisTemplate.delete(String.format("chat:order:%d", buyOrderId));
+        }
+
+        //매도 챗봇 주문 확인
+        String sellChatOrderId = redisTemplate.opsForValue().get(String.format("chat:order:%d", sellOrderId));
+        if (sellChatOrderId != null) {
+            tradeEventProducer.sendChatOrderResult(ChatOrderResult.builder()
+                    .chatOrderId(sellChatOrderId)
+                    .success(false)
+                    .stockName(stockClient.getStockName(sellOrder.getStockCode()))
+                    .quantity(sellOrder.getQuantity())
+                    .message("주문 체결에 실패했습니다.")
+                    .build());
+
+            redisTemplate.delete(String.format("chat:order:%d", sellOrderId));
+        }
     }
 
     private void processOrder(Orders order, OrderBook orderBook, long filledQuantity){

@@ -22,6 +22,7 @@ import com.example.demo.trade.repository.TradesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ public class TradeService {
     private final OrderHistoryRepository orderHistoryRepository;
     private final TradeHistoryRepository tradeHistoryRepository;
     private final StockClient stockClient;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public void placeOrder(Long userId, TradeRequest request){
@@ -140,6 +142,13 @@ public class TradeService {
                 .build();
 
         ordersRepository.save(order);
+
+        if (request.getChatOrderId() != null){
+            redisTemplate.opsForValue().set(
+                    String.format("chat:order:%d", order.getId()),
+                    request.getChatOrderId()
+            );
+        }
 
         //주문 내역 insert
         OrderHistory history=OrderHistory.builder()
