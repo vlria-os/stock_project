@@ -1,8 +1,9 @@
-# requirements.txt
 fastapi
 uvicorn
-langchain
-langchain-openai
+langchain==0.2.16
+langchain-openai==0.1.23
+langchain-core==0.2.41
+langchain-community==0.2.16
 chromadb
 beautifulsoup4
 requests
