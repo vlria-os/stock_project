@@ -62,7 +62,7 @@ const PendingOrders = ({ onNavigate }) => {
                             {
                                 data?.content?.length === 0 ? (
                                     <tr>
-                                        <td>미체결 주문 내역이 없습니다.</td>
+                                        <td colSpan={10}>미체결 주문 내역이 없습니다.</td>
                                     </tr>
                                 ) : (
                                     data?.content?.map((order, index) => {
