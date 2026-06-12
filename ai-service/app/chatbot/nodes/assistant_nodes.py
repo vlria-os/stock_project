@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
-from chatbot.config import OPENAI_API_KEY, STOCK_SERVICE_URL
+from app.chatbot.config import OPENAI_API_KEY, STOCK_SERVICE_URL
 import requests
 
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY)
