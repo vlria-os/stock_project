@@ -43,7 +43,10 @@ const PROTECTED = new Set(["balance", "portfolio", "mypage",
 ]);
 
 function MainApp() {
-  const [page, setPage] = useState("dashboard");
+  const [page, setPage] = useState(() => {
+    const path = window.location.hash.replace("#", "") || "dashboard";
+    return PAGE_COMPONENTS[path] ? path : "dashboard";
+  });
   const [props, setProps] = useState({});
 
   const { isAuthenticated, logout } = useAuth();
@@ -72,13 +75,24 @@ function MainApp() {
       };
   }, [isAuthenticated]);
 
-  const navigate = (target, props = {}) => {
-    if (PROTECTED.has(target) && !isAuthenticated) {
-      setPage("login");
-    } else {
+  // 브라우저 뒤로가기/앞으로가기 처리
+  useEffect(() => {
+    const onPop = (e) => {
+      const target = e.state?.page ?? "dashboard";
       setPage(target);
-      setProps(props);
-    }
+      setProps(e.state?.props ?? {});
+    };
+    window.addEventListener("popstate", onPop);
+    // 초기 진입 시 현재 상태를 히스토리에 등록
+    window.history.replaceState({ page, props: {} }, "", `#${page}`);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const navigate = (target, navProps = {}) => {
+    const actualTarget = PROTECTED.has(target) && !isAuthenticated ? "login" : target;
+    setPage(actualTarget);
+    setProps(navProps);
+    window.history.pushState({ page: actualTarget, props: navProps }, "", `#${actualTarget}`);
   };
 
   const PageComponent = PAGE_COMPONENTS[page] ?? PAGE_COMPONENTS.dashboard;
@@ -91,7 +105,7 @@ function MainApp() {
         onNavigate={navigate}
         isAuthenticated={isAuthenticated}
         onLogin={() => setPage("login")}
-        onLogout={() => { logout(); setPage("login"); }}
+        onLogout={() => { logout(); setPage("login"); window.history.pushState({ page: "login", props: {} }, "", "#login"); }}
       />
       <main style={{ padding: "32px 24px", maxWidth: 960, margin: "0 auto" }}>
         <PageComponent onNavigate={navigate} {...props}/>
