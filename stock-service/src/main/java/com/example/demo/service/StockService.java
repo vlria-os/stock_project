@@ -29,6 +29,11 @@ public class StockService {
     @Value("${kis.app-secret}")
     private String appSecret;
 
+    public String getStockCode(String stockName){
+        return stockRepository.findCodeByName(stockName).orElse(null);
+
+    }
+
     //종목 코드, 잔여 발행 수량, 기준가 조회
     public List<TradeStockResponse> getStocksForTrade(){
         return stockRepository.findAll().stream().map(
