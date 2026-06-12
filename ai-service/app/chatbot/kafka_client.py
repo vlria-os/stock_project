@@ -1,5 +1,5 @@
 from confluent_kafka import Producer, Consumer
-from config import KAFKA_HOST
+from app.chatbot.config import KAFKA_HOST
 
 def get_producer() -> Producer:
     return Producer({'bootstrap.servers': KAFKA_HOST})
