@@ -61,6 +61,11 @@ export default function MyPage({ onNavigate }) {
         <button type="button" onClick={() => {
           onNavigate("trades");
         }}>체결 내역</button>
+        <button type="button" onClick={() => {
+          onNavigate("holdings");
+        }}>
+          보유 주식
+        </button>
       </div>
 
       <div style={s.layout}>
