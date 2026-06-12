@@ -1,0 +1,58 @@
+name: AI Service Deploy
+
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'ai-service/**'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: invest/python/ai-service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AI_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AI_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push image
+        run: |
+          IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          docker build --no-cache -t $IMAGE ./ai-service
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Deploy via Bastion
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BASTION_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BASTION_SSH_KEY }}
+          script: |
+            ssh -i ~/.ssh/aws-invest-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.AI_EC2_PRIVATE_IP }} "
+              aws configure set aws_access_key_id ${{ secrets.AI_AWS_ACCESS_KEY_ID }}
+              aws configure set aws_secret_access_key ${{ secrets.AI_AWS_SECRET_ACCESS_KEY }}
+              aws configure set region ap-northeast-2
+              aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+              docker system prune -a -f
+              docker pull ${{ env.IMAGE }}
+              docker stop ai-service || true
+              docker rm ai-service || true
+              docker run -d --name ai-service -p 8085:8085 \
+                -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+                -e KAFKA_HOST=${{ secrets.KAFKA_HOST }} \
+                ${{ env.IMAGE }}
+            "
