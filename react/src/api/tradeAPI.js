@@ -24,7 +24,7 @@ export const order=async(param) => {
 }
 
 export const cancelOrder=async(id) => {
-    const res=await tradeApi.delete(`/order/${id}`);
+    const res=await tradeApi.delete(`/order/${Number(id)}`);
     return res.data;
 }
 
