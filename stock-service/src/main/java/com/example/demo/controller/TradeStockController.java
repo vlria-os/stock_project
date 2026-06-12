@@ -20,7 +20,7 @@ public class TradeStockController {
         try {
             return ResponseEntity.ok(stockService.getStockName(stockCode));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -29,7 +29,16 @@ public class TradeStockController {
         try {
             return ResponseEntity.ok(stockService.getStocksForTrade());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/code")
+    public ResponseEntity<?> getStockCode(@RequestParam("stockName") String stockName){
+        try {
+            return ResponseEntity.ok(stockService.getStockCode(stockName));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
