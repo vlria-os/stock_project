@@ -75,6 +75,23 @@ public class StockService {
                 .map(StockPriceResponse::new)
                 .orElseThrow(() -> new RuntimeException("종목을 찾을 수 없습니다: " + stockCode));
     }
+    // KOSPI/KOSDAQ 지수 조회
+    public IndexPriceResponse getIndexPrice(String indexCode) {
+        String token = kisTokenService.getAccessToken();
+        String uri = "/uapi/domestic-stock/v1/quotations/inquire-index-price"
+                + "?fid_cond_mrkt_div_code=U&fid_input_iscd=" + indexCode;
+
+        return kisWebClient.get().uri(uri)
+                .header("Authorization", "Bearer " + token)
+                .header("appkey", appKey)
+                .header("appsecret", appSecret)
+                .header("tr_id", "FHPUP02100000")
+                .retrieve()
+                .bodyToMono(KisIndexApiResponse.class)
+                .map(KisIndexApiResponse::getOutput)
+                .block();
+    }
+
     //차트조회(일봉 기준 30일)
     public List<StockChartResponse> getStockChart(String stockCode) {
         String token = kisTokenService.getAccessToken();

@@ -4,6 +4,8 @@ const BASE = `${import.meta.env.VITE_GATEWAY_URL}/stocks`;
 
 export const getStocks = () => instance.get(BASE).then((r) => r.data);
 
+export const getIndex = (code) => instance.get(`${BASE}/index/${code}`).then((r) => r.data);
+
 export const getPrice = (code) => instance.get(`${BASE}/${code}/price`).then((r) => r.data);
 
 export const getChart = (code) => instance.get(`${BASE}/${code}/chart`).then((r) => r.data);

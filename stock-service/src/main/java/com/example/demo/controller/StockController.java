@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.IndexPriceResponse;
 import com.example.demo.dto.StockChartResponse;
 import com.example.demo.dto.StockListResponse;
 import com.example.demo.dto.StockPriceResponse;
@@ -29,6 +30,12 @@ public class StockController {
     @GetMapping("/{code}/price")
     public ResponseEntity<StockPriceResponse> getStockPrice(@PathVariable String code){
         return ResponseEntity.ok(stockService.getStockPrice(code));
+    }
+
+    //KOSPI/KOSDAQ 지수 조회 (인증 불필요)
+    @GetMapping("/index/{code}")
+    public ResponseEntity<IndexPriceResponse> getIndexPrice(@PathVariable String code) {
+        return ResponseEntity.ok(stockService.getIndexPrice(code));
     }
 
     //차트조회
