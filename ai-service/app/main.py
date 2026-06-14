@@ -2,9 +2,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from app.news_service.agent import analyze_stock
-from chatbot.nodes.assistant_nodes import answer_investment_question
+from app.chatbot.nodes.assistant_nodes import answer_investment_question
 from fastapi.middleware.cors import CORSMiddleware
-from chatbot.graph import graph
+from app.chatbot.graph import graph
 
 app=FastAPI(title="AI Service")
 

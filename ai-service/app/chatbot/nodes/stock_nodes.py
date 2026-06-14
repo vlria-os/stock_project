@@ -1,4 +1,4 @@
-from stock_client import get_stock_code
+from app.chatbot.stock_client import get_stock_code
 
 async def fetch_stock(state: dict) -> dict:
     stock_name = state["order"]["stock_name"]

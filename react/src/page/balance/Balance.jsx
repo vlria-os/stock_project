@@ -121,111 +121,113 @@ export default function Balance() {
     };
 
     return (
-        <div style={{ maxWidth: 480, margin: "0 auto" }}>
+        <div style={styles.page}>
             {error && <div style={styles.error}>{error}</div>}
 
             {/* 잔액 */}
             <div style={styles.card}>
-                <p style={styles.label}>증권계좌 잔액</p>
-                <p style={styles.balance}>
+                <div style={styles.balanceLabel}>증권계좌 잔액</div>
+                <div style={styles.balanceAmount}>
                     {balance === null ? "불러오는 중..." : `${balance.toLocaleString()}원`}
-                </p>
+                </div>
             </div>
 
-            {/* 연결 계좌 */}
-            <div style={styles.card}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <p style={styles.sectionTitle}>연결 계좌</p>
-                    <button onClick={() => setShowAddForm(!showAddForm)} style={styles.smallBtn}>
-                        {showAddForm ? "취소" : "+ 추가"}
-                    </button>
+            <div style={styles.twoCol}>
+                {/* 연결 계좌 */}
+                <div style={styles.card}>
+                    <div style={styles.cardHeader}>
+                        <div style={styles.sectionTitle}>연결 계좌</div>
+                        <button onClick={() => setShowAddForm(!showAddForm)} style={styles.smallBtn}>
+                            {showAddForm ? "취소" : "+ 추가"}
+                        </button>
+                    </div>
+
+                    {showAddForm && (
+                        <div style={styles.addForm}>
+                            <select value={newBank} onChange={(e) => setNewBank(e.target.value)} style={styles.input}>
+                                {BANKS.map(b => <option key={b}>{b}</option>)}
+                            </select>
+                            <input
+                                type="text"
+                                placeholder="계좌번호 입력"
+                                value={newAccountNo}
+                                onChange={(e) => setNewAccountNo(e.target.value)}
+                                style={styles.input}
+                            />
+                            <button onClick={handleAddAccount} style={styles.registerBtn}>등록</button>
+                        </div>
+                    )}
+
+                    {linkedAccounts.length === 0 && !showAddForm && (
+                        <div style={styles.empty}>연결된 계좌 없음</div>
+                    )}
+
+                    {linkedAccounts.map((a) => {
+                        const active = selectedAccountId === a.id;
+                        return (
+                            <div key={a.id} onClick={() => setSelected(a.id)}
+                                style={{
+                                    ...styles.accountRow,
+                                    background: active ? "rgba(0,0,0,0.04)" : "transparent",
+                                    border: active ? "1px solid rgba(0,0,0,0.2)" : "1px solid var(--border)",
+                                }}>
+                                <div>
+                                    <span style={styles.bankName}>{a.bankName}</span>
+                                    <span style={styles.accountNo}>{a.accountNumber}</span>
+                                </div>
+                                <button onClick={(e) => { e.stopPropagation(); handleDeleteAccount(a.id); }}
+                                    style={styles.deleteBtn}>
+                                    삭제
+                                </button>
+                            </div>
+                        );
+                    })}
                 </div>
 
-                {showAddForm && (
-                    <div style={{ marginBottom: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-                        <select value={newBank} onChange={(e) => setNewBank(e.target.value)} style={styles.input}>
-                            {BANKS.map(b => <option key={b}>{b}</option>)}
-                        </select>
-                        <input
-                            type="text"
-                            placeholder="계좌번호 입력"
-                            value={newAccountNo}
-                            onChange={(e) => setNewAccountNo(e.target.value)}
-                            style={styles.input}
-                        />
-                        <button onClick={handleAddAccount} style={{ ...styles.btn, background: "#2563eb", color: "#fff" }}>
-                            등록
+                {/* 입출금 */}
+                <div style={styles.card}>
+                    <div style={styles.sectionTitle}>입출금</div>
+                    <input
+                        type="number"
+                        placeholder="금액 입력 (원)"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        style={{ ...styles.input, marginTop: 14 }}
+                        disabled={loading}
+                    />
+                    <div style={styles.actionBtns}>
+                        <button onClick={() => handleAction("deposit")} disabled={loading}
+                            style={{ ...styles.actionBtn, background: "var(--bg)", color: "var(--text-h)", border: "1px solid var(--border)" }}>
+                            {loading ? "처리 중..." : "입금"}
+                        </button>
+                        <button onClick={() => handleAction("withdraw")} disabled={loading}
+                            style={{ ...styles.actionBtn, background: "var(--bg)", color: "var(--text-h)", border: "1px solid var(--border)" }}>
+                            {loading ? "처리 중..." : "출금"}
                         </button>
                     </div>
-                )}
-
-                {linkedAccounts.length === 0 && !showAddForm && (
-                    <p style={{ fontSize: 14, color: "var(--color-text-tertiary, #aaa)" }}>연결된 계좌 없음</p>
-                )}
-
-                {linkedAccounts.map((a) => (
-                    <div key={a.id} onClick={() => setSelected(a.id)}
-                         style={{
-                             ...styles.accountRow,
-                             background: selectedAccountId === a.id ? "#eff6ff" : "transparent",
-                             border: selectedAccountId === a.id ? "1px solid #2563eb" : "1px solid var(--color-border-tertiary, #eee)",
-                         }}>
-                        <div>
-                            <span style={{ fontWeight: 500, fontSize: 14 }}>{a.bankName}</span>
-                            <span style={{ fontSize: 13, color: "var(--color-text-secondary, #666)", marginLeft: 8 }}>{a.accountNumber}</span>
-                        </div>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteAccount(a.id); }}
-                                style={{ background: "none", border: "none", cursor: "pointer", color: "#dc2626", fontSize: 13 }}>
-                            삭제
-                        </button>
-                    </div>
-                ))}
-            </div>
-
-            {/* 입출금 */}
-            <div style={styles.card}>
-                <input
-                    type="number"
-                    placeholder="금액 입력"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    style={styles.input}
-                    disabled={loading}
-                />
-                <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => handleAction("deposit")} disabled={loading}
-                            style={{ ...styles.btn, ...styles.btnDeposit }}>
-                        {loading ? "처리 중..." : "입금"}
-                    </button>
-                    <button onClick={() => handleAction("withdraw")} disabled={loading}
-                            style={{ ...styles.btn, ...styles.btnWithdraw }}>
-                        {loading ? "처리 중..." : "출금"}
-                    </button>
                 </div>
             </div>
 
             {/* 거래 내역 */}
             <div style={styles.card}>
-                <p style={styles.sectionTitle}>거래 내역</p>
+                <div style={styles.sectionTitle}>거래 내역</div>
                 {history.length === 0 && (
-                    <p style={{ fontSize: 14, color: "var(--color-text-tertiary, #aaa)" }}>내역 없음</p>
+                    <div style={styles.empty}>내역 없음</div>
                 )}
                 {history.map((h) => {
                     const t = TYPE_LABEL[h.type] ?? { text: h.type, color: "#666", bg: "#f3f4f6" };
                     const signed = ["DEPOSIT", "SELL_CONFIRM", "UNLOCK"].includes(h.type) ? "+" : "-";
                     return (
                         <div key={h.historyId} style={styles.historyRow}>
-                            <div>
+                            <div style={styles.historyLeft}>
                                 <span style={{ ...styles.badge, background: t.bg, color: t.color }}>{t.text}</span>
-                                <span style={{ fontSize: 13, color: "var(--color-text-tertiary, #aaa)", marginLeft: 8 }}>
-                                    {h.createAt?.slice(0, 10)}
-                                </span>
+                                <span style={styles.historyDate}>{h.createAt?.slice(0, 10)}</span>
                             </div>
                             <div style={{ textAlign: "right" }}>
-                                <div style={{ fontWeight: 500, color: t.color }}>
+                                <div style={{ fontWeight: 600, fontSize: 14, color: t.color }}>
                                     {signed}{h.amount.toLocaleString()}원
                                 </div>
-                                <div style={{ fontSize: 12, color: "var(--color-text-tertiary, #aaa)" }}>
+                                <div style={styles.balanceAfter}>
                                     잔액 {h.balanceAfter.toLocaleString()}원
                                 </div>
                             </div>
@@ -238,36 +240,116 @@ export default function Balance() {
 }
 
 const styles = {
+    page: { display: "flex", flexDirection: "column", gap: 14 },
     card: {
-        background: "var(--color-background-primary, #fff)",
-        border: "1px solid var(--color-border-tertiary, #eee)",
-        borderRadius: 12, padding: "20px 24px", marginBottom: 16,
+        background: "var(--bg)",
+        border: "1px solid var(--border)",
+        borderRadius: 12,
+        padding: "20px 24px",
+    },
+    cardHeader: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 14,
+    },
+    twoCol: {
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 14,
     },
     error: {
-        background: "#fee2e2", color: "#dc2626",
-        borderRadius: 8, padding: "10px 14px", fontSize: 14, marginBottom: 12,
+        background: "rgba(239,68,68,0.08)",
+        border: "1px solid rgba(239,68,68,0.3)",
+        color: "#ef4444",
+        borderRadius: 10,
+        padding: "10px 16px",
+        fontSize: 14,
     },
-    label: { fontSize: 13, color: "var(--color-text-secondary, #666)", marginBottom: 8 },
-    balance: { fontSize: 32, fontWeight: 600, color: "var(--color-text-primary, #111)" },
-    sectionTitle: { fontSize: 14, fontWeight: 500, color: "var(--color-text-primary, #111)", margin: 0 },
+    balanceLabel: { fontSize: 12, color: "var(--text)", marginBottom: 8 },
+    balanceAmount: { fontSize: 34, fontWeight: 700, color: "var(--text-h)" },
+    sectionTitle: { fontSize: 14, fontWeight: 600, color: "var(--text-h)", margin: 0 },
     input: {
-        width: "100%", fontSize: 15, padding: "10px 12px", borderRadius: 8,
-        border: "1px solid var(--color-border-tertiary, #ddd)", boxSizing: "border-box",
+        width: "100%",
+        fontSize: 14,
+        padding: "10px 12px",
+        borderRadius: 8,
+        border: "1px solid var(--border)",
+        background: "var(--bg)",
+        color: "var(--text-h)",
+        boxSizing: "border-box",
+        outline: "none",
     },
-    btn: { flex: 1, padding: "10px 0", fontSize: 15, fontWeight: 500, border: "none", borderRadius: 8, cursor: "pointer", marginTop: 10 },
-    btnDeposit:  { background: "#16a34a", color: "#fff" },
-    btnWithdraw: { background: "#dc2626", color: "#fff" },
+    addForm: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 },
+    registerBtn: {
+        padding: "9px 0",
+        background: "var(--accent, #aa3bff)",
+        color: "#fff",
+        border: "none",
+        borderRadius: 8,
+        fontSize: 14,
+        fontWeight: 600,
+        cursor: "pointer",
+    },
+    actionBtns: { display: "flex", gap: 8, marginTop: 10 },
+    actionBtn: {
+        flex: 1,
+        padding: "11px 0",
+        fontSize: 14,
+        fontWeight: 600,
+        borderRadius: 8,
+        cursor: "pointer",
+    },
     smallBtn: {
-        fontSize: 13, padding: "4px 10px", border: "1px solid var(--color-border-secondary, #ddd)",
-        borderRadius: 6, cursor: "pointer", background: "none", color: "var(--color-text-primary, #111)",
+        fontSize: 12,
+        padding: "4px 10px",
+        border: "1px solid var(--border)",
+        borderRadius: 6,
+        cursor: "pointer",
+        background: "none",
+        color: "var(--text)",
     },
     accountRow: {
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "10px 12px", borderRadius: 8, marginBottom: 8, cursor: "pointer",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px 12px",
+        borderRadius: 8,
+        marginBottom: 8,
+        cursor: "pointer",
+        transition: "background 0.15s",
+    },
+    bankName: { fontWeight: 600, fontSize: 14, color: "var(--text-h)" },
+    accountNo: { fontSize: 12, color: "var(--text)", marginLeft: 8 },
+    deleteBtn: {
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        color: "#ef4444",
+        fontSize: 12,
+        padding: "3px 6px",
+    },
+    empty: {
+        padding: "20px 0",
+        textAlign: "center",
+        fontSize: 13,
+        color: "var(--text)",
     },
     historyRow: {
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "10px 0", borderTop: "1px solid var(--color-border-tertiary, #eee)",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "12px 0",
+        borderTop: "1px solid var(--border)",
     },
-    badge: { fontSize: 12, padding: "2px 8px", borderRadius: 99, fontWeight: 500 },
+    historyLeft: { display: "flex", alignItems: "center", gap: 10 },
+    historyDate: { fontSize: 12, color: "var(--text)" },
+    balanceAfter: { fontSize: 12, color: "var(--text)", marginTop: 2 },
+    badge: {
+        fontSize: 11,
+        padding: "3px 8px",
+        borderRadius: 99,
+        fontWeight: 600,
+        whiteSpace: "nowrap",
+    },
 };

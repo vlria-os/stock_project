@@ -1,5 +1,5 @@
 import httpx
-from config import STOCK_SERVICE_URL
+from app.chatbot.config import STOCK_SERVICE_URL
 
 async def get_stock_code(stock_name: str) -> str | None:
     async with httpx.AsyncClient() as client:

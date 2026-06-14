@@ -1,9 +1,8 @@
 import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.agents import AgentExecutor, create_openai_tools_agent
-from langchain.tools import tool
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.tools import tool
+from langgraph.prebuilt import create_react_agent
 
 from app.news_service.news_crawler import crawl_stock_news, fetch_news_for_rag
 from app.news_service.chroma_store import StockNewsVectorStore
@@ -69,36 +68,20 @@ SYSTEM_PROMPT = """당신은 주식 뉴스 분석 전문 AI입니다.
 ⚠️ 면책: 본 분석은 뉴스 기반 AI 리포트로 투자 권유가 아닙니다.
 """
 
-def build_agent() -> AgentExecutor:
+def build_agent():
     llm = ChatOpenAI(
         model="gpt-4o",
         temperature=0.3,
         openai_api_key=OPENAI_API_KEY,
     )
-
     tools = [fetch_and_store_news, search_news_rag, crawl_stock_news]
-
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", SYSTEM_PROMPT),
-        ("human", "{input}"),
-        MessagesPlaceholder(variable_name="agent_scratchpad"),
-    ])
-
-    agent = create_openai_tools_agent(llm=llm, tools=tools, prompt=prompt)
-
-    return AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=True,
-        max_iterations=5,
-        handle_parsing_errors=True,
-    )
+    return create_react_agent(llm, tools, prompt=SYSTEM_PROMPT)
 
 
 def analyze_stock(stock_name: str) -> str:
     agent = build_agent()
-    result = agent.invoke({"input": f"{stock_name} 종목의 최신 뉴스를 분석해줘"})
-    return result["output"]
+    result = agent.invoke({"messages": [("human", f"{stock_name} 종목의 최신 뉴스를 분석해줘")]})
+    return result["messages"][-1].content
 
 
 if __name__ == "__main__":

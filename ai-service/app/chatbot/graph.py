@@ -1,9 +1,9 @@
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 from typing import TypedDict, Optional
-from nodes.order_nodes import extract_order, validate_order, ask_user, check_gtc
-from nodes.stock_nodes import fetch_stock
-from nodes.kafka_nodes import produce_order, wait_result, respond
+from app.chatbot.nodes.order_nodes import extract_order, validate_order, ask_user, check_gtc
+from app.chatbot.nodes.stock_nodes import fetch_stock
+from app.chatbot.nodes.kafka_nodes import produce_order, wait_result, respond
 
 class ChatState(TypedDict):
     user_id: str
