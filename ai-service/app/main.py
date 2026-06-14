@@ -53,7 +53,7 @@ class ChatRequest(BaseModel):
     thread_id: str
     message: str
     
-@app.post("/chat")
+@app.post("/api/ai/chat")
 async def chat(request: ChatRequest, x_user_id: str = Header(...)):
     config={"configurable": {"thread_id": request.thread_id}}
     
