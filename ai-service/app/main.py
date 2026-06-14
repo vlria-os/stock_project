@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from typing import Optional
 from app.news_service.agent import analyze_stock
@@ -50,12 +50,11 @@ async def health():
 #################### 자연어 주문 챗봇 #####################
 
 class ChatRequest(BaseModel):
-    user_id: str
     thread_id: str
     message: str
     
 @app.post("/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, x_user_id: str = Header(...)):
     config={"configurable": {"thread_id": request.thread_id}}
     
     #이전 state 복원
@@ -65,7 +64,7 @@ async def chat(request: ChatRequest):
     
     result=await graph.ainvoke(
         {
-            "user_id": request.user_id,
+            "user_id": x_user_id,
             "messages": messages,
             "order": {},
             "missing_fields": [],
