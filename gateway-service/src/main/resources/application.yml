@@ -70,6 +70,16 @@ spring:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
                 redis-rate-limiter.requestedTokens: 1
+        - id: ai-service
+          uri: http://10.0.3.77:8000
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
 jwt:
   secret: ${JWT_SECRET}
 server:
