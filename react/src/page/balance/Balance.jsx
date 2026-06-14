@@ -197,11 +197,11 @@ export default function Balance() {
                     />
                     <div style={styles.actionBtns}>
                         <button onClick={() => handleAction("deposit")} disabled={loading}
-                            style={{ ...styles.actionBtn, background: "#16a34a" }}>
+                            style={{ ...styles.actionBtn, background: "rgba(22,163,74,0.1)", color: "#16a34a", border: "1px solid rgba(22,163,74,0.25)" }}>
                             {loading ? "처리 중..." : "입금"}
                         </button>
                         <button onClick={() => handleAction("withdraw")} disabled={loading}
-                            style={{ ...styles.actionBtn, background: "#ef4444" }}>
+                            style={{ ...styles.actionBtn, background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>
                             {loading ? "처리 중..." : "출금"}
                         </button>
                     </div>
@@ -297,10 +297,8 @@ const styles = {
         padding: "11px 0",
         fontSize: 14,
         fontWeight: 600,
-        border: "none",
         borderRadius: 8,
         cursor: "pointer",
-        color: "#fff",
     },
     smallBtn: {
         fontSize: 12,
