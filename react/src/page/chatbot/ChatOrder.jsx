@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
-import { chatOrder } from '../../api/tradeAPI';
+import { chatOrder } from '../../api/chatAPI';
 
 const ChatOrder = () => {
   const [messages, setMessages]=useState([]);

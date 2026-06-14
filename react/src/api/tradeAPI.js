@@ -78,12 +78,3 @@ export const pendingOrders=async(page, sort) => {
 
     return res.data;
 }
-
-export const chatOrder=async(threadId, message) => {
-    const res=await tradeApi.post("/chat", {
-        thread_id: threadId,
-        message: message
-    });
-
-    return res.data;
-}
