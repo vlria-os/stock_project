@@ -168,8 +168,8 @@ export default function Balance() {
                             <div key={a.id} onClick={() => setSelected(a.id)}
                                 style={{
                                     ...styles.accountRow,
-                                    background: active ? "var(--accent-bg, rgba(170,59,255,0.08))" : "transparent",
-                                    border: active ? "1px solid var(--accent)" : "1px solid var(--border)",
+                                    background: active ? "rgba(0,0,0,0.04)" : "transparent",
+                                    border: active ? "1px solid rgba(0,0,0,0.2)" : "1px solid var(--border)",
                                 }}>
                                 <div>
                                     <span style={styles.bankName}>{a.bankName}</span>
