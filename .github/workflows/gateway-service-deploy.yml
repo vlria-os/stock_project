@@ -5,6 +5,7 @@ name: Gateway Service Deploy
     branches: [main]
     paths:
       - 'gateway-service/**'
+  workflow_dispatch:
 
 env:
   AWS_REGION: ap-northeast-2
