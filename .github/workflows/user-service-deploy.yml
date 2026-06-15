@@ -26,8 +26,11 @@ jobs:
       - name: Build & Push image
         run: |
           IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          LATEST=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
           docker build -t $IMAGE ./user-service
+          docker tag $IMAGE $LATEST
           docker push $IMAGE
+          docker push $LATEST
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
       - name: Deploy via Bastion
         uses: appleboy/ssh-action@v1
