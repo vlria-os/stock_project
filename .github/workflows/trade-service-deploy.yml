@@ -5,6 +5,7 @@ name: Trade Service Deploy
     branches: [main]
     paths:
       - 'trade-service/**'
+  workflow_dispatch:
 
 env:
   AWS_REGION: ap-northeast-2
