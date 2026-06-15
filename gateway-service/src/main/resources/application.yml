@@ -3,7 +3,7 @@ spring:
     name: gateway-service
   data:
     redis:
-      host: redis
+      host: clustercfg.invest-redis.l9metn.apn2.cache.amazonaws.com
       port: 6379
   cloud:
     discovery:
