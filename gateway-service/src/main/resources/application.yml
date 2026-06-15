@@ -71,7 +71,7 @@ spring:
                 redis-rate-limiter.burstCapacity: 20
                 redis-rate-limiter.requestedTokens: 1
         - id: ai-service
-          uri: http://ai-service:8000
+          uri: http://ai-service:8085
           predicates:
             - Path=/api/ai/**
           filters:
