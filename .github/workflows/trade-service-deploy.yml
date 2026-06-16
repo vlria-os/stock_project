@@ -38,27 +38,8 @@ jobs:
           docker push $LATEST
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      - name: Deploy via Bastion
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.BASTION_HOST }}
-          username: ubuntu
-          key: ${{ secrets.BASTION_SSH_KEY }}
-          script: |
-            ssh -i ~/.ssh/aws-invest-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.TRADE_EC2_PRIVATE_IP }} "
-              aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
-              docker pull ${{ env.IMAGE }}
-              docker stop trade-service || true
-              docker rm trade-service || true
-              docker run -d --name trade-service -p 8084:8084 \
-                -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
-                -e KAFKA_HOST=${{ secrets.KAFKA_HOST }} \
-                -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
-                -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-                -e TRADE_KIS_APP_KEY=${{ secrets.TRADE_KIS_APP_KEY }} \
-                -e TRADE_KIS_APP_SECRET=${{ secrets.TRADE_KIS_APP_SECRET }} \
-                -e TRADE_KIS_REST_URL=${{ secrets.TRADE_KIS_REST_URL }} \
-                -e TRADE_KIS_WS_URL=${{ secrets.TRADE_KIS_WS_URL }} \
-                -e SPRING_PROFILES_ACTIVE=prod \
-                ${{ env.IMAGE }}
-            "
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --name my-cluster --region ap-northeast-2
+          kubectl set image deployment/trade-service trade-service=${{ env.IMAGE }}
+          kubectl rollout status deployment/trade-service

@@ -36,24 +36,8 @@ jobs:
           docker push $REGISTRY/invest/react/front:${{ github.sha }}
           docker push $REGISTRY/invest/react/front:latest
 
-      - name: Deploy to Frontend EC2
-        uses: appleboy/ssh-action@v1
-        with:
-          host:     ${{ secrets.FRONTEND_EC2_HOST }}
-          username: ${{ secrets.FRONTEND_EC2_USER }}
-          key:      ${{ secrets.FRONTEND_EC2_SSH_KEY }}
-          script: |
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
-              | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-
-            docker pull ${{ secrets.ECR_REGISTRY }}/invest/react/front:latest
-
-            docker stop frontend || true
-            docker rm   frontend || true
-            docker run -d \
-              --name frontend \
-              --restart always \
-              -p 80:80 \
-              ${{ secrets.ECR_REGISTRY }}/invest/react/front:latest
-
-            docker image prune -f
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --name my-cluster --region ap-northeast-2
+          kubectl set image deployment/frontend frontend=${{ secrets.ECR_REGISTRY }}/invest/react/front:${{ github.sha }}
+          kubectl rollout status deployment/frontend

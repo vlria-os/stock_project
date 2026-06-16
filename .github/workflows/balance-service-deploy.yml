@@ -36,29 +36,8 @@ jobs:
           docker push $REGISTRY/invest/spring/balance:${{ github.sha }}
           docker push $REGISTRY/invest/spring/balance:latest
 
-      - name: Deploy to Balance EC2 (via Bastion)
-        uses: appleboy/ssh-action@v1
-        with:
-          host:     ${{ secrets.BASTION_HOST }}
-          username: ubuntu
-          key:      ${{ secrets.BASTION_SSH_KEY }}
-          script: |
-            ssh -o StrictHostKeyChecking=no \
-                -i /home/ubuntu/balance-key.pem \
-                ubuntu@${{ secrets.BALANCE_EC2_HOST }} << 'REMOTE'
-
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
-              | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-
-            docker pull ${{ secrets.ECR_REGISTRY }}/invest/spring/balance:latest
-
-            docker stop balance || true
-            docker rm   balance || true
-            docker run -d \
-              --name balance \
-              --restart always \
-              -p 8083:8083 \
-              ${{ secrets.ECR_REGISTRY }}/invest/spring/balance:latest
-
-            docker image prune -f
-            REMOTE
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --name my-cluster --region ap-northeast-2
+          kubectl set image deployment/balance-service balance-service=${{ secrets.ECR_REGISTRY }}/invest/spring/balance:${{ github.sha }}
+          kubectl rollout status deployment/balance-service

@@ -42,28 +42,8 @@ jobs:
           docker push $IMAGE
           docker push $LATEST
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
-      - name: Deploy via Bastion
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.BASTION_HOST }}
-          username: ubuntu
-          key: ${{ secrets.BASTION_SSH_KEY }}
-          script: |
-            ssh -i ~/.ssh/aws-invest-key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.STOCK_EC2_PRIVATE_IP }} "
-              aws configure set aws_access_key_id ${{ secrets.STOCK_AWS_ACCESS_KEY_ID }}
-              aws configure set aws_secret_access_key ${{ secrets.STOCK_AWS_SECRET_ACCESS_KEY }}
-              aws configure set region ap-northeast-2
-              aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
-              docker system prune -a -f
-              docker pull ${{ env.IMAGE }}
-              docker stop stock-service || true
-              docker rm stock-service || true
-              docker run -d --name stock-service -p 8082:8082 \
-                -e STOCK_DB_HOST=${{ secrets.STOCK_DB_HOST }} \
-                -e STOCK_DB_USERNAME=${{ secrets.STOCK_DB_USERNAME }} \
-                -e STOCK_DB_PASSWORD=${{ secrets.STOCK_DB_PASSWORD }} \
-                -e KIS_APP_KEY=${{ secrets.KIS_APP_KEY }} \
-                -e KIS_APP_SECRET=${{ secrets.KIS_APP_SECRET }} \
-                -e SPRING_PROFILES_ACTIVE=prod \
-                ${{ env.IMAGE }}
-            "
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --name my-cluster --region ap-northeast-2
+          kubectl set image deployment/stock-service stock-service=${{ env.IMAGE }}
+          kubectl rollout status deployment/stock-service
