@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getPrice, getChart, checkWishlist, addWishlist, removeWishlist } from "../../api/stockAPI";
 import { useAuth } from "../../store/AuthContext";
 import MiniChart from "./MiniChart";
+import OrderBook from "../trade/OrderBook";
 
 export default function StockDetail({ stock, onNavigate }) {
   const { accessToken, isAuthenticated } = useAuth();
@@ -64,8 +65,7 @@ export default function StockDetail({ stock, onNavigate }) {
     <div style={s.wrap}>
       <div style={s.header}>
         <div>
-          <span style={s.name}
-            onClick={() => onNavigate?.("orderbook", { stockCode: stock.code })}>{stock.name}</span>
+          <span style={s.name}>{stock.name}</span>
           <span style={s.code}>{stock.code}</span>
           <span style={{
             ...s.badge,
@@ -120,6 +120,7 @@ export default function StockDetail({ stock, onNavigate }) {
             </div>
           )}
           {chart.length > 0 && <MiniChart data={chart} />}
+          <OrderBook stockCode={stock.code} />
           <button
             type="button"
             onClick={() => onNavigate?.("order", { stockCode: stock.code, stockName: stock.name })}
@@ -161,7 +162,7 @@ const s = {
     borderBottom: "1px solid var(--border)",
     gap: 8,
   },
-  name: { fontSize: 18, fontWeight: 700, color: "var(--text-h)", marginRight: 8, cursor:"pointer" },
+  name: { fontSize: 18, fontWeight: 700, color: "var(--text-h)", marginRight: 8 },
   code: { fontSize: 12, color: "var(--text)", marginRight: 8, fontFamily: "var(--mono)" },
   badge: { fontSize: 11, padding: "2px 6px", borderRadius: 4, fontWeight: 600 },
   wishBtn: {

@@ -17,6 +17,7 @@ import Holdings from "./page/trade/Holdings.jsx";
 import OrderList from "./page/trade/OrderList.jsx";
 import TradeList from "./page/trade/TradeList.jsx";
 import PendingOrders from "./page/trade/PendingOrders.jsx";
+import ChatOrder from "./page/chatbot/ChatOrder.jsx";
 
 const PAGE_COMPONENTS = {
   dashboard: DashboardPage,
@@ -35,6 +36,7 @@ const PAGE_COMPONENTS = {
   trades: TradeList,
   pendingOrders: PendingOrders,
   ai: AIPage,
+  chat: ChatOrder
 };
 
 // 로그인이 필요한 페이지 — 비로그인 시 로그인 페이지로 이동

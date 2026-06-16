@@ -49,28 +49,16 @@ export default function MyPage({ onNavigate }) {
       {/* 유저 정보 */}
       <div style={s.userCard}>
         <div style={s.avatar}>👤</div>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={s.userName}>{user?.name}</div>
           <div style={s.userEmail}>{user?.email}</div>
         </div>
-      </div>
-      <div>
-        <button type="button" onClick={() => {
-          onNavigate("orders");
-        }}>주문 내역</button>
-        <button type="button" onClick={() => {
-          onNavigate("trades");
-        }}>체결 내역</button>
-        <button type="button" onClick={() => {
-          onNavigate("holdings");
-        }}>
-          보유 주식
-        </button>
-        <button type="button" onClick={() => {
-          onNavigate("pendingOrders", { onNavigate: onNavigate })
-        }}>
-          미체결 주문
-        </button>
+        <div style={s.navBtns}>
+          <button type="button" style={s.navBtn} onClick={() => onNavigate("orders")}>주문 내역</button>
+          <button type="button" style={s.navBtn} onClick={() => onNavigate("trades")}>체결 내역</button>
+          <button type="button" style={s.navBtn} onClick={() => onNavigate("holdings")}>보유 주식</button>
+          <button type="button" style={s.navBtn} onClick={() => onNavigate("pendingOrders", { onNavigate })}>미체결 주문</button>
+        </div>
       </div>
 
       <div style={s.layout}>
@@ -153,6 +141,24 @@ const s = {
   avatar: { fontSize: 36 },
   userName: { fontSize: 18, fontWeight: 700, color: "var(--text-h)", marginBottom: 4 },
   userEmail: { fontSize: 14, color: "var(--text)" },
+  navBtns: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 6,
+    alignSelf: "center",
+  },
+  navBtn: {
+    padding: "8px 14px",
+    fontSize: 12,
+    fontWeight: 600,
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    background: "none",
+    color: "var(--text)",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+  },
   layout: {
     display: "flex",
     border: "1px solid var(--border)",

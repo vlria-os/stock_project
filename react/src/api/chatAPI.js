@@ -18,7 +18,7 @@ chatApi.interceptors.request.use((config) => {
 });
 
 export const chatOrder=async(threadId, message) => {
-    const res=await tradeApi.post("/chat", {
+    const res=await chatApi.post("/chat", {
         thread_id: threadId,
         message: message
     });
