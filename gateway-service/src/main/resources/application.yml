@@ -34,24 +34,10 @@ spring:
           uri: http://balance-service:8083
           predicates:
             - Path=/api/balance/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-                redis-rate-limiter.requestedTokens: 1
-                deny-empty-key: false
         - id: trade-service
           uri: http://trade-service:8084
           predicates:
             - Path=/api/trade/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-                redis-rate-limiter.requestedTokens: 1
-                deny-empty-key: false
         - id: trade-service-ws
           uri: http://trade-service:8084
           predicates:
@@ -60,24 +46,10 @@ spring:
           uri: http://stock-service:8082
           predicates:
             - Path=/stocks/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-                redis-rate-limiter.requestedTokens: 1
-                deny-empty-key: false
         - id: ai-service
           uri: http://ai-service:8085
           predicates:
             - Path=/api/ai/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-                redis-rate-limiter.requestedTokens: 1
-                deny-empty-key: false
 jwt:
   secret: ${JWT_SECRET}
 server:
