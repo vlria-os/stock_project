@@ -1,5 +1,8 @@
 import asyncio
+import logging
 from fastapi import FastAPI, HTTPException, Header
+
+logging.basicConfig(level=logging.INFO)
 from pydantic import BaseModel
 from typing import Optional
 from app.news_service.agent import analyze_stock
