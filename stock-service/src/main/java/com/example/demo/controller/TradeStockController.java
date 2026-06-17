@@ -2,12 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.service.StockService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -35,10 +31,10 @@ public class TradeStockController {
         }
     }
 
-    @GetMapping("/code")
-    public ResponseEntity<?> getStockCode(@RequestParam("stockName") String name){
+    @GetMapping("/code/{stockName}")
+    public ResponseEntity<?> getStockCode(@PathVariable String stockName){
         try {
-            return ResponseEntity.ok(Map.of("code", stockService.getStockCode(name)));
+            return ResponseEntity.ok(Map.of("code", stockService.getStockCode(stockName)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
