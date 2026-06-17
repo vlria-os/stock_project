@@ -25,6 +25,11 @@ def route_after_check_gtc(state: ChatState) -> str:
         return "ask_user"
     return "fetch_stock"
 
+def route_after_fetch_stock(state: ChatState) -> str:
+    if state["order"].get("stock_code") is None:
+        return "respond"
+    return "produce_order"
+
 builder=StateGraph(ChatState)
 
 builder.add_node("extract_order", extract_order)
@@ -46,8 +51,11 @@ builder.add_conditional_edges("check_gtc", route_after_check_gtc, {
     "ask_user": "ask_user",
     "fetch_stock": "fetch_stock",
 })
+builder.add_conditional_edges("fetch_stock", route_after_fetch_stock, {
+    "respond": "respond",
+    "produce_order": "produce_order",
+})
 builder.add_edge("ask_user", END)
-builder.add_edge("fetch_stock", "produce_order")
 builder.add_edge("produce_order", "wait_result")
 builder.add_edge("wait_result", "respond")
 builder.add_edge("respond", END)
