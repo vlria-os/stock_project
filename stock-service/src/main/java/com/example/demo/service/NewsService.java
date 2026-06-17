@@ -34,7 +34,7 @@ public class NewsService {
 
                 NodeList items = doc.getElementsByTagName("item");
                 List<NewsItemResponse> result = new ArrayList<>();
-                int limit = Math.min(items.getLength(), 5);
+                int limit = Math.min(items.getLength(), 3);
                 for (int i = 0; i < limit; i++) {
                     Element item = (Element) items.item(i);
                     result.add(new NewsItemResponse(
