@@ -22,7 +22,7 @@ EXTRACT_PROMPT="""
 JSON 외 다른 텍스트 없이 응답하세요.
 
 대화 내역:
-{message}
+{messages}
 """
 
 MISSING_FIELD_QUESTIONS={
