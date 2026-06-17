@@ -6,7 +6,7 @@ const OrderBook = ({ stockCode }) => {
 
   useEffect(() => {
     const client = new Client({
-      brokerURL: `${import.meta.env.VITE_GATEWAY_URL.replace('https://', 'wss://').replace('http://', 'ws://')}/ws`,
+      brokerURL: `${import.meta.env.VITE_WS_URL}/ws`,
       onConnect: () => {
         client.subscribe("/topic/orderbook", (message) => {
           setOrderBook(JSON.parse(message.body));
