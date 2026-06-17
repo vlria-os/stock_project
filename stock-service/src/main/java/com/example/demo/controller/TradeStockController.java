@@ -31,9 +31,10 @@ public class TradeStockController {
         }
     }
 
-    @GetMapping("/code/{stockName}")
-    public ResponseEntity<?> getStockCode(@PathVariable String stockName){
+    @PostMapping("/code")
+    public ResponseEntity<?> getStockCode(@RequestBody Map<String, String> body){
         try {
+            String stockName = body.get("stockName");
             return ResponseEntity.ok(Map.of("code", stockService.getStockCode(stockName)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
