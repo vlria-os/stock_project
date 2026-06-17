@@ -35,7 +35,7 @@ class AnalyzeResponse(BaseModel):
     report: str
 
 
-@app.post("/analyze", response_model=AnalyzeResponse)
+@app.post("/api/ai/analyze", response_model=AnalyzeResponse)
 async def analyze(req: AnalyzeRequest):
     if not req.stock.strip():
         raise HTTPException(status_code=400, detail="종목명을 입력해주세요.")
