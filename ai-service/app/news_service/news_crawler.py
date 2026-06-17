@@ -10,7 +10,7 @@ from typing import List
 
 logger = logging.getLogger(__name__)
 
-RSS_URL = "https://www.hankyung.com/feed/all-news"
+RSS_URL = "https://www.hankyung.com/feed/finance"
 
 HEADERS = {
     "User-Agent": (
@@ -58,6 +58,9 @@ def _fetch_rss_items(stock_name: str) -> List[dict]:
                 "source": "한국경제",
                 "summary": (item.findtext("description") or "").strip(),
             })
+
+        for item in parsed[:5]:
+            logger.info("[RSS 샘플] %s", item.get("title", ""))
 
         def _text(item: dict) -> str:
             return item["title"] + " " + item["summary"]
