@@ -10,7 +10,7 @@ from typing import List
 
 logger = logging.getLogger(__name__)
 
-RSS_URL = "https://www.hankyung.com/feed/all-news"
+RSS_URL = "https://www.hankyung.com/feed/finance"
 
 HEADERS = {
     "User-Agent": (
