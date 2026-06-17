@@ -59,6 +59,9 @@ def _fetch_rss_items(stock_name: str) -> List[dict]:
                 "summary": (item.findtext("description") or "").strip(),
             })
 
+        for item in parsed[:5]:
+            logger.info("[RSS 샘플] %s", item.get("title", ""))
+
         def _text(item: dict) -> str:
             return item["title"] + " " + item["summary"]
 
