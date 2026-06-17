@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from typing import Optional
@@ -39,7 +40,7 @@ class AnalyzeResponse(BaseModel):
 async def analyze(req: AnalyzeRequest):
     if not req.stock.strip():
         raise HTTPException(status_code=400, detail="종목명을 입력해주세요.")
-    report = analyze_stock(req.stock.strip())
+    report = await asyncio.get_event_loop().run_in_executor(None, analyze_stock, req.stock.strip())
     return AnalyzeResponse(stock=req.stock, report=report)
 
 
