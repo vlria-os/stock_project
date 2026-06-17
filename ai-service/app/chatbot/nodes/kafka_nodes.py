@@ -34,11 +34,15 @@ def wait_result(state: dict) -> dict:
     consumer.subscribe(["chat.order.result"])
     
     result=None
-    for _ in range(30): #최대 30초 대기
+    for _ in range(30):
         msg=consumer.poll(1.0)
         if msg and not msg.error():
-            data=json.loads(msg.value().decode("utf-8"))
-            if data.get("chatOrderId") == chat_order_id:
+            raw=msg.value().decode("utf-8")
+            data=json.loads(raw)
+            # 혹시 이중 직렬화된 경우 처리
+            if isinstance(data, str):
+                data=json.loads(data)
+            if isinstance(data, dict) and data.get("chatOrderId") == chat_order_id:
                 result=data
                 break
             
