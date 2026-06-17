@@ -183,7 +183,7 @@ export default function DashboardPage({ onNavigate }) {
         <div style={{ ...s.panel, flex: 2 }}>
           <div style={s.panelHeader}>
             <div style={s.panelTitle}>📰 주요 뉴스</div>
-            <a href="https://www.hankyung.com/finance" target="_blank" rel="noopener noreferrer" style={s.moreBtn}>전체보기 →</a>
+            <a href="https://www.hankyung.com/all-news-finance" target="_blank" rel="noopener noreferrer" style={s.moreBtn}>전체보기 →</a>
           </div>
           {newsLoading
             ? <div style={s.emptyBox}>뉴스를 불러오는 중...</div>
