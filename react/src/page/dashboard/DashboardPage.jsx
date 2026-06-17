@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../store/AuthContext";
-import { getWishlist, getIndex } from "../../api/stockAPI";
+import { getWishlist, getIndex, getMainNews } from "../../api/stockAPI";
 import { holdings as fetchHoldings, orders as fetchOrders } from "../../api/tradeAPI";
 
 const fetchBalance = (token) =>
@@ -17,13 +17,19 @@ export default function DashboardPage({ onNavigate }) {
   const [loadingData, setLoadingData] = useState(false);
   const [kospi, setKospi] = useState(null);
   const [kosdaq, setKosdaq] = useState(null);
+  const [news, setNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
 
-  // 시장 지수는 로그인 여부와 무관하게 로드
+  // 시장 지수 + 뉴스는 로그인 여부와 무관하게 로드
   useEffect(() => {
     Promise.allSettled([getIndex("0001"), getIndex("1001")]).then(([kp, kq]) => {
       if (kp.status === "fulfilled") setKospi(kp.value);
       if (kq.status === "fulfilled") setKosdaq(kq.value);
     });
+    getMainNews()
+      .then((data) => setNews(data || []))
+      .catch(() => setNews([]))
+      .finally(() => setNewsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -177,9 +183,19 @@ export default function DashboardPage({ onNavigate }) {
         <div style={{ ...s.panel, flex: 2 }}>
           <div style={s.panelHeader}>
             <div style={s.panelTitle}>📰 주요 뉴스</div>
-            <button onClick={() => onNavigate("news")} style={s.moreBtn}>전체보기 →</button>
+            <a href="https://www.hankyung.com/all-news-finance" target="_blank" rel="noopener noreferrer" style={s.moreBtn}>전체보기 →</a>
           </div>
-          <div style={s.emptyBox}>뉴스를 불러오는 중...</div>
+          {newsLoading
+            ? <div style={s.emptyBox}>뉴스를 불러오는 중...</div>
+            : news.length === 0
+            ? <div style={s.emptyBox}>뉴스를 불러올 수 없습니다</div>
+            : news.map((item, i) => (
+                <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" style={s.newsRow}>
+                  <div style={s.newsTitle}>{item.title}</div>
+                  <div style={s.newsMeta}>{item.pubDate?.slice(0, 16) || ""}</div>
+                </a>
+              ))
+          }
         </div>
 
       </div>
@@ -303,4 +319,13 @@ const s = {
   rowName: { fontSize: 13, fontWeight: 600, color: "var(--text-h)" },
   rowMeta: { fontSize: 12, color: "var(--text)", marginTop: 2 },
   rowPrice: { fontSize: 13, fontWeight: 600, color: "var(--text-h)" },
+  newsRow: {
+    display: "block",
+    padding: "8px 0",
+    borderBottom: "1px solid var(--border)",
+    textDecoration: "none",
+    cursor: "pointer",
+  },
+  newsTitle: { fontSize: 13, fontWeight: 500, color: "var(--text-h)", lineHeight: 1.4 },
+  newsMeta: { fontSize: 11, color: "var(--text)", marginTop: 3 },
 };
