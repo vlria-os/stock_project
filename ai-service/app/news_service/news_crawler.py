@@ -1,12 +1,15 @@
 import logging
+import time
+import xml.etree.ElementTree as ET
+
 import requests
 from bs4 import BeautifulSoup
 from langchain_core.tools import tool
 from typing import List
-import time
 
 logger = logging.getLogger(__name__)
 
+RSS_URL = "https://www.hankyung.com/feed/all-news"
 
 HEADERS = {
     "User-Agent": (
@@ -17,148 +20,112 @@ HEADERS = {
 }
 
 
-def _get_stock_code(query: str) -> str | None:
-    """네이버 금융 검색으로 종목코드 조회"""
-    url = "https://ac.stock.naver.com/ac"
-    params = {"q": query, "target": "stock,fund,etf"}
+def _fetch_rss_items(stock_name: str) -> List[dict]:
+    """한국경제 RSS에서 종목명 포함 기사 필터링"""
     try:
-        res = requests.get(url, params=params, headers=HEADERS, timeout=5)
-        data = res.json()
-        items = data.get("items", [])
-        if items and items[0]:
-            code = items[0][0].get("code")
-            logger.info("[_get_stock_code] '%s' → 종목코드: %s", query, code)
-            return code
-        logger.warning("[_get_stock_code] '%s' 종목코드 없음 — 응답: %s", query, data)
-    except Exception as e:
-        logger.error("[_get_stock_code] '%s' 요청 실패: %s", query, e)
-    return None
+        res = requests.get(RSS_URL, headers=HEADERS, timeout=10)
+        res.raise_for_status()
+        root = ET.fromstring(res.content)
 
+        all_items = root.findall(".//item")
+        logger.info("[_fetch_rss_items] RSS 전체 기사: %d건", len(all_items))
 
-def _crawl_news_list(stock_code: str, page: int = 1) -> List[dict]:
-    """종목 코드로 네이버 금융 뉴스 목록 크롤링"""
-    url = f"https://finance.naver.com/item/news_news.naver"
-    params = {
-        "code": stock_code,
-        "page": page,
-        "sm": "title_entity_id.basic",
-        "clusterId": "",
-    }
-    try:
-        res = requests.get(url, params=params, headers=HEADERS, timeout=8)
-        res.encoding = "euc-kr"
-        soup = BeautifulSoup(res.text, "html.parser")
+        matched = []
+        for item in all_items:
+            title = (item.findtext("title") or "").strip()
+            # RSS 2.0의 <link>는 text가 아닌 tail로 오는 경우가 있어 둘 다 시도
+            link_elem = item.find("link")
+            link = (
+                (link_elem.text or link_elem.tail or "").strip()
+                if link_elem is not None else ""
+            )
+            pub_date = (item.findtext("pubDate") or "").strip()
+            description = (item.findtext("description") or "").strip()
 
-        news_items = []
-        rows = soup.select("table.type5 tr")
-        logger.info("[_crawl_news_list] 코드=%s, HTML rows=%d개", stock_code, len(rows))
-
-        for row in rows:
-            title_tag = row.select_one("td.title a")
-            date_tag = row.select_one("td.date")
-            source_tag = row.select_one("td.info")
-
-            if not title_tag:
+            if stock_name not in title and stock_name not in description:
                 continue
 
-            href = title_tag.get("href", "")
-            news_items.append({
-                "title": title_tag.get_text(strip=True),
-                "url": "https://finance.naver.com" + href if href.startswith("/") else href,
-                "date": date_tag.get_text(strip=True) if date_tag else "",
-                "source": source_tag.get_text(strip=True) if source_tag else "",
+            matched.append({
+                "title": title,
+                "url": link,
+                "date": pub_date,
+                "source": "한국경제",
+                "summary": description,
             })
 
-        logger.info("[_crawl_news_list] 파싱된 뉴스: %d건", len(news_items))
-        return news_items
+        logger.info("[_fetch_rss_items] '%s' 필터링 결과: %d건", stock_name, len(matched))
+        return matched
 
     except Exception as e:
-        logger.error("[_crawl_news_list] 크롤링 실패: %s", e)
+        logger.error("[_fetch_rss_items] RSS 요청 실패: %s", e)
         return []
 
 
-def _crawl_article_body(url: str) -> str:
-    """개별 기사 본문 크롤링"""
+def _crawl_article_body(url: str, fallback: str = "") -> str:
+    """한국경제 기사 본문 크롤링. 실패 시 RSS description(fallback) 반환"""
+    if not url:
+        return fallback
     try:
         res = requests.get(url, headers=HEADERS, timeout=8)
-        res.encoding = "euc-kr"
         soup = BeautifulSoup(res.text, "html.parser")
 
-        # 네이버 금융 뉴스 본문 셀렉터
-        body = soup.select_one("div#news_read")
-        if body:
-            return body.get_text(separator="\n", strip=True)[:2000]  # 토큰 절약
+        for selector in ("div.article-body", "div#articlebody", "div.article_body", "article"):
+            body = soup.select_one(selector)
+            if body:
+                return body.get_text(separator="\n", strip=True)[:2000]
 
-        # fallback: article 태그
-        body = soup.select_one("article") or soup.select_one("div.article_body")
-        if body:
-            return body.get_text(separator="\n", strip=True)[:2000]
+    except Exception as e:
+        logger.warning("[_crawl_article_body] 본문 수집 실패 (%s): %s", url, e)
 
-    except Exception:
-        pass
-    return ""
+    return fallback[:2000]
 
 
 @tool
 def crawl_stock_news(query: str) -> str:
     """
-    종목명 또는 티커를 입력받아 네이버 금융에서 관련 뉴스를 크롤링합니다.
+    종목명을 입력받아 한국경제 RSS에서 관련 뉴스를 가져옵니다.
     최신 뉴스 10개의 제목, 날짜, 본문 요약을 반환합니다.
     """
-    stock_code = _get_stock_code(query)
-    if not stock_code:
-        return f"'{query}' 종목을 찾을 수 없습니다. 종목명을 정확히 입력해주세요."
-
-    news_list = _crawl_news_list(stock_code, page=1)
-    if not news_list:
+    items = _fetch_rss_items(query)
+    if not items:
         return f"'{query}' 관련 뉴스를 찾을 수 없습니다."
 
-    results = []
-    for i, news in enumerate(news_list[:10]):
-        body = _crawl_article_body(news["url"])
-        results.append({
-            **news,
-            "body": body,
-        })
-        time.sleep(0.3)  # 크롤링 딜레이
-
-    # 텍스트로 직렬화해서 반환 (에이전트가 읽을 수 있도록)
-    output_lines = [f"[{query} 관련 최신 뉴스 {len(results)}건]\n"]
-    for i, r in enumerate(results, 1):
+    output_lines = [f"[{query} 관련 최신 뉴스 {len(items[:10])}건]\n"]
+    for i, news in enumerate(items[:10], 1):
+        body = _crawl_article_body(news["url"], fallback=news["summary"])
         output_lines.append(
             f"--- 뉴스 {i} ---\n"
-            f"제목: {r['title']}\n"
-            f"날짜: {r['date']} | 출처: {r['source']}\n"
-            f"본문:\n{r['body']}\n"
+            f"제목: {news['title']}\n"
+            f"날짜: {news['date']} | 출처: {news['source']}\n"
+            f"본문:\n{body}\n"
         )
+        time.sleep(0.2)
 
     return "\n".join(output_lines)
 
 
-# 벡터스토어 저장용으로 구조화된 데이터도 반환하는 함수 (RAG 파이프라인용)
 def fetch_news_for_rag(query: str) -> List[dict]:
-    stock_code = _get_stock_code(query)
-    if not stock_code:
-        return []
+    """벡터스토어 저장용 구조화 데이터 반환 (RAG 파이프라인용)"""
+    items = _fetch_rss_items(query)
 
-    news_list = _crawl_news_list(stock_code)
     results = []
-    for news in news_list[:10]:
-        body = _crawl_article_body(news["url"])
-        if body:
-            results.append({
-                "title": news["title"],
+    for news in items[:10]:
+        body = _crawl_article_body(news["url"], fallback=news["summary"])
+        if not body:
+            continue
+        results.append({
+            "title": news["title"],
+            "date": news["date"],
+            "source": news["source"],
+            "url": news["url"],
+            "content": f"{news['title']}\n{body}",
+            "metadata": {
+                "stock": query,
                 "date": news["date"],
                 "source": news["source"],
                 "url": news["url"],
-                "content": f"{news['title']}\n{body}",
-                "metadata": {
-                    "stock": query,
-                    "date": news["date"],
-                    "source": news["source"],
-                    "url": news["url"],
-                }
-            })
-        time.sleep(0.3)
+            },
+        })
+        time.sleep(0.2)
 
     return results
