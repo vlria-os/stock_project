@@ -24,7 +24,7 @@ public class ChatOrderConsumer {
 
         try {
             tradeService.placeOrder(request.getUserId(), request);
-        } catch (IllegalArgumentException e){
+        } catch (Exception e){
             tradeEventProducer.sendChatOrderResult(ChatOrderResult.builder()
                     .chatOrderId(request.getChatOrderId())
                     .success(false)
