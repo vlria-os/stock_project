@@ -7,24 +7,35 @@ const OrderBook = ({ stockCode }) => {
   useEffect(() => {
     const client = new Client({
       brokerURL: `${import.meta.env.VITE_WS_URL}/ws`,
+      
+      heartbeatIncoming: 0,
+      heartbeatOutgoing: 20000,
+
       onConnect: () => {
-        client.subscribe("/topic/orderbook", (message) => {
+        console.log('✅ Native WebSocket 기반 STOMP 연결 성공!');
+
+        client.subscribe(`/topic/orderbook/${stockCode}`, (message) => {
           setOrderBook(JSON.parse(message.body));
         });
-        fetch(`${import.meta.env.VITE_GATEWAY_URL}/api/trade/orderbook/subscribe/${stockCode}`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+
+        client.publish({
+          destination: '/app/stock/subscribe',
+          body: stockCode,
         });
+        console.log(`🚀 STOMP 단일 채널을 통해 종목 구독 요청 완료: ${stockCode}`);
       },
     });
 
     client.activate();
 
     return () => {
-      fetch(`${import.meta.env.VITE_GATEWAY_URL}/api/trade/orderbook/unsubscribe/${stockCode}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-      });
+      if (client.connected) {
+        client.publish({
+          destination: '/app/stock/unsubscribe',
+          body: stockCode,
+        });
+        console.log(`⏹️ STOMP 단일 채널을 통해 종목 구독 해제 완료: ${stockCode}`);
+      }
       client.deactivate();
     };
   }, [stockCode]);
