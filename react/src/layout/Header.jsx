@@ -4,7 +4,7 @@ const PAGES = [
   { id: "dashboard", label: "대시보드",  icon: "📊" },
   { id: "portfolio", label: "포트폴리오", icon: "💼" },
   { id: "market",    label: "시장",       icon: "🌍" },
-  { id: "news",      label: "뉴스",       icon: "📰" },
+  { id: "chat",      label: "AI 주문",       icon: "📋" },
   { id: "balance",  label: "입출금",       icon: "⚙️" },
   { id: "ai",       label: "AI 어시스턴트", icon: "🤖" },
 ];
