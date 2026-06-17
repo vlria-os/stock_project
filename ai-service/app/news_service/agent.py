@@ -75,7 +75,7 @@ def build_agent():
         openai_api_key=OPENAI_API_KEY,
     )
     tools = [fetch_and_store_news, search_news_rag, crawl_stock_news]
-    return create_react_agent(llm, tools, prompt=SYSTEM_PROMPT)
+    return create_react_agent(llm, tools, state_modifier=SYSTEM_PROMPT)
 
 
 def analyze_stock(stock_name: str) -> str:

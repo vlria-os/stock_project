@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { getStocks } from "../../api/stockAPI";
 import StockDetail from "./StockDetail";
 
-const BASE_URL = process.env.REACT_APP_AI_SERVICE_URL || "http://localhost:8000";
+const BASE_URL = import.meta.env.VITE_GATEWAY_URL;
 
 export default function MarketPage({ onNavigate }) {
   const [allStocks, setAllStocks] = useState([]);
@@ -79,7 +79,7 @@ export default function MarketPage({ onNavigate }) {
       setNewsReport("");
       setNewsStock(displayStock.name);
       try {
-        const res = await fetch(`${BASE_URL}/analyze`, {
+        const res = await fetch(`${BASE_URL}/api/ai/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ stock: displayStock.name }),
