@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ErrorBoundary from "./ErrorBoundary";
 import Header from "./layout/Header";
 import Balance from "./page/balance/Balance.jsx";
 import DashboardPage from "./page/dashboard/DashboardPage";
@@ -119,7 +120,9 @@ function MainApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <MainApp />
+      <ErrorBoundary>
+        <MainApp />
+      </ErrorBoundary>
     </AuthProvider>
   );
 }
