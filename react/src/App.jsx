@@ -22,7 +22,6 @@ import ChatOrder from "./page/chatbot/ChatOrder.jsx";
 
 const PAGE_COMPONENTS = {
   dashboard: DashboardPage,
-  portfolio: () => <div>포트폴리오 페이지</div>,
   market:    MarketPage,
   search:    SearchPage,
   news:      () => <div>뉴스 페이지</div>,
@@ -41,7 +40,7 @@ const PAGE_COMPONENTS = {
 };
 
 // 로그인이 필요한 페이지 — 비로그인 시 로그인 페이지로 이동
-const PROTECTED = new Set(["balance", "portfolio", "mypage",
+const PROTECTED = new Set(["balance", "mypage",
   "order", "holdings", "orders", "trades"
 ]);
 
