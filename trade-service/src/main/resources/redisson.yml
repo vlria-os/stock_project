@@ -1,0 +1,5 @@
+clusterServersConfig:
+  nodeAddresses:
+    - "rediss://clustercfg.invest-redis.l9metn.apn2.cache.amazonaws.com:6379"
+  scanInterval: 2000
+  sslEnableEndpointIdentification: false
