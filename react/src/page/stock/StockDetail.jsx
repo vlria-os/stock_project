@@ -9,7 +9,7 @@ export default function StockDetail({ stock, onNavigate }) {
   const [price, setPrice] = useState(null);
   const [chart, setChart] = useState([]);
   const [wished, setWished] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!stock) return;
