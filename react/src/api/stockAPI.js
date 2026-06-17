@@ -29,3 +29,5 @@ export const checkWishlist = (code, token) =>
   instance
     .get(`${BASE}/wishlist/${code}/check`, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
+
+export const getMainNews = () => instance.get(`${BASE}/news/main`).then((r) => r.data);
