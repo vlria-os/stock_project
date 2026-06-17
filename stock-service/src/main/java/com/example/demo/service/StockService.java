@@ -13,7 +13,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -22,6 +24,8 @@ public class StockService {
     private final WebClient kisWebClient;
     private final KisTokenService kisTokenService;
     private final StockRepository stockRepository;
+
+    private final Map<String, IndexPriceResponse> indexPriceCache = new ConcurrentHashMap<>();
 
     @Value("${kis.app-key}")
     private String appKey;
@@ -80,21 +84,36 @@ public class StockService {
                 .map(StockPriceResponse::new)
                 .orElseThrow(() -> new RuntimeException("종목을 찾을 수 없습니다: " + stockCode));
     }
-    // KOSPI/KOSDAQ 지수 조회
+    // KOSPI/KOSDAQ 지수 조회 (KIS API 실패 시 캐시 반환)
     public IndexPriceResponse getIndexPrice(String indexCode) {
-        String token = kisTokenService.getAccessToken();
-        String uri = "/uapi/domestic-stock/v1/quotations/inquire-index-price"
-                + "?fid_cond_mrkt_div_code=U&fid_input_iscd=" + indexCode;
+        try {
+            String token = kisTokenService.getAccessToken();
+            String uri = "/uapi/domestic-stock/v1/quotations/inquire-index-price"
+                    + "?fid_cond_mrkt_div_code=U&fid_input_iscd=" + indexCode;
 
-        return kisWebClient.get().uri(uri)
-                .header("Authorization", "Bearer " + token)
-                .header("appkey", appKey)
-                .header("appsecret", appSecret)
-                .header("tr_id", "FHPUP02100000")
-                .retrieve()
-                .bodyToMono(KisIndexApiResponse.class)
-                .map(KisIndexApiResponse::getOutput)
-                .block();
+            IndexPriceResponse response = kisWebClient.get().uri(uri)
+                    .header("Authorization", "Bearer " + token)
+                    .header("appkey", appKey)
+                    .header("appsecret", appSecret)
+                    .header("tr_id", "FHPUP02100000")
+                    .retrieve()
+                    .bodyToMono(KisIndexApiResponse.class)
+                    .map(KisIndexApiResponse::getOutput)
+                    .block();
+
+            if (response != null && response.getCurrentPrice() != null) {
+                indexPriceCache.put(indexCode, response);
+                return response;
+            }
+        } catch (Exception e) {
+            log.warn("KIS 지수 API 호출 실패, 캐시 반환: indexCode={}", indexCode, e);
+        }
+
+        IndexPriceResponse cached = indexPriceCache.get(indexCode);
+        if (cached != null) {
+            return cached;
+        }
+        throw new RuntimeException("지수 데이터를 조회할 수 없습니다: " + indexCode);
     }
 
     //차트조회(일봉 기준 30일)
