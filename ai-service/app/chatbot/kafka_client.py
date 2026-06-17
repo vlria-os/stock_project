@@ -8,5 +8,5 @@ def get_consumer(group_id: str) -> Consumer:
     return Consumer({
         'bootstrap.servers': KAFKA_HOST,
         'group.id': group_id,
-        'auto.offset.reset': 'latest'
+        'auto.offset.reset': 'earliest'
     })
