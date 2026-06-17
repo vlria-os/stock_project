@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 public class NewsService {
 
-    private static final String HANKYUNG_RSS = "https://rss.hankyung.com/board/finance.xml";
+    private static final String HANKYUNG_RSS = "https://www.hankyung.com/feed/finance";
 
     public List<NewsItemResponse> getMainNews() {
         try {
