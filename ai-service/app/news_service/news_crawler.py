@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 import xml.etree.ElementTree as ET
 
@@ -20,8 +21,20 @@ HEADERS = {
 }
 
 
+def _build_keywords(stock_name: str) -> List[str]:
+    """종목명을 공백·괄호·영한 경계로 분리해 키워드 리스트 반환 (길이 긴 순)"""
+    parts = re.split(r'[\s()（）]+', stock_name)
+    tokens = []
+    for part in parts:
+        # 영문/숫자 ↔ 한글 경계에서 추가 분리 (예: SK하이닉스 → SK, 하이닉스)
+        sub = re.split(r'(?<=[a-zA-Z0-9])(?=[가-힣])|(?<=[가-힣])(?=[a-zA-Z0-9])', part)
+        tokens.extend(sub)
+    # 길이 2 이상만 남기고, 길이 긴 순으로 정렬 (긴 키워드 = 더 특정적)
+    return sorted({k for k in tokens if len(k) >= 2}, key=len, reverse=True)
+
+
 def _fetch_rss_items(stock_name: str) -> List[dict]:
-    """한국경제 RSS에서 종목명 포함 기사 필터링"""
+    """한국경제 RSS에서 종목명 포함 기사 필터링 (정확 매칭 우선, 없으면 키워드 폴백)"""
     try:
         res = requests.get(RSS_URL, headers=HEADERS, timeout=10)
         res.raise_for_status()
@@ -30,30 +43,36 @@ def _fetch_rss_items(stock_name: str) -> List[dict]:
         all_items = root.findall(".//item")
         logger.info("[_fetch_rss_items] RSS 전체 기사: %d건", len(all_items))
 
-        matched = []
+        parsed = []
         for item in all_items:
             title = (item.findtext("title") or "").strip()
-            # RSS 2.0의 <link>는 text가 아닌 tail로 오는 경우가 있어 둘 다 시도
             link_elem = item.find("link")
             link = (
                 (link_elem.text or link_elem.tail or "").strip()
                 if link_elem is not None else ""
             )
-            pub_date = (item.findtext("pubDate") or "").strip()
-            description = (item.findtext("description") or "").strip()
-
-            if stock_name not in title and stock_name not in description:
-                continue
-
-            matched.append({
+            parsed.append({
                 "title": title,
                 "url": link,
-                "date": pub_date,
+                "date": (item.findtext("pubDate") or "").strip(),
                 "source": "한국경제",
-                "summary": description,
+                "summary": (item.findtext("description") or "").strip(),
             })
 
-        logger.info("[_fetch_rss_items] '%s' 필터링 결과: %d건", stock_name, len(matched))
+        def _text(item: dict) -> str:
+            return item["title"] + " " + item["summary"]
+
+        # 1단계: 종목명 전체 정확 매칭
+        matched = [it for it in parsed if stock_name in _text(it)]
+        if matched:
+            logger.info("[_fetch_rss_items] 정확 매칭: '%s' → %d건", stock_name, len(matched))
+            return matched
+
+        # 2단계: 0건이면 키워드 폴백 (길이 긴 키워드부터 순서대로 시도)
+        keywords = _build_keywords(stock_name)
+        logger.info("[_fetch_rss_items] 정확 매칭 0건 → 키워드 폴백: %s", keywords)
+        matched = [it for it in parsed if any(k in _text(it) for k in keywords)]
+        logger.info("[_fetch_rss_items] 키워드 매칭: '%s' → %d건", stock_name, len(matched))
         return matched
 
     except Exception as e:
