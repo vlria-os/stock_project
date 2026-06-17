@@ -30,8 +30,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/auth/sse-cookie",
             "/stocks",
             "/api/trade/sse",
-            "/ws",
-            "/api/ai"
+            "/ws"
     );
 
     //WHITELIST에 포함되더라도 인증이 필요한 경로들
