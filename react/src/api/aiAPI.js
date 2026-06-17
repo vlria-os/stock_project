@@ -1,6 +1,6 @@
 import instance from "./axiosInstance";
 
-const BASE = `${import.meta.env.VITE_GATEWAY_URL}/ai`;
+const BASE = `${import.meta.env.VITE_GATEWAY_URL}/api/ai`;
 
 export const sendMessage = (message, stockCode = null) =>
   instance
