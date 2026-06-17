@@ -1,9 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.IndexPriceResponse;
+import com.example.demo.dto.NewsItemResponse;
 import com.example.demo.dto.StockChartResponse;
 import com.example.demo.dto.StockListResponse;
 import com.example.demo.dto.StockPriceResponse;
+import com.example.demo.service.NewsService;
 import com.example.demo.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.List;
 @RequestMapping("/stocks")
 public class StockController {
     private final StockService stockService;
+    private final NewsService newsService;
 
     //전체 종목 목록 조회
     @GetMapping
@@ -42,5 +45,11 @@ public class StockController {
     @GetMapping("/{code}/chart")
     public ResponseEntity<List<StockChartResponse>> getStockChart(@PathVariable String code){
         return ResponseEntity.ok(stockService.getStockChart(code));
+    }
+
+    // 한국경제 RSS 뉴스 (인증 불필요)
+    @GetMapping("/news/main")
+    public ResponseEntity<List<NewsItemResponse>> getMainNews() {
+        return ResponseEntity.ok(newsService.getMainNews());
     }
 }
