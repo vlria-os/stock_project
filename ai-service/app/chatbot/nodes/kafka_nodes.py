@@ -19,6 +19,8 @@ def produce_order(state: dict) -> dict:
         "expiredAt": order.get("expired_at")
     }
     
+    print(f"Kafka produce 시도: {payload}")
+    
     producer=get_producer()
     producer.produce(
         "chat.order.request",
@@ -26,6 +28,8 @@ def produce_order(state: dict) -> dict:
         key=str(state["user_id"])
     )
     producer.flush()
+    
+    print(f"Kafka produce 완료: {chat_order_id}")
     
     return {**state, "chat_order_id": chat_order_id}
 
