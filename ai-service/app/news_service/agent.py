@@ -1,4 +1,5 @@
 import os
+import logging
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
@@ -8,6 +9,8 @@ from app.news_service.news_crawler import crawl_stock_news, fetch_news_for_rag
 from app.news_service.chroma_store import StockNewsVectorStore
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 vector_store = StockNewsVectorStore(openai_api_key=OPENAI_API_KEY)
@@ -31,10 +34,13 @@ def fetch_and_store_news(stock_name: str) -> str:
     종목 뉴스를 크롤링하고 벡터DB에 저장합니다.
     새로운 종목 분석 시작 시 반드시 먼저 호출해야 합니다.
     """
+    logger.info("[fetch_and_store_news] 크롤링 시작: %s", stock_name)
     news_items = fetch_news_for_rag(stock_name)
     if not news_items:
+        logger.warning("[fetch_and_store_news] 뉴스 없음: '%s' — 크롤러가 빈 리스트 반환", stock_name)
         return f"'{stock_name}' 뉴스를 가져오지 못했습니다."
 
+    logger.info("[fetch_and_store_news] 크롤링 성공: %s건", len(news_items))
     added = vector_store.add_news(news_items)
     return (
         f"'{stock_name}' 뉴스 {len(news_items)}건 수집 완료 "

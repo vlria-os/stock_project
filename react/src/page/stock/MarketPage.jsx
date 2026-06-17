@@ -47,7 +47,7 @@ export default function MarketPage({ onNavigate }) {
     return () => clearInterval(interval);
   }, []);
 
-  // 선택 없을 때 9초마다 랜덤 순환
+  // 선택 없을 때 20초마다 랜덤 순환
   useEffect(() => {
     if (selected !== null || allStocks.length === 0) return;
     const timer = setInterval(() => {
@@ -57,7 +57,7 @@ export default function MarketPage({ onNavigate }) {
         while (next === prev && allStocks.length > 1);
         return next;
       });
-    }, 9000);
+    }, 20000);
     return () => clearInterval(timer);
   }, [selected, allStocks.length]);
 

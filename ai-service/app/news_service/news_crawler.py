@@ -1,8 +1,11 @@
+import logging
 import requests
 from bs4 import BeautifulSoup
 from langchain_core.tools import tool
 from typing import List
 import time
+
+logger = logging.getLogger(__name__)
 
 
 HEADERS = {
@@ -23,9 +26,12 @@ def _get_stock_code(query: str) -> str | None:
         data = res.json()
         items = data.get("items", [])
         if items and items[0]:
-            return items[0][0].get("code")
-    except Exception:
-        return None
+            code = items[0][0].get("code")
+            logger.info("[_get_stock_code] '%s' → 종목코드: %s", query, code)
+            return code
+        logger.warning("[_get_stock_code] '%s' 종목코드 없음 — 응답: %s", query, data)
+    except Exception as e:
+        logger.error("[_get_stock_code] '%s' 요청 실패: %s", query, e)
     return None
 
 
@@ -45,6 +51,7 @@ def _crawl_news_list(stock_code: str, page: int = 1) -> List[dict]:
 
         news_items = []
         rows = soup.select("table.type5 tr")
+        logger.info("[_crawl_news_list] 코드=%s, HTML rows=%d개", stock_code, len(rows))
 
         for row in rows:
             title_tag = row.select_one("td.title a")
@@ -62,10 +69,11 @@ def _crawl_news_list(stock_code: str, page: int = 1) -> List[dict]:
                 "source": source_tag.get_text(strip=True) if source_tag else "",
             })
 
+        logger.info("[_crawl_news_list] 파싱된 뉴스: %d건", len(news_items))
         return news_items
 
     except Exception as e:
-        print(f"[크롤링 오류] {e}")
+        logger.error("[_crawl_news_list] 크롤링 실패: %s", e)
         return []
 
 
