@@ -39,9 +39,9 @@ spring:
           predicates:
             - Path=/api/trade/**
         - id: trade-service-ws
-          uri: http://trade-service:8084
+          uri: ws://trade-service:8084
           predicates:
-            - Path=/ws/**
+            - Path=/ws,/ws/**
         - id: stock-service
           uri: http://stock-service:8082
           predicates:
