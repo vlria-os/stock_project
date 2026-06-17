@@ -18,4 +18,11 @@ public class IndexPriceResponse {
 
     @JsonProperty("prdy_vrss_sign")
     private String sign;             // 부호 (1:상한, 2:상승, 3:보합, 4:하한, 5:하락)
+
+    public IndexPriceResponse(String currentPrice, String priceChange, String changeRate, String sign) {
+        this.currentPrice = currentPrice;
+        this.priceChange = priceChange;
+        this.changeRate = changeRate;
+        this.sign = sign;
+    }
 }

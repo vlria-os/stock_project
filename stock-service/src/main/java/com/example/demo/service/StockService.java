@@ -1,8 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.*;
+import com.example.demo.entity.IndexPrice;
 import com.example.demo.entity.Stock;
 import com.example.demo.kis.KisTokenService;
+import com.example.demo.repository.IndexPriceRepository;
 import com.example.demo.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ public class StockService {
     private final WebClient kisWebClient;
     private final KisTokenService kisTokenService;
     private final StockRepository stockRepository;
+    private final IndexPriceRepository indexPriceRepository;
 
     private final Map<String, IndexPriceResponse> indexPriceCache = new ConcurrentHashMap<>();
 
@@ -84,7 +87,7 @@ public class StockService {
                 .map(StockPriceResponse::new)
                 .orElseThrow(() -> new RuntimeException("종목을 찾을 수 없습니다: " + stockCode));
     }
-    // KOSPI/KOSDAQ 지수 조회 (KIS API 실패 시 캐시 반환)
+    // KOSPI/KOSDAQ 지수 조회 (KIS API 실패 시 메모리 캐시 → DB 순으로 fallback)
     public IndexPriceResponse getIndexPrice(String indexCode) {
         try {
             String token = kisTokenService.getAccessToken();
@@ -103,17 +106,32 @@ public class StockService {
 
             if (response != null && response.getCurrentPrice() != null) {
                 indexPriceCache.put(indexCode, response);
+                persistIndexPrice(indexCode, response);
                 return response;
             }
         } catch (Exception e) {
-            log.warn("KIS 지수 API 호출 실패, 캐시 반환: indexCode={}", indexCode, e);
+            log.warn("KIS 지수 API 호출 실패, fallback 시도: indexCode={}", indexCode, e);
         }
 
         IndexPriceResponse cached = indexPriceCache.get(indexCode);
         if (cached != null) {
             return cached;
         }
-        throw new RuntimeException("지수 데이터를 조회할 수 없습니다: " + indexCode);
+
+        return indexPriceRepository.findByIndexCode(indexCode)
+                .map(ip -> new IndexPriceResponse(ip.getCurrentPrice(), ip.getPriceChange(), ip.getChangeRate(), ip.getSign()))
+                .orElseThrow(() -> new RuntimeException("지수 데이터를 조회할 수 없습니다: " + indexCode));
+    }
+
+    private void persistIndexPrice(String indexCode, IndexPriceResponse response) {
+        try {
+            IndexPrice entity = indexPriceRepository.findByIndexCode(indexCode)
+                    .orElseGet(() -> IndexPrice.builder().indexCode(indexCode).build());
+            entity.update(response.getCurrentPrice(), response.getPriceChange(), response.getChangeRate(), response.getSign());
+            indexPriceRepository.save(entity);
+        } catch (Exception e) {
+            log.warn("지수 가격 DB 저장 실패: indexCode={}", indexCode, e);
+        }
     }
 
     //차트조회(일봉 기준 30일)
