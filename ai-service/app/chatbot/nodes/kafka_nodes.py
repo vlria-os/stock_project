@@ -8,7 +8,8 @@ def produce_order(state: dict) -> dict:
     
     payload={
         "chatOrderId": chat_order_id,
-        "stockCode": order["order_side"],
+        "stockName": order.get("stock_name"),
+        "stockCode": order.get("stock_code"),
         "side": order["order_side"],
         "orderType": order["order_type"],
         "orderCondition": order["order_condition"],
