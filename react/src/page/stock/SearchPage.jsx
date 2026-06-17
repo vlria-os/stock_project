@@ -8,7 +8,7 @@ export default function SearchPage({ onNavigate }) {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    getStocks().then(setAllStocks).catch(() => {});
+    getStocks().then((data) => setAllStocks(Array.isArray(data) ? data : [])).catch(() => {});
   }, []);
 
   const results = query.trim()

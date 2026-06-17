@@ -23,9 +23,10 @@ export default function MarketPage({ onNavigate }) {
     const fetchStocks = () =>
         getStocks()
             .then((data) => {
+              const list = Array.isArray(data) ? data : [];
               setAllStocks((prev) => {
                 const flashes = {};
-                data.forEach((s) => {
+                list.forEach((s) => {
                   const old = prevStocksRef.current[s.code];
                   if (old && old !== s.currentPrice) {
                     flashes[s.code] = Number(s.currentPrice) > Number(old) ? "up" : "down";
@@ -35,8 +36,8 @@ export default function MarketPage({ onNavigate }) {
                   setFlashMap(flashes);
                   setTimeout(() => setFlashMap({}), 1000);
                 }
-                prevStocksRef.current = Object.fromEntries(data.map((s) => [s.code, s.currentPrice]));
-                return data;
+                prevStocksRef.current = Object.fromEntries(list.map((s) => [s.code, s.currentPrice]));
+                return list;
               });
             })
             .catch((e) => console.error("[주식 데이터 오류]", e));
