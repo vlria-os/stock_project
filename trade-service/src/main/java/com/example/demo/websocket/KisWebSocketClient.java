@@ -25,12 +25,6 @@ public class KisWebSocketClient {
     @Value("${trade.kis.ws.url}")
     private String wsUrl;
 
-    @Value("${trade.kis.app.key}")
-    private String appKey;
-
-    @Value("${trade.kis.app.secret}")
-    private String appSecret;
-
     private final KisTokenService kisTokenService;
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectMapper objectMapper;
@@ -44,9 +38,7 @@ public class KisWebSocketClient {
                 .pingInterval(30, TimeUnit.SECONDS)
                 .build();
 
-        String approvalKey= kisTokenService.getApprovalKey();
-
-        Request request=new Request.Builder()
+        Request request = new Request.Builder()
                 .url(wsUrl)
                 .build();
 
@@ -70,7 +62,8 @@ public class KisWebSocketClient {
                     String[] fields = parts[3].split("\\^");
 
                     Map<String, Object> orderBook = new HashMap<>();
-                    orderBook.put("stockCode", fields[0]);
+                    String stockCode = fields[0]; // 한국투자증권이 보내준 메시지에서 종목코드 추출
+                    orderBook.put("stockCode", stockCode);
                     orderBook.put("time", fields[1]);
 
                     // 매도 호가 (ASKP1~10: index 3~12, 잔량: index 23~32)
@@ -94,7 +87,12 @@ public class KisWebSocketClient {
                     orderBook.put("askPrices", askPrices);
                     orderBook.put("bidPrices", bidPrices);
 
-                    messagingTemplate.convertAndSend("/topic/orderbook", objectMapper.writeValueAsString(orderBook));
+                    // 🔄 [수정 완료💡] 기존의 단일 주소 "/topic/orderbook" 대신,
+                    // 분산 환경(EKS)에서 RabbitMQ 브로커가 각 종목방 구독자들에게 정확히 배달할 수 있도록
+                    // 종목 코드가 붙은 동적 라우팅 경로로 메시지를 밀어 넣습니다.
+                    String destination = "/topic/orderbook/" + stockCode;
+                    messagingTemplate.convertAndSend(destination, objectMapper.writeValueAsString(orderBook));
+
                 } catch (Exception e) {
                     log.error("메시지 처리 오류", e);
                 }
@@ -114,14 +112,14 @@ public class KisWebSocketClient {
     }
 
     public void subscribe(String stockCode) {
-        String approvalKey= kisTokenService.getApprovalKey();
+        String approvalKey = kisTokenService.getApprovalKey();
 
-        Map<String, Object> body=new HashMap<>();
+        Map<String, Object> body = new HashMap<>();
         body.put("header", Map.of(
-           "approval_key", approvalKey,
-           "custtype", "P",
-           "tr_type", "1",
-           "content-type", "utf-8"
+                "approval_key", approvalKey,
+                "custtype", "P",
+                "tr_type", "1",
+                "content-type", "utf-8"
         ));
         body.put("body", Map.of(
                 "input", Map.of(
@@ -138,13 +136,13 @@ public class KisWebSocketClient {
     }
 
     public void unsubscribe(String stockCode){
-        String approvalKey= kisTokenService.getApprovalKey();
+        String approvalKey = kisTokenService.getApprovalKey();
 
         Map<String, Object> body = new HashMap<>();
         body.put("header", Map.of(
                 "approval_key", approvalKey,
                 "custtype", "P",
-                "tr_type", "2",  // 2가 구독 해제
+                "tr_type", "2", // 2가 구독 해제
                 "content-type", "utf-8"
         ));
         body.put("body", Map.of(
@@ -163,7 +161,6 @@ public class KisWebSocketClient {
 
     private void reconnect(){
         log.info("KIS WebSocket 재연결 시도...");
-
         try {
             Thread.sleep(5000);
             connect();
@@ -177,7 +174,6 @@ public class KisWebSocketClient {
         if (webSocket != null){
             webSocket.close(1000, "서버 종료");
         }
-
         if (client != null){
             client.dispatcher().executorService().shutdown();
         }

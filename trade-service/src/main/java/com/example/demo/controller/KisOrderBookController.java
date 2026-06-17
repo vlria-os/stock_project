@@ -3,29 +3,24 @@ package com.example.demo.controller;
 import com.example.demo.websocket.KisWebSocketClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.stereotype.Controller;
 
 @Slf4j
-@RestController
+@Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/trade/orderbook")
 public class KisOrderBookController {
     private final KisWebSocketClient kisWebSocketClient;
 
-    @PostMapping("/subscribe/{stockCode}")
-    public ResponseEntity<Void> subscribe(@PathVariable String stockCode){
-        log.info("구독 요청: {}", stockCode);
+    @MessageMapping("/stock/subscribe")
+    public void handleStockSubscribe(String stockCode) {
+        log.info("[STOMP 구독] 현재 파드에서 KIS 연동 엔진을 가동합니다. 종목코드: {}", stockCode);
         kisWebSocketClient.subscribe(stockCode);
-        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/unsubscribe/{stockCode}")
-    public ResponseEntity<Void> unsubscribe(@PathVariable String stockCode){
+    @MessageMapping("/stock/unsubscribe")
+    public void handleStockUnsubscribe(String stockCode) {
+        log.info("[STOMP 해제] 현재 파드에서 KIS 연동 엔진 구독 해제를 요청합니다. 종목코드: {}", stockCode);
         kisWebSocketClient.unsubscribe(stockCode);
-        return ResponseEntity.ok().build();
     }
 }
