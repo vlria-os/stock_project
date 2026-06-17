@@ -18,14 +18,18 @@ public class KisTokenService {
     private String appSecret;
 
     private final KisAuthClient kisAuthClient;
+    private String cachedApprovalKey = null;
 
     public String getApprovalKey(){
+        if (cachedApprovalKey != null) return cachedApprovalKey;
+
         Map<String, String> body=new HashMap<>();
         body.put("grant_type", "client_credentials");
         body.put("appkey", appKey);
         body.put("secretkey", appSecret);
 
         Map<String, String> response=kisAuthClient.getApprovalKey(body);
-        return response.get("approval_key");
+        cachedApprovalKey = response.get("approval_key");
+        return cachedApprovalKey;
     }
 }
