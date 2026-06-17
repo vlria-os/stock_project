@@ -23,8 +23,7 @@ public class TradeEventProducer {
         kafkaTemplate.send("stock.result", event);
     }
 
-    public void sendChatOrderResult(ChatOrderResult result) throws JsonProcessingException{
-        String message=objectMapper.writeValueAsString(result);
-        kafkaTemplate.send("chat.order.result", result.getChatOrderId(), message);
+    public void sendChatOrderResult(ChatOrderResult result) {
+        kafkaTemplate.send("chat.order.result", result.getChatOrderId(), result);
     }
 }
