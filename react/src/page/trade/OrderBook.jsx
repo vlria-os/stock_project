@@ -14,7 +14,7 @@ const OrderBook = ({ stockCode }) => {
       onConnect: () => {
         console.log('✅ Native WebSocket 기반 STOMP 연결 성공!');
 
-        client.subscribe(`/topic/orderbook/${stockCode}`, (message) => {
+        client.subscribe(`/topic/orderbook.${stockCode}`, (message) => {
           setOrderBook(JSON.parse(message.body));
         });
 
