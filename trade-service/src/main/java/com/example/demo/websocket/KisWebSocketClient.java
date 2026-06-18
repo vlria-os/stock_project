@@ -51,7 +51,7 @@ public class KisWebSocketClient {
             @Override
             public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
                 try {
-                    if (text.startsWith("{") || text.startsWith("0|H0STASP0|000")) return;
+                    if (text.startsWith("{")) return;  // JSON 응답만 스킵
 
                     String[] parts = text.split("\\|");
                     if (parts.length < 4) return;
