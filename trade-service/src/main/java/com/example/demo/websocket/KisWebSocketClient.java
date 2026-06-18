@@ -90,7 +90,7 @@ public class KisWebSocketClient {
                     // 🔄 [수정 완료💡] 기존의 단일 주소 "/topic/orderbook" 대신,
                     // 분산 환경(EKS)에서 RabbitMQ 브로커가 각 종목방 구독자들에게 정확히 배달할 수 있도록
                     // 종목 코드가 붙은 동적 라우팅 경로로 메시지를 밀어 넣습니다.
-                    String destination = "/topic/orderbook/" + stockCode;
+                    String destination = "/topic/orderbook." + stockCode;
                     messagingTemplate.convertAndSend(destination, objectMapper.writeValueAsString(orderBook));
 
                 } catch (Exception e) {
