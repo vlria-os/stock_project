@@ -9,6 +9,8 @@ spring:
     discovery:
       enabled: false
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
       httpclient:
         websocket:
           max-frame-payload-length: 65536
