@@ -15,16 +15,18 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "*"
+            allowedOrigins:
+              - "https://www.xyzoffer.xyz"
             allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
-              - HEAD
             allowedHeaders: "*"
-            allowCredentials: false
+            allowCredentials: true
+            exposedHeaders:
+              - "Set-Cookie"
       routes:
         - id: user-service
           uri: http://user-service:8081
