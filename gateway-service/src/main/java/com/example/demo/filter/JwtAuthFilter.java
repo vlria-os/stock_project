@@ -56,7 +56,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
         //sse 경로는 쿠키에서, 나머지는 헤더에서 토큰 추출
         String token=null;
-        if (path.startsWith("/trade/sse")){
+        if (path.startsWith("/api/trade/sse")){
             HttpCookie cookie=exchange.getRequest().getCookies().getFirst("accessToken");
             if (cookie != null){
                 token=cookie.getValue();
