@@ -53,7 +53,8 @@ public class ApiRefreshController {
 
         Cookie sseCookie=new Cookie("accessToken", sseAccessToken);
         sseCookie.setHttpOnly(true);
-        sseCookie.setPath("/trade/sse"); //sse 경로에서만 전송
+        sseCookie.setSecure(true);
+        sseCookie.setPath("/api/trade/sse"); //sse 경로에서만 전송
         sseCookie.setMaxAge(60 * 30); //30분
         response.addCookie(sseCookie);
 
