@@ -220,7 +220,7 @@ Gateway Service, User Service, Kafka, Frontend 등 공통 영역은
 
 # 5. 시스템 아키텍처
 
-![System Architecture](docs/images/msa-architecture.svg)
+![System Architecture](docs/images/msa-architecture.drawio.svg)
 
 ## 시스템 구성
 
