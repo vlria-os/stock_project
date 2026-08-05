@@ -264,59 +264,127 @@ Gateway Service는 외부 요청을 각 서비스로 전달하며,
 
 # 7. 주요 처리 흐름
 
-## 7.1 회원가입 및 초기 데이터 생성
+## 7.1 회원가입 및 기본 잔액 생성
 
+회원가입이 완료되면 User Service는 Kafka에 `user-created` 이벤트를 발행합니다.
+
+Balance Service는 해당 이벤트를 구독하여 신규 사용자의 기본 잔액 데이터를 생성합니다.
+
+이를 통해 회원 생성과 잔액 초기화 로직을 분리하고, 서비스 간 결합도를 낮추도록 구성했습니다.
+
+```text
 회원가입 완료
       │
+      ▼
 User Service
       │
-Kafka User Event 발행
+      │ user-created Event 발행
+      ▼
+Apache Kafka
       │
-├── Balance Service: 기본 잔액 생성
-└── Stock Service: 사용자 관련 초기 데이터 처리
+      ▼
+Balance Service
+      │
+      ▼
+사용자 기본 잔액 생성
+```
+
+---
 
 ## 7.2 주문 처리 흐름
 
+사용자가 매수·매도 주문을 요청하면 Trade Service가 주문을 생성하고 Redis 기반 주문장에서 주문을 매칭합니다.
+
+주문이 체결되면 Trade Service는 거래 정보를 Kafka 이벤트로 발행하고, Balance Service는 이를 수신하여 잔액을 처리합니다.
+
+잔액 처리 결과는 다시 Trade Service로 전달되며, 체결 정보 저장과 Stock Service 반영, SSE 기반 주문 결과 전송이 순차적으로 수행됩니다.
+
+```text
 주문 요청
-      │
+    │
+    ▼
 Gateway Service
-      │
+    │
+    ▼
 Trade Service
-      │
-잔액 확인 요청
-      │
-Kafka Event
-      │
+    │
+    ▼
+주문 생성 및 Redis 주문장 매칭
+    │
+    │ balance.trade.request
+    ▼
+Apache Kafka
+    │
+    ▼
 Balance Service
-      │
-잔액 확인 및 응답
-      │
-Trade Service
-      │
-주문 처리 및 체결
-      │
-Kafka Event
-      │
-├── Balance Service: 잔액 반영
-└── Stock Service: 보유 정보 반영
+    │
+    ├── 잔액 처리 성공
+    │       │
+    │       │ balance.trade.success
+    │       ▼
+    │   Trade Service
+    │       │
+    │       ├── 체결 및 주문 내역 저장
+    │       ├── SSE 체결 결과 전달
+    │       └── stock.result Event 발행
+    │                   │
+    │                   ▼
+    │              Stock Service
+    │
+    └── 잔액 처리 실패
+            │
+            │ balance.trade.fail
+            ▼
+        Trade Service
+            │
+            ├── 주문 실패 처리
+            ├── Redis 주문장 제거
+            └── SSE 실패 결과 전달
+```
 
+---
 
-## 7.3 자연어 주문 흐름
+## 7.3 뉴스 분석 처리 흐름
 
+사용자가 종목 분석을 요청하면 AI Service가 관련 뉴스를 수집하고, BeautifulSoup을 이용해 기사 본문을 추출합니다.
 
-사용자 자연어 입력
+수집한 뉴스는 OpenAI Embedding을 통해 벡터화하여 ChromaDB에 저장하고, 사용자 요청과 유사한 뉴스를 검색하여 LLM의 Context로 활용합니다.
+
+LLM은 검색된 뉴스와 사용자 요청을 기반으로 종목 분석 결과를 생성하여 반환합니다.
+
+```text
+종목 분석 요청
       │
+      ▼
 AI Service
       │
-주문 정보 추출
+      ▼
+한국경제 금융 RSS 수집
       │
-Kafka 주문 이벤트 발행
+      ▼
+종목명 기반 뉴스 필터링
       │
-Trade Service
+      ▼
+BeautifulSoup 기사 본문 수집
       │
-주문 처리
+      ▼
+OpenAI Embedding
       │
-결과 반환
+      ▼
+ChromaDB 저장
+      │
+      ▼
+관련 뉴스 벡터 검색
+      │
+      ▼
+검색 결과를 LLM Context로 구성
+      │
+      ▼
+뉴스 분석 리포트 생성
+      │
+      ▼
+분석 결과 반환
+```
 
 
 ---
@@ -326,97 +394,112 @@ Trade Service
 
 ## 8.1 API Gateway 기반 인증 및 라우팅
 
+MSA 환경에서는 모든 요청이 Gateway Service를 통해 각 서비스로 전달됩니다.
+
+Gateway Service는 요청 경로를 각 서비스로 라우팅하며, JWT를 검증한 뒤 인증된 사용자 정보만 내부 서비스로 전달하도록 구성했습니다.
+
+이를 통해 인증 로직을 각 서비스에 중복 구현하지 않고 Gateway에서 공통으로 처리하도록 설계했습니다.
+
+### 주요 구현
+
 - 서비스별 요청 경로 라우팅
-- Gateway에서 JWT 검증
+- JWT 기반 사용자 인증
 - 인증 사용자 정보 Header 전달
+
+---
 
 ## 8.2 Kafka 기반 서비스 간 이벤트 처리
 
-- User Service 회원 생성 이벤트
-- Trade Service 주문 및 거래 이벤트
-- Balance Service 잔액 처리 이벤트
-- 서비스 간 비동기 통신
+서비스 간 직접 호출을 최소화하기 위해 Kafka 기반 이벤트 구조를 적용했습니다.
+
+회원 생성, 주문 처리, 잔액 반영 등 서비스 간 상태 변경이 필요한 작업은 이벤트를 발행하고 필요한 서비스가 이를 구독하여 처리하도록 구성했습니다.
+
+이를 통해 서비스 간 결합도를 낮추고 비동기적으로 데이터를 처리할 수 있도록 설계했습니다.
+
+### 주요 구현
+
+- 회원 생성 이벤트 처리
+- 주문 및 거래 이벤트 처리
+- 잔액 처리 이벤트
+- Kafka 기반 비동기 통신
+
+---
 
 ## 8.3 Balance Service
 
-- 사용자별 기본 잔액 관리
+Balance Service는 사용자의 잔액과 연결 계좌를 관리하며, 주문 처리 과정에서 필요한 잔액 검증과 변경 이력을 담당합니다.
+
+Trade Service에서 발행한 거래 이벤트를 Kafka를 통해 수신하고, 처리 결과를 다시 이벤트로 전달하여 서비스 간 데이터를 동기화하도록 구성했습니다.
+
+### 주요 구현
+
+- 사용자 기본 잔액 관리
 - 연결 계좌 관리
-- 주문 금액 확인 및 잔액 처리
-- 잔액 변경 이력 저장
+- 주문 금액 검증 및 잔액 처리
+- 잔액 변경 이력 관리
 - Kafka 이벤트 수신 및 처리
 
-## 8.4 Stock Service
+---
 
-- 한국투자증권 API 기반 종목 및 주가 조회
-- 주가 차트 데이터 관리
-- 관심 종목 관리
-- 스케줄러 기반 시세 데이터 갱신
+## 8.4 AI 뉴스 분석
 
-## 8.5 Trade Service
+AI Service는 종목 관련 뉴스를 수집하고 분석하여 투자 판단에 참고할 수 있는 정보를 제공합니다.
 
-- 매수·매도 주문 관리
-- Redis 기반 주문장 관리
-- 주문 매칭 엔진
-- 주문 상태 및 거래 내역 관리
-- SSE 기반 주문 결과 전달
+수집한 뉴스는 OpenAI Embedding을 이용해 벡터화하여 ChromaDB에 저장하고, 사용자 요청과 관련성이 높은 뉴스를 검색한 뒤 LLM의 Context로 활용하도록 구성했습니다.
+
+이를 통해 단순 뉴스 요약이 아니라 관련 뉴스를 기반으로 종목 분석 결과를 생성하도록 설계했습니다.
+
+### 주요 구현
+
+- 한국경제 금융 RSS 기반 뉴스 수집
+- BeautifulSoup 기반 기사 본문 추출
+- OpenAI Embedding 기반 벡터 생성
+- ChromaDB 기반 뉴스 저장 및 검색
+- LLM 기반 뉴스 분석 결과 생성
 
 
 ---
 
 
-# 9. AI Service
+# 9. 인증 및 보안
 
-## 9.1 뉴스 분석 서비스
+## 9.1 JWT 기반 인증
 
-- 종목 관련 뉴스 수집
-- 뉴스 데이터 전처리
-- ChromaDB 저장
-- 관련 뉴스 검색
-- LLM 기반 뉴스 요약 및 분석
+MSA 환경에서는 Gateway Service가 모든 요청의 진입점 역할을 수행합니다.
 
-## 9.2 투자 어시스턴트
+사용자가 로그인하면 User Service에서 Access Token을 발급하며, 이후 요청은 Gateway Service에서 JWT를 검증한 뒤 인증된 사용자 정보만 내부 서비스로 전달하도록 구성했습니다.
 
-- 사용자 입력 기반 투자 정보 제공
-- 종목 및 투자 관련 질의 처리
-- LangGraph 기반 처리 흐름
+이를 통해 인증 로직을 각 서비스에 중복 구현하지 않고 Gateway에서 공통으로 처리하도록 설계했습니다.
 
-## 9.3 자연어 주문 챗봇
+### 주요 구현
 
-- 자연어에서 종목, 수량, 매수·매도 정보 추출
-- 주문 정보 검증
-- Kafka 기반 주문 이벤트 전달
-- 주문 처리 결과 반환
-
+- User Service 기반 JWT 발급
+- Gateway Service 기반 JWT 검증
+- 인증 사용자 정보 Header 전달
 
 ---
 
+## 9.2 Refresh Token 관리
 
-# 10. 인증 및 보안
+Refresh Token은 Redis를 이용하여 관리했습니다.
 
-## 10.1 JWT 기반 인증
+Access Token 재발급 요청 시 JWT 유효성을 확인한 뒤 Redis에 저장된 Refresh Token과 비교하여 일치하는 경우에만 새로운 Access Token을 발급하도록 구성했습니다.
 
-- User Service에서 Access Token 발급
-- Gateway Service에서 JWT 검증
-- 인증된 사용자 요청만 내부 서비스로 전달
+로그아웃 시에는 Redis에 저장된 Refresh Token을 삭제하여 기존 Refresh Token을 이용한 재발급을 방지했습니다.
 
-## 10.2 Refresh Token 관리
+### 주요 구현
 
 - Redis 기반 Refresh Token 저장
 - Access Token 재발급
 - 로그아웃 시 Refresh Token 제거
 
-## 10.3 Gateway Rate Limiting
-
-- Redis 기반 요청 횟수 관리
-- 비정상적이거나 과도한 요청 제한
-
 
 ---
 
 
-# 11. CI/CD 및 배포
+# 10. CI/CD 및 배포
 
-## 11.1 서비스별 Docker 구성
+## 10.1 서비스별 Docker 구성
 
 - Gateway Service
 - User Service
@@ -426,7 +509,7 @@ Trade Service
 - AI Service
 - React Frontend
 
-## 11.2 GitHub Actions 기반 자동 배포
+## 10.2 GitHub Actions 기반 자동 배포
 
 - 서비스별 Workflow 구성
 - Docker Image Build
@@ -436,9 +519,9 @@ Trade Service
 ---
 
 
-# 12. Troubleshooting
+# 11. Troubleshooting
 
-## 12.1 Kafka 기반 서비스 간 데이터 정합성 처리
+## 11.1 Kafka 기반 서비스 간 데이터 정합성 처리
 
 ### 문제
 
@@ -452,7 +535,7 @@ Trade Service
 ### 결과
 
 
-## 12.2 Gateway 인증 정보 전달 문제
+## 11.2 Gateway 인증 정보 전달 문제
 
 
 ### 문제
@@ -464,7 +547,7 @@ Trade Service
 ### 결과
 
 
-## 12.3 주문 처리와 잔액 반영 시점 문제
+## 11.3 주문 처리와 잔액 반영 시점 문제
 
 
 ### 문제
@@ -476,7 +559,7 @@ Trade Service
 ### 결과
 
 
-## 12.4 AI 뉴스 데이터 검색 및 응답 구성 문제
+## 11.4 AI 뉴스 데이터 검색 및 응답 구성 문제
 
 
 ### 문제
@@ -491,17 +574,17 @@ Trade Service
 ---
 
 
-# 13. 핵심 코드
+# 12. 핵심 코드
 
 
-## 13.1 Kafka 기반 거래 이벤트 처리
+## 12.1 Kafka 기반 거래 이벤트 처리
 
 
-## 13.2 Balance Service 잔액 검증 및 반영
+## 12.2 Balance Service 잔액 검증 및 반영
 
 
-## 13.3 Gateway JWT 인증
+## 12.3 Gateway JWT 인증
 
 
-## 13.4 뉴스 수집 및 ChromaDB 기반 검색
+## 12.4 뉴스 수집 및 ChromaDB 기반 검색
 
