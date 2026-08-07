@@ -448,9 +448,9 @@ Trade Service에서 발행한 거래 이벤트를 Kafka를 통해 수신하고, 
 
 AI Service는 종목 관련 뉴스를 수집하고 분석하여 투자 판단에 참고할 수 있는 정보를 제공합니다.
 
-수집한 뉴스는 OpenAI Embedding을 이용해 벡터화하여 ChromaDB에 저장하고, 사용자 요청과 관련성이 높은 뉴스를 검색한 뒤 LLM의 Context로 활용하도록 구성했습니다.
-
-검색된 관련 뉴스를 LLM의 Context로 활용하여 종목 분석 결과를 생성하도록 구성했습니다.
+수집한 뉴스는 OpenAI Embedding을 이용해 벡터화하여 ChromaDB에 저장하고,
+사용자 요청과 관련성이 높은 뉴스를 검색해 LLM의 Context로 활용하여
+종목 분석 결과를 생성하도록 구성했습니다.
 
 ### 주요 구현
 
@@ -659,15 +659,225 @@ BeautifulSoup 본문 추출
 
 # 12. 핵심 코드
 
+## 12.1 Kafka 기반 거래 요청 이벤트 처리
 
-## 12.1 Kafka 기반 거래 이벤트 처리
+### 구현 배경
 
+MSA 환경에서는 Trade Service가 직접 Balance Service를 호출하지 않고,
+Kafka를 통해 거래 요청 이벤트를 전달하도록 구성했습니다.
 
-## 12.2 Balance Service 잔액 검증 및 반영
+이를 통해 서비스 간 결합도를 낮추고, 거래 처리와 잔액 처리를 각각 독립적인 서비스에서 수행하도록 설계했습니다.
 
+### 핵심 코드
 
-## 12.3 Gateway JWT 인증
+```java
+public void sendBalanceRequest(BalanceRequestEvent event) {
+    kafkaTemplate.send("balance.trade.request", event);
+}
+```
 
+```java
+@KafkaListener(
+        topics = "balance.trade.request",
+        groupId = "balance-service"
+)
+public void getTradeRequest(String message)
+        throws JsonProcessingException {
 
-## 12.4 뉴스 수집 및 ChromaDB 기반 검색
+    TradeRequest request =
+            objectMapper.readValue(message, TradeRequest.class);
+
+    balanceService.executeTrade(
+            request.getBuyOrderId(),
+            request.getBuyerId(),
+            request.getSellerId(),
+            request.getAmount()
+    );
+}
+```
+
+### 코드 설명
+
+- Trade Service에서 거래 요청 이벤트를 Kafka Topic으로 발행
+- Balance Service가 이벤트를 구독하여 거래 처리 수행
+- 서비스 간 직접 호출 없이 비동기 이벤트 기반으로 처리
+
+### 전체 코드
+
+- `trade-service/.../TradeEventProducer.java`
+- `balance-service/.../TradeKafkaConsumer.java`
+
+---
+
+## 12.2 Redis Lock과 멱등성을 적용한 Balance 거래 처리
+
+### 구현 배경
+
+동일한 거래 요청이 중복 처리되거나 여러 사용자의 잔액이 동시에 변경되는 상황을 방지하기 위해
+Redis Lock과 멱등성(Idempotency)을 적용했습니다.
+
+### 핵심 코드
+
+```java
+private boolean tryLock(Long userId) {
+    String key = "lock:balance:" + userId;
+
+    Boolean acquired =
+            redisTemplate.opsForValue()
+                    .setIfAbsent(
+                            key,
+                            "locked",
+                            LOCK_TTL,
+                            TimeUnit.SECONDS
+                    );
+
+    return Boolean.TRUE.equals(acquired);
+}
+
+private boolean isDuplicate(Long idempotencyKey) {
+    String key = "idempotency:" + idempotencyKey;
+
+    Boolean isNew =
+            redisTemplate.opsForValue()
+                    .setIfAbsent(
+                            key,
+                            "processed",
+                            IDEMPOTENCY_TTL,
+                            TimeUnit.SECONDS
+                    );
+
+    return !Boolean.TRUE.equals(isNew);
+}
+```
+
+```java
+public void executeTrade(...) {
+
+    if (isDuplicate(buyOrderId)) {
+        throw new IllegalStateException("중복 요청");
+    }
+
+    if (!tryLock(firstId)) {
+        throw new IllegalStateException("잠시 후 다시 시도해주세요");
+    }
+
+    ...
+}
+```
+
+### 코드 설명
+
+- Redis `setIfAbsent()`를 이용한 사용자별 Lock 적용
+- 거래 요청에 대한 멱등성 검사
+- 중복 거래 및 동시성 문제 방지
+- 거래 완료 후 Kafka 이벤트 발행
+
+> 일부 예외 처리 및 이력 저장 로직은 가독성을 위해 생략했습니다.
+
+### 전체 코드
+
+- `balance-service/.../BalanceService.java`
+
+---
+
+## 12.3 Gateway JWT 인증 및 사용자 정보 전달
+
+### 구현 배경
+
+MSA에서는 모든 서비스가 JWT를 직접 검증하지 않고,
+Gateway Service에서 공통으로 인증을 처리하도록 구성했습니다.
+
+JWT 검증 이후 사용자 정보를 Header에 추가하여 내부 서비스가 인증 정보를 재검증하지 않도록 설계했습니다.
+
+### 핵심 코드
+
+```java
+Claims claims = Jwts.parser()
+        .verifyWith(secretKey)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
+
+Long userId =
+        ((Number) claims.get("userId")).longValue();
+
+ServerWebExchange modifiedExchange =
+        exchange.mutate()
+                .request(r ->
+                        r.header(
+                                "X-User-Id",
+                                String.valueOf(userId)
+                        )
+                )
+                .build();
+
+return chain.filter(modifiedExchange);
+```
+
+### 코드 설명
+
+- Gateway에서 JWT 검증
+- 사용자 ID 추출
+- 인증 정보를 Header에 추가
+- 내부 서비스는 Header 기반으로 사용자 정보 활용
+
+### 전체 코드
+
+- `gateway-service/.../JwtAuthFilter.java`
+
+---
+
+## 12.4 뉴스 데이터 저장 및 ChromaDB 기반 유사 검색
+
+### 구현 배경
+
+뉴스 분석 기능은 동일한 뉴스가 반복 저장되지 않도록 관리하면서,
+사용자 질의와 관련성이 높은 뉴스를 검색해 LLM의 Context로 활용하도록 구성했습니다.
+
+### 핵심 코드
+
+```python
+def add_news(self, news_items):
+
+    for item in news_items:
+
+        doc_id = hashlib.md5(
+            item["url"].encode()
+        ).hexdigest()
+
+        existing = self.collection.get(ids=[doc_id])
+
+        if existing["ids"]:
+            continue
+
+        docs.append(item["content"])
+        metas.append(item["metadata"])
+        ids.append(doc_id)
+
+    if docs:
+        self.collection.add(
+            documents=docs,
+            metadatas=metas,
+            ids=ids
+        )
+```
+
+```python
+results = self.collection.query(
+    query_texts=[query],
+    where=where,
+    n_results=n_results
+)
+```
+
+### 코드 설명
+
+- 기사 URL 기반 Document ID 생성
+- 중복 뉴스 저장 방지
+- ChromaDB 기반 유사 뉴스 검색
+- 검색 결과를 LLM Context로 활용
+
+### 전체 코드
+
+- `ai-service/.../chroma_store.py`
 
