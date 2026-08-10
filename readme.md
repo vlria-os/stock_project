@@ -12,15 +12,19 @@ MSA 구조로 분리해 구현한 모의 주식 거래 플랫폼입니다.
 
 
 ### 메인 페이지
+![Preview1](docs/images/stock1.jpg)
 
 
 ### 종목 조회 및 관심 종목
+![Preview2](docs/images/stock2.jpg)
 
 
 ### 주문 및 거래 내역
+![Preview3](docs/images/stock3.jpg)
 
 
-### AI 투자 지원
+### AI 기반 뉴스 분석
+![Preview4](docs/images/stock4.jpg)
 
 
 ---
@@ -751,7 +755,12 @@ private boolean isDuplicate(Long idempotencyKey) {
 ```
 
 ```java
-public void executeTrade(...) {
+public void executeTrade(
+        Long buyOrderId,
+        Long buyerId,
+        Long sellerId,
+        Long amount
+) {
 
     if (isDuplicate(buyOrderId)) {
         throw new IllegalStateException("중복 요청");
@@ -837,7 +846,7 @@ return chain.filter(modifiedExchange);
 ### 핵심 코드
 
 ```python
-def add_news(self, news_items):
+def add_news(self, news_items: List[dict]) -> int:
 
     for item in news_items:
 
