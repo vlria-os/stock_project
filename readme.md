@@ -17,17 +17,24 @@ MSA 구조로 분리해 구현한 모의 주식 거래 플랫폼입니다.
   <img src="docs/images/stock1.jpg" width="85%" alt="메인 페이지">
 </p>
 
-### 종목 조회 및 관심 종목
-
-<p align="center">
-  <img src="docs/images/stock2.jpg" width="58%" alt="종목 조회 및 관심 종목">
-</p>
-
-### 주문 및 거래 내역
-
-<p align="center">
-  <img src="docs/images/stock3.jpg" width="58%" alt="주문 및 거래 내역">
-</p>
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <b>종목 조회 및 관심 종목</b>
+    </td>
+    <td width="50%" align="center">
+      <b>주문 및 거래 내역</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <img src="docs/images/stock2.jpg" width="95%" alt="종목 조회 및 관심 종목">
+    </td>
+    <td align="center" valign="top">
+      <img src="docs/images/stock3.jpg" width="95%" alt="주문 및 거래 내역">
+    </td>
+  </tr>
+</table>
 
 ### AI 기반 뉴스 분석
 
